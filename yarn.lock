@@ -1468,14 +1468,14 @@ __metadata:
     "@fjell/core": "npm:^4.3.1"
     "@fjell/lib": "npm:^4.3.0"
     "@fjell/logging": "npm:^4.3.4"
-    "@google-cloud/firestore": "npm:^7.5.0"
-    "@google-cloud/storage": "npm:^7.9.0"
+    "@google-cloud/firestore": "npm:^7.11.0"
+    "@google-cloud/storage": "npm:^7.15.2"
     "@tsconfig/recommended": "npm:^1.0.8"
     "@types/jest": "npm:^29.5.14"
-    "@types/multer": "npm:^1.4.11"
-    "@types/node": "npm:^20.10.4"
-    "@typescript-eslint/eslint-plugin": "npm:^7"
-    "@typescript-eslint/parser": "npm:^7"
+    "@types/multer": "npm:^1.4.12"
+    "@types/node": "npm:^20.17.19"
+    "@typescript-eslint/eslint-plugin": "npm:^7.18.0"
+    "@typescript-eslint/parser": "npm:^7.18.0"
     concurrently: "npm:^8.2.2"
     dayjs: "npm:^1.11.13"
     deepmerge: "npm:^4.3.1"
@@ -1522,7 +1522,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google-cloud/firestore@npm:^7.11.0, @google-cloud/firestore@npm:^7.5.0":
+"@google-cloud/firestore@npm:^7.11.0":
   version: 7.11.0
   resolution: "@google-cloud/firestore@npm:7.11.0"
   dependencies:
@@ -1559,7 +1559,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google-cloud/storage@npm:^7.15.2, @google-cloud/storage@npm:^7.9.0":
+"@google-cloud/storage@npm:^7.15.2":
   version: 7.15.2
   resolution: "@google-cloud/storage@npm:7.15.2"
   dependencies:
@@ -2338,7 +2338,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/multer@npm:^1.4.11":
+"@types/multer@npm:^1.4.12":
   version: 1.4.12
   resolution: "@types/multer@npm:1.4.12"
   dependencies:
@@ -2365,7 +2365,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.10.4":
+"@types/node@npm:^20.17.19":
   version: 20.17.19
   resolution: "@types/node@npm:20.17.19"
   dependencies:
@@ -2465,7 +2465,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^7":
+"@typescript-eslint/eslint-plugin@npm:^7.18.0":
   version: 7.18.0
   resolution: "@typescript-eslint/eslint-plugin@npm:7.18.0"
   dependencies:
@@ -2488,7 +2488,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^7":
+"@typescript-eslint/parser@npm:^7.18.0":
   version: 7.18.0
   resolution: "@typescript-eslint/parser@npm:7.18.0"
   dependencies:
