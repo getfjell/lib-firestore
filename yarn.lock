@@ -1476,9 +1476,9 @@ __metadata:
     "@babel/preset-env": "npm:^7.26.9"
     "@babel/preset-react": "npm:^7.26.3"
     "@babel/preset-typescript": "npm:^7.26.0"
-    "@fjell/core": "npm:^4.3.3"
-    "@fjell/lib": "npm:^4.3.5"
-    "@fjell/logging": "npm:^4.3.8"
+    "@fjell/core": "npm:^4.3"
+    "@fjell/lib": "npm:^4.3"
+    "@fjell/logging": "npm:^4.3"
     "@google-cloud/firestore": "npm:^7.11.0"
     "@google-cloud/storage": "npm:^7.15.2"
     "@tsconfig/recommended": "npm:^1.0.8"
@@ -1504,12 +1504,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fjell/lib@npm:^4.3.5":
-  version: 4.3.5
-  resolution: "@fjell/lib@npm:4.3.5"
+"@fjell/lib@npm:^4.3":
+  version: 4.3.6
+  resolution: "@fjell/lib@npm:4.3.6"
   dependencies:
-    "@fjell/core": "npm:^4.3"
-    "@fjell/logging": "npm:^4.3"
+    "@fjell/core": "npm:^4.3.3"
+    "@fjell/logging": "npm:^4.3.8"
     "@google-cloud/firestore": "npm:^7.11.0"
     "@google-cloud/storage": "npm:^7.15.2"
     dayjs: "npm:^1.11.13"
@@ -1518,7 +1518,7 @@ __metadata:
     sequelize: "npm:^6.37.5"
     specifier-resolution-node: "npm:^1.1.4"
     winston: "npm:^3.17.0"
-  checksum: 10c0/bef9970206659235a725a00564e4422dda649e214682e9ccbe5f1161a36512df7236a511ba5232d6a4e3fd0df3be5eab9473ef91d7b340ea3fcee7f6ae4b5035
+  checksum: 10c0/be36f921f4d68062ebcb8afc51839a6bf0cc8fb57ba803884d662959e00cb6f37ab21b9c67370f17d3cfc1277b86a51623ef63c1f48e60e5a13af22609aaec47
   languageName: node
   linkType: hard
 
