@@ -1,0 +1,62 @@
+{
+    "name": "@fjell/lib-firestore",
+    "version": "4.3.0",
+    "license": "UNLICENSED",
+    "description": "Firestore Library for Fjell",
+    "engines": {
+        "node": ">=21"
+    },
+    "main": "dist/src/index.js",
+    "exports": {
+        ".": {
+            "require": "./dist/src/index.js",
+            "import": "./dist/src/index.js",
+            "types": "./dist/src/index.d.ts"
+        }
+    },
+    "type": "module",
+    "scripts": {
+        "build": "yarn run lint && tsc && tsc-alias -p tsconfig.json",
+        "dev": "concurrently \"tsc -w\" \"tsc-alias -w\"",
+        "lint": "eslint .",
+        "clean": "rimraf dist",
+        "test": "yarn run lint && NODE_OPTIONS='--experimental-require-module' yarn run jest --coverage"
+    },
+    "dependencies": {
+        "@fjell/core": "^4.3.1",
+        "@fjell/lib": "^4.3.0",
+        "@fjell/logging": "^4.3.4",
+        "@google-cloud/firestore": "^7.5.0",
+        "@google-cloud/storage": "^7.9.0",
+        "dayjs": "^1.11.13",
+        "deepmerge": "^4.3.1",
+        "multer": "^1.4.5-lts.1",
+        "specifier-resolution-node": "^1.1.4",
+        "winston": "^3.17.0"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.26.9",
+        "@babel/preset-react": "^7.26.3",
+        "@babel/preset-typescript": "^7.26.0",
+        "@tsconfig/recommended": "^1.0.8",
+        "@types/jest": "^29.5.14",
+        "@types/multer": "^1.4.11",
+        "@types/node": "^20.10.4",
+        "@typescript-eslint/eslint-plugin": "^7",
+        "@typescript-eslint/parser": "^7",
+        "concurrently": "^8.2.2",
+        "eslint": "^8.57.1",
+        "jest": "^29.7.0",
+        "nodemon": "^3.1.9",
+        "rimraf": "^6.0.1",
+        "ts-jest": "^29.2.5",
+        "ts-node": "^10.9.2",
+        "tsc-alias": "^1.8.10",
+        "typescript": "^5.7.3"
+    },
+    "packageManager": "yarn@4.6.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/getfjell/lib-firestore.git"
+    }
+}
