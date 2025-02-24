@@ -5,7 +5,7 @@ import { LocKey } from "@fjell/core";
 import LibLogger from "@/logger";
 import { DocumentReference } from "@google-cloud/firestore";
 
-const logger = LibLogger.get('firestore', 'ReferenceFinder');
+const logger = LibLogger.get('ReferenceFinder');
 
 export const addReference = <S extends string,
 L1 extends string = never,
@@ -18,7 +18,7 @@ L5 extends string = never
     keys: Array<PriKey<S> | LocKey<L1 | L2 | L3 | L4 | L5>>,
     collections: string[],
   ): FirebaseFirestore.DocumentReference => {
-  logger.default('Adding Reference', { base, keys, collections });
+  logger.debug('Adding Reference', { base, keys, collections });
     
   if (keys.length === 0) {
     // If you've recursively consumed all of the keys, return the base.
@@ -64,7 +64,7 @@ L5 extends string = never>(
     firestore: FirebaseFirestore.Firestore,
   ):
   FirebaseFirestore.Firestore | FirebaseFirestore.CollectionReference | FirebaseFirestore.DocumentReference => {
-  logger.default('Getting Reference', { key, collectionNames });
+  logger.debug('Getting Reference', { key, collectionNames });
 
   const collections: string[] = [...collectionNames];
   let reference: FirebaseFirestore.Firestore |

@@ -26,12 +26,12 @@ import LibLogger from '@/logger';
 const logger = LibLogger.get('QueryBuilder');
 
 const addDeleteQuery = (query: Query): Query => {
-  logger.default('Adding Delete Query', { query });
+  logger.debug('Adding Delete Query', { query });
   return query.where('events.deleted.at', '==', null);
 }
   
 const addEventQueries = (query: Query, events: Record<string, EventQuery>): Query => {
-  logger.default('Adding Event Queries', { query, events });
+  logger.debug('Adding Event Queries', { query, events });
   let retQuery = query;
   Object.keys(events).forEach((key: string) => {
     const event = events[key];
@@ -50,10 +50,10 @@ const addEventQueries = (query: Query, events: Record<string, EventQuery>): Quer
 
 // Add the references to the query
 const addReferenceQueries = (query: Query, references: References): Query => {
-  logger.default('Adding Reference Queries', { query, references });
+  logger.debug('Adding Reference Queries', { query, references });
   let retQuery = query;
   Object.keys(references).forEach((key: string) => {
-    logger.default('Adding Reference Query', { key, references });
+    logger.debug('Adding Reference Query', { key, references });
     if (isComKey(references[key])) {
       const ComKey: ComKey<string, string, string | never, string | never, string | never, string | never> =
         references[key] as ComKey<string, string, string | never, string | never, string | never, string | never>;
@@ -81,7 +81,7 @@ const addReferenceQueries = (query: Query, references: References): Query => {
 }
     
 const createFilter = (compoundCondition: CompoundCondition): Filter => {
-  logger.default('Adding Compound Condition', { compoundCondition });
+  logger.debug('Adding Compound Condition', { compoundCondition });
   const compoundType = compoundCondition.compoundType;
   const conditions: Array<Condition | CompoundCondition> = compoundCondition.conditions;
   
@@ -109,7 +109,7 @@ export const buildQuery = (
   itemQuery: ItemQuery,
   collectionReference: CollectionReference | CollectionGroup
 ): Query => {
-  logger.default('build', { itemQuery, collectionReference });
+  logger.debug('buildQuery', { itemQuery, collectionReference });
 
   let itemsQuery: Query = collectionReference;
   itemsQuery = addDeleteQuery(itemsQuery);
@@ -123,13 +123,13 @@ export const buildQuery = (
   // TODO: Once we start to support Aggs on the server-side, we'll need to parse agg queries
   
   if (itemQuery.compoundCondition) {
-    logger.default('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });
+    logger.debug('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });
     itemsQuery = itemsQuery.where(createFilter(itemQuery.compoundCondition));
   }
   
   // Apply a limit to the result set
   if (itemQuery.limit) {
-    logger.default('Limiting to', { limit: itemQuery.limit });
+    logger.debug('Limiting to', { limit: itemQuery.limit });
     itemsQuery = itemsQuery.limit(itemQuery.limit);
   }
   

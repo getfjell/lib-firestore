@@ -9,6 +9,9 @@ import { getGetOperation } from "./ops/get";
 import { getOneOperation } from "./ops/one";
 import { getRemoveOperations } from "./ops/remove";
 import { getUpdateOperation } from "./ops/update";
+import LibLogger from "./logger";
+
+const logger = LibLogger.get('Operations');
 
 export const createOperations = <
   V extends Item<S, L1, L2, L3, L4, L5>,
@@ -23,6 +26,8 @@ export const createOperations = <
     definition: Definition<V, S, L1, L2, L3, L4, L5>,
   // eslint-disable-next-line max-params
   ): Library.Operations<V, S, L1, L2, L3, L4, L5> => {
+
+  logger.debug('createOperations', { firestore, definition });
 
   const operations = {} as Library.Operations<V, S, L1, L2, L3, L4, L5>;
 

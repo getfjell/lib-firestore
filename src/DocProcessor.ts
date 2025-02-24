@@ -4,7 +4,7 @@ import { addKey } from "./KeyMaster";
 import LibLogger from "@/logger";
 import { DocumentSnapshot, Timestamp } from "@google-cloud/firestore";
 
-const logger = LibLogger.get('firestore', 'DocProcessor');
+const logger = LibLogger.get('DocProcessor');
 
 const convertDates = <S extends string,
 L1 extends string = never,

@@ -23,9 +23,9 @@
         "test": "yarn run lint && NODE_OPTIONS='--experimental-require-module' yarn run jest --coverage"
     },
     "dependencies": {
-        "@fjell/core": "^4.3",
-        "@fjell/lib": "^4.3",
-        "@fjell/logging": "^4.3",
+        "@fjell/core": "^4.3.4",
+        "@fjell/lib": "^4.3.8",
+        "@fjell/logging": "^4.3.8",
         "@google-cloud/firestore": "^7.11.0",
         "@google-cloud/storage": "^7.15.2",
         "dayjs": "^1.11.13",

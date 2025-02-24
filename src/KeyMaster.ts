@@ -7,7 +7,7 @@ import {
 
 import LibLogger from '@/logger';
 
-const logger = LibLogger.get('firestore', 'KeyMaster');
+const logger = LibLogger.get('KeyMaster');
 
 export const removeKey = <
   S extends string,
@@ -18,7 +18,7 @@ export const removeKey = <
   L5 extends string = never
 >(item: ItemProperties<S, L1, L2, L3, L4, L5>):
       ItemProperties<S, L1, L2, L3, L4, L5> => {
-  logger.default('Removing Key', { item });
+  logger.debug('Removing Key', { item });
   delete item.key;
   return item;
 }
@@ -35,7 +35,7 @@ export const addKey = <
     doc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>,
     keyTypes: AllItemTypeArrays<S, L1, L2, L3, L4, L5>
   ): void => {
-  logger.default('Adding Key', { item });
+  logger.debug('Adding Key', { item });
   const key = {};
   if (Array.isArray(keyTypes) && keyTypes.length > 1) {
     const type = [...keyTypes];

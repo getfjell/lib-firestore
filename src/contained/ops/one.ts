@@ -6,7 +6,7 @@ import { Definition } from "@/Definition";
 import LibLogger from "@/logger";
 import { getAllOperation } from "./all";
 
-const logger = LibLogger.get('firestore', 'contained','ops', 'one');
+const logger = LibLogger.get('contained','ops', 'one');
 
 export const getOneOperation = <
 V extends Item<S, L1, L2, L3, L4, L5>,
@@ -24,7 +24,7 @@ L5 extends string = never>(
     itemQuery: ItemQuery,
     locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
   ): Promise<V | null> => {
-    logger.default('One', { itemQuery, locations });
+    logger.debug('One', { itemQuery, locations });
 
     const items = await getAllOperation(firestore, definition)(itemQuery, locations);
     if (items.length > 0) {
@@ -33,6 +33,8 @@ L5 extends string = never>(
       return null;
     }
   }
+
+  logger.debug('One', { one });
 
   return one;
 }

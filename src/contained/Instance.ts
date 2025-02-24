@@ -4,6 +4,10 @@ import { Contained } from '@fjell/lib';
 import { createDefinition } from '@/Definition';
 import { createOperations } from './Operations';
 
+import LibLogger from '@/logger';
+
+const logger = LibLogger.get('contained', 'Instance');
+
 export interface Instance<
   V extends Item<S>,
   S extends string,
@@ -32,6 +36,8 @@ export function createInstance<
   libOptions: Contained.Options<V, S, L1, L2, L3, L4, L5> = {},
   scopes: string[] = [],
 ): Instance<V, S, L1, L2, L3, L4, L5> {
+
+  logger.debug('createInstance', { keyTypes, collectionNames, firestore, libOptions, scopes });
 
   const definition = createDefinition(keyTypes, scopes, collectionNames, libOptions);
   const operations = createOperations(firestore, definition);

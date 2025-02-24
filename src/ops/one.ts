@@ -6,7 +6,7 @@ import { Definition } from "@/Definition";
 import LibLogger from "@/logger";
 import { getAllOperation } from "./all";
 
-const logger = LibLogger.get('firestore', 'ops', 'one');
+const logger = LibLogger.get('ops', 'one');
 
 export const getOneOperation = <
 V extends Item<S, L1, L2, L3, L4, L5>,

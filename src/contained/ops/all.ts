@@ -9,7 +9,7 @@ import { processDoc } from "@/DocProcessor";
 import { getReference } from "@/ReferenceFinder";
 import LibLogger from "@/logger";
 
-const logger = LibLogger.get('firestore', 'contained','ops', 'all');
+const logger = LibLogger.get('contained','ops', 'all');
 
 export const getAllOperation = <
   V extends Item<S, L1, L2, L3, L4, L5>,
@@ -45,7 +45,7 @@ export const getAllOperation = <
     locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
   ): Promise<V[]> => {
 
-    logger.default('All', { itemQuery, locations });
+    logger.debug('All', { itemQuery, locations });
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
     let colRef: CollectionReference | CollectionGroup;
@@ -68,6 +68,7 @@ export const getAllOperation = <
     // TODO: Move this up.
     const docs = matchingItems.docs.map(doc => validateKeys(processDoc(doc, kta), kta));
 
+    logger.default('Matching Items', { docs });
     return docs as V[];
 
   }

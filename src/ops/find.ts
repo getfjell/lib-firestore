@@ -4,7 +4,7 @@ import { Definition } from "@/Definition";
 import LibLogger from "@/logger";
 import { Operations } from "@fjell/lib";
 
-const logger = LibLogger.get('firestore', 'ops', 'find');
+const logger = LibLogger.get('ops', 'find');
 
 export const getFindOperation = <
 V extends Item<S, L1, L2, L3, L4, L5>,
