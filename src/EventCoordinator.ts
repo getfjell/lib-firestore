@@ -6,7 +6,7 @@ import deepmerge from 'deepmerge';
   
 import LibLogger from '@/logger';
   
-const logger = LibLogger.get('firestore', 'EventCoordinator');
+const logger = LibLogger.get('EventCoordinator');
 
 //#region Event Managmeent Methods
 export const createEvents = <
@@ -18,7 +18,7 @@ L4 extends string = never,
 L5 extends string = never
 >(item: ItemProperties<S, L1, L2, L3, L4, L5>):
       ItemProperties<S, L1, L2, L3, L4, L5> => {
-  logger.default('Creating Events', { item });
+  logger.debug('Creating Events', { item });
   const currentDate = new Date();
   
   let events = item.events;
@@ -55,7 +55,7 @@ export const updateEvents = <
     L5 extends string = never
   >(item: ItemProperties<S, L1, L2, L3, L4, L5>):
       ItemProperties<S, L1, L2, L3, L4, L5> => {
-  logger.default('Updating Events', { item });
+  logger.debug('Updating Events', { item });
   const currentDate = new Date();
   const events: Evented = {
     updated: { at: currentDate },

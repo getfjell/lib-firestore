@@ -6,7 +6,7 @@ import { Definition } from "@/Definition";
 import LibLogger from "@/logger";
 import { getUpdateOperation } from "./update";
 
-const logger = LibLogger.get('firestore', 'ops', 'remove');
+const logger = LibLogger.get('ops', 'remove');
 
 export const getRemoveOperations = <
 V extends Item<S, L1, L2, L3, L4, L5>,

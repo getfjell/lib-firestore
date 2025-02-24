@@ -6,7 +6,7 @@ import { ComKey, isValidItemKey, Item, PriKey, validateKeys } from "@fjell/core"
 import * as Library from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";
 
-const logger = LibLogger.get('firestore', 'ops', 'get');
+const logger = LibLogger.get('ops', 'get');
 
 export const getGetOperation = <
 V extends Item<S, L1, L2, L3, L4, L5>,

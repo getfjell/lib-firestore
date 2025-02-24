@@ -2,6 +2,9 @@ import * as Library from '@fjell/lib';
 import { Item, ItemTypeArray } from '@fjell/core';
 import { createDefinition } from './Definition';
 import { createOperations } from './Operations';
+import LibLogger from '@/logger';
+
+const logger = LibLogger.get('Instance');
 
 export interface Instance<
   V extends Item<S, L1, L2, L3, L4, L5>,
@@ -31,7 +34,7 @@ export function createInstance<
   libOptions: Library.Options<V, S, L1, L2, L3, L4, L5> = {},
   scopes: string[] = [],
 ): Instance<V, S, L1, L2, L3, L4, L5> {
-
+  logger.debug('createInstance', { keyTypes, collectionNames, firestore, libOptions, scopes });
   const definition = createDefinition(keyTypes, scopes, collectionNames, libOptions);
   const operations = createOperations(firestore, definition);
 

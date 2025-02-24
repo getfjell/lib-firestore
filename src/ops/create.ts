@@ -19,7 +19,7 @@ import LibLogger from "@/logger";
 import { getReference } from "@/ReferenceFinder";
 import { CollectionReference } from "@google-cloud/firestore";
 
-const logger = LibLogger.get('firestore', 'ops', 'create');
+const logger = LibLogger.get('ops', 'create');
 
 export const getCreateOperation = <
 V extends Item<S, L1, L2, L3, L4, L5>,

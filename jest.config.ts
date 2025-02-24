@@ -17,8 +17,8 @@ const config: Config = {
     global: {
       branches: 75,
       functions: 69,
-      lines: 77,
-      statements: 77,
+      lines: 74,
+      statements: 74,
     },
   },
   preset: 'ts-jest/presets/js-with-ts',

@@ -1458,14 +1458,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fjell/core@npm:^4.3.3":
-  version: 4.3.3
-  resolution: "@fjell/core@npm:4.3.3"
+"@fjell/core@npm:^4.3.4":
+  version: 4.3.4
+  resolution: "@fjell/core@npm:4.3.4"
   dependencies:
-    "@fjell/logging": "npm:^4.3.8"
+    "@fjell/logging": "npm:^4.3"
     flatted: "npm:^3.3.3"
     luxon: "npm:^3.5.0"
-  checksum: 10c0/a56520b1f9787d3a732f4dc4c8a2792bc6e444d2d5548f8b81be4f0158ca05c63be0cb9d9f53f4e725223381f5f52f6cd02d4a85566079d9b0a498e3927a03dc
+  checksum: 10c0/a7216bbf5bb4819be202c58bd439b533f95e8ad6d4d39ab3fd04d79f445b6f79f6f2a5ef94a8dd0582c4dcaf026532c54a31f995b49df5f42ab9a736ea4410d0
   languageName: node
   linkType: hard
 
@@ -1476,9 +1476,9 @@ __metadata:
     "@babel/preset-env": "npm:^7.26.9"
     "@babel/preset-react": "npm:^7.26.3"
     "@babel/preset-typescript": "npm:^7.26.0"
-    "@fjell/core": "npm:^4.3"
-    "@fjell/lib": "npm:^4.3"
-    "@fjell/logging": "npm:^4.3"
+    "@fjell/core": "npm:^4.3.4"
+    "@fjell/lib": "npm:^4.3.8"
+    "@fjell/logging": "npm:^4.3.8"
     "@google-cloud/firestore": "npm:^7.11.0"
     "@google-cloud/storage": "npm:^7.15.2"
     "@tsconfig/recommended": "npm:^1.0.8"
@@ -1504,12 +1504,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@fjell/lib@npm:^4.3":
-  version: 4.3.6
-  resolution: "@fjell/lib@npm:4.3.6"
+"@fjell/lib@npm:^4.3.8":
+  version: 4.3.8
+  resolution: "@fjell/lib@npm:4.3.8"
   dependencies:
-    "@fjell/core": "npm:^4.3.3"
-    "@fjell/logging": "npm:^4.3.8"
+    "@fjell/core": "npm:^4.3"
+    "@fjell/logging": "npm:^4.3"
     "@google-cloud/firestore": "npm:^7.11.0"
     "@google-cloud/storage": "npm:^7.15.2"
     dayjs: "npm:^1.11.13"
@@ -1518,7 +1518,7 @@ __metadata:
     sequelize: "npm:^6.37.5"
     specifier-resolution-node: "npm:^1.1.4"
     winston: "npm:^3.17.0"
-  checksum: 10c0/be36f921f4d68062ebcb8afc51839a6bf0cc8fb57ba803884d662959e00cb6f37ab21b9c67370f17d3cfc1277b86a51623ef63c1f48e60e5a13af22609aaec47
+  checksum: 10c0/5484c6f402d1586e2522160514ce672d822ac0097d802b30f6fc60f3f64f9114d0891ac29bb7d9e1c27db2bfb8c600908943425c8cc7b12432966c0860d73dcf
   languageName: node
   linkType: hard
 

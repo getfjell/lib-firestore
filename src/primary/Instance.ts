@@ -5,7 +5,7 @@ import { createDefinition } from '@/Definition';
 import { createOperations } from '@/Operations';
 import LibLogger from '@/logger';
 
-const logger = LibLogger.get('firestore', 'primary', 'Instance');
+const logger = LibLogger.get('Instance');
 
 export interface Instance<
   V extends Item<S>,
@@ -26,7 +26,7 @@ export function createInstance<
   scopes: string[] = [],
 ): Instance<V, S> {
 
-  logger.default('createInstance', { keyType, collectionName, libOptions, scopes });
+  logger.debug('createInstance', { keyType, collectionName, libOptions, scopes });
 
   const definition = createDefinition([keyType], scopes, [collectionName], libOptions);
   const operations = createOperations(firestore, definition);

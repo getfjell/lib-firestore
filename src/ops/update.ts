@@ -11,7 +11,7 @@ import LibLogger from "@/logger";
 import * as Library from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";
 
-const logger = LibLogger.get('firestore', 'ops', 'update');
+const logger = LibLogger.get('ops', 'update');
 
 export const getUpdateOperation = <
 V extends Item<S, L1, L2, L3, L4, L5>,
