@@ -1,184 +1,145 @@
-/* eslint-disable no-undefined */
-import { Definition } from '@/Definition';
-import { createOperations } from '@/Operations';
-import { Item, PriKey, TypesProperties } from '@fjell/core';
-import { wrapOperations } from '@fjell/lib';
-import { CollectionReference, DocumentReference, DocumentSnapshot, Firestore } from '@google-cloud/firestore';
+import { jest } from '@jest/globals';
 
-jest.mock('@fjell/logging', () => {
-  return {
-    get: jest.fn().mockReturnThis(),
-    getLogger: jest.fn().mockReturnThis(),
-    default: jest.fn(),
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
-    emergency: jest.fn(),
-    alert: jest.fn(),
-    critical: jest.fn(),
-    notice: jest.fn(),
-    time: jest.fn().mockReturnThis(),
-    end: jest.fn(),
-    log: jest.fn(),
-  }
+// Mock logger
+const mockLogger = { default: jest.fn(), error: jest.fn() };
+const mockLoggerGet = jest.fn(() => mockLogger);
+jest.unstable_mockModule('@/logger', () => ({
+  default: { get: mockLoggerGet },
+}));
+
+// Mock updateEvents and removeKey
+const mockUpdateEvents = jest.fn((item: any) => ({ ...item, updated: true }));
+const mockRemoveKey = jest.fn((item: any) => {
+  // Remove 'key' property from item
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { key: _removed, ...rest } = item;
+  return rest;
 });
-jest.mock('@google-cloud/firestore');
+jest.unstable_mockModule('@/EventCoordinator', () => ({
+  updateEvents: mockUpdateEvents,
+}));
+jest.unstable_mockModule('@/KeyMaster', () => ({
+  removeKey: mockRemoveKey,
+}));
 
-describe('update', () => {
-  type TestItem = Item<'test'>;
-  let firestoreMock: jest.Mocked<Firestore>;
-  let collectionRefMock: jest.Mocked<CollectionReference>;
-  let documentRefMock: jest.Mocked<DocumentReference>;
-  let documentSnapshotMock: jest.Mocked<DocumentSnapshot>;
-  let definitionMock: jest.Mocked<Definition<TestItem, 'test'>>;
-  // let queryMock: jest.Mocked<Query>;
+// Mock getReference to return a mock DocumentReference
+const mockDocRef = {
+  set: jest.fn(),
+  get: jest.fn(),
+};
+const mockGetReference = jest.fn(() => mockDocRef);
+jest.unstable_mockModule('@/ReferenceFinder', () => ({
+  getReference: mockGetReference,
+}));
+
+// Mock processDoc to return the doc data
+const mockProcessDoc = jest.fn((doc: any) => {
+  const data = doc && typeof doc.data === 'function' ? doc.data() : {};
+  return { ...data, processed: true };
+});
+jest.unstable_mockModule('@/DocProcessor', () => ({
+  processDoc: mockProcessDoc,
+}));
+
+// Mock validateKeys to just return the item as an object
+const mockValidateKeys = jest.fn((item: any) => ({ ...item, validated: true }));
+const mockIsValidItemKey = jest.fn(() => true);
+jest.unstable_mockModule('@fjell/core', () => ({
+  validateKeys: mockValidateKeys,
+  isValidItemKey: mockIsValidItemKey,
+  Item: class { },
+  PriKey: Object,
+  ComKey: Object,
+  TypesProperties: Object,
+}));
+
+// Mock NotUpdatedError from @fjell/lib
+const mockNotUpdatedError = jest.fn((op: any, coordinate: any, key: any) => {
+  const err = new Error('NotUpdatedError: ' + String(key));
+  err.name = 'NotUpdatedError';
+  return err;
+});
+jest.unstable_mockModule('@fjell/lib', () => ({
+  NotUpdatedError: mockNotUpdatedError,
+}));
+
+let getUpdateOperation: any;
+beforeAll(async () => {
+  ({ getUpdateOperation } = await import('@/ops/update'));
+});
+
+describe('getUpdateOperation', () => {
+  const firestore = {};
+  const definition = {
+    collectionNames: ['testCollection'],
+    coordinate: { kta: ['TYPEA'] },
+  };
+  const validKey = { pk: 'id1', kt: 'pri' };
+  const item = { foo: 'bar', key: { pk: 'id1', kt: 'pri' } };
+  const docData = { foo: 'bar' };
 
   beforeEach(() => {
-    firestoreMock = new (Firestore as any)();
-    collectionRefMock = new (CollectionReference as any)();
-    documentRefMock = new (DocumentReference as any)();
-    documentSnapshotMock = new (DocumentSnapshot as any)();
-    // queryMock = new (Query as any)();
-
-    firestoreMock.collection.mockReturnValue(collectionRefMock);
-    collectionRefMock.doc.mockReturnValue(documentRefMock);
-    documentRefMock.get.mockResolvedValue(documentSnapshotMock);
-    // @ts-ignore
-    documentSnapshotMock.exists = true;
-    documentSnapshotMock.data.mockReturnValue({});
-
-    definitionMock = {
-      collectionNames: ['tests'],
-      coordinate: {
-        kta: ['test'],
-        scopes: []
-      },
-      options: {}
-    } as unknown as jest.Mocked<Definition<TestItem, 'test'>>;
+    jest.clearAllMocks();
+    mockIsValidItemKey.mockReturnValue(true);
+    mockDocRef.set.mockReset();
+    mockDocRef.get.mockReset();
   });
 
-  describe('update', () => {
-
-    test('should throw an error when updating with an invalid key', async () => {
-      const lib = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const invalidKey = { kt: 'invalid', pk: 'null' } as unknown as PriKey<'test'>;
-      const item = { name: 'updatedItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      await expect(lib.update(invalidKey, item)).rejects.toThrow('Key for Update is not a valid ItemKey');
-    });
-    
-    test('should call preUpdate hook if defined', async () => {
-      const preUpdateHook = jest.fn().mockResolvedValueOnce({ name: 'hookedItem' });
-      definitionMock.options.hooks = { preUpdate: preUpdateHook };
-      const operations = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const wrappedOperations = wrapOperations(operations, definitionMock);
-
-      const key = { kt: 'test', pk: '1-1-1-1-1' } as PriKey<'test'>;
-      const item = { name: 'updatedItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      const mockDocRef = {
-        update: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: true,
-          data: () => ({ name: 'hookedItem' })
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      mockDocRef.set = jest.fn().mockResolvedValueOnce(undefined);
-      mockDocRef.get = jest.fn().mockResolvedValueOnce({
-        exists: true,
-        data: () => ({ name: 'hookedItem' })
-      } as unknown as DocumentSnapshot);
-
-      const result = await wrappedOperations.update(key, item);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('hookedItem');
-      expect(preUpdateHook).toHaveBeenCalledWith(key, item);
-    });
-
-    test('should call postUpdate hook if defined', async () => {
-      const postUpdateHook = jest.fn().mockResolvedValueOnce({ name: 'hookedItem' });
-      definitionMock.options.hooks = { postUpdate: postUpdateHook };
-      const operations = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const wrappedOperations = wrapOperations(operations, definitionMock);
-      const key = { kt: 'test', pk: '1-1-1-1-1' } as PriKey<'test'>;
-      const item = { name: 'updatedItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      const mockDocRef = {
-        update: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: true,
-          data: () => ({ name: 'hookedItem' })
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      mockDocRef.set = jest.fn().mockResolvedValueOnce(undefined);
-      mockDocRef.get = jest.fn().mockResolvedValueOnce({
-        exists: true,
-        data: () => ({ name: 'hookedItem' })
-      } as unknown as DocumentSnapshot);
-
-      const result = await wrappedOperations.update(key, item);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('hookedItem');
-      expect(postUpdateHook).toHaveBeenCalledTimes(1);
-    });
-
-    test('should call onUpdate validator if defined', async () => {
-      const key = { kt: 'test', pk: '1-1-1-1-1' } as PriKey<'test'>;
-      const item = { name: 'updatedItem' } as TypesProperties<Item<'test'>, 'test'>;
-      const onUpdateValidator = jest.fn().mockResolvedValueOnce(item);
-      definitionMock.options.validators = { onUpdate: onUpdateValidator };
-      const operations = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const wrappedOperations = wrapOperations(operations, definitionMock);
-
-      const mockDocRef = {
-        update: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: true,
-          data: () => ({ name: 'updatedItem' })
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      mockDocRef.set = jest.fn().mockResolvedValueOnce(undefined);
-      mockDocRef.get = jest.fn().mockResolvedValueOnce({
-        exists: true,
-        data: () => ({ name: 'updatedItem' })
-      } as unknown as DocumentSnapshot);
-
-      const result = await wrappedOperations.update(key, item);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('updatedItem');
-      expect(onUpdateValidator).toHaveBeenCalledWith(key, item);
-    });
-
-    test('should throw an error if document does not exist after update', async () => {
-      const lib = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const key = { kt: 'test', pk: '1-1-1-1-1' } as PriKey<'test'>;
-      const item = { name: 'updatedItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      const mockDocRef = {
-        update: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: false
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      mockDocRef.set = jest.fn().mockResolvedValueOnce(undefined);
-
-      await expect(lib.update(key, item)).rejects.toThrow('Item not updated');
-
-    });
+  it('updates and returns processed and validated item for a valid key', async () => {
+    // @ts-expect-error
+    mockDocRef.set.mockResolvedValue(void 0);
+    // @ts-expect-error
+    mockDocRef.get.mockResolvedValue({ exists: true, data: () => docData });
+    const update = getUpdateOperation(firestore, definition);
+    const result = await update(validKey, item);
+    expect(mockLogger.default).toHaveBeenCalledWith('Update', { key: validKey, item });
+    expect(mockIsValidItemKey).toHaveBeenCalledWith(validKey);
+    expect(mockGetReference).toHaveBeenCalledWith(validKey, definition.collectionNames, firestore);
+    expect(mockUpdateEvents).toHaveBeenCalledWith(item);
+    expect(mockRemoveKey).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', updated: true, key: { pk: 'id1', kt: 'pri' } }));
+    expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', updated: true }), { merge: true });
+    expect(mockDocRef.get).toHaveBeenCalled();
+    expect(mockProcessDoc).toHaveBeenCalledWith({ exists: true, data: expect.any(Function) }, ['TYPEA']);
+    expect(mockValidateKeys).toHaveBeenCalledWith(expect.objectContaining({ processed: true }), ['TYPEA']);
+    expect(result).toEqual(expect.objectContaining({ foo: 'bar', processed: true, validated: true }));
   });
 
+  it('throws if key is invalid', async () => {
+    mockIsValidItemKey.mockReturnValue(false);
+    const update = getUpdateOperation(firestore, definition);
+    await expect(update(validKey, item)).rejects.toThrow('Key for Update is not a valid ItemKey');
+    expect(mockLogger.error).toHaveBeenCalledWith('Key for Update is not a valid ItemKey: %j', validKey);
+    expect(mockGetReference).not.toHaveBeenCalled();
+    expect(mockDocRef.set).not.toHaveBeenCalled();
+  });
+
+  it('throws NotUpdatedError if doc does not exist after set', async () => {
+    // @ts-expect-error
+    mockDocRef.set.mockResolvedValue(void 0);
+    // @ts-expect-error
+    mockDocRef.get.mockResolvedValue({ exists: false });
+    const update = getUpdateOperation(firestore, definition);
+    await expect(update(validKey, item)).rejects.toThrow('NotUpdatedError');
+    expect(mockNotUpdatedError).toHaveBeenCalledWith('update', definition.coordinate, validKey);
+  });
+
+  it('propagates error from set', async () => {
+    const error = new Error('set failed');
+    // @ts-expect-error
+    mockDocRef.set.mockRejectedValue(error);
+    const update = getUpdateOperation(firestore, definition);
+    await expect(update(validKey, item)).rejects.toThrow('set failed');
+    expect(mockDocRef.set).toHaveBeenCalled();
+  });
+
+  it('propagates error from get', async () => {
+    // @ts-expect-error
+    mockDocRef.set.mockResolvedValue(void 0);
+    const error = new Error('get failed');
+    // @ts-expect-error
+    mockDocRef.get.mockRejectedValue(error);
+    const update = getUpdateOperation(firestore, definition);
+    await expect(update(validKey, item)).rejects.toThrow('get failed');
+    expect(mockDocRef.get).toHaveBeenCalled();
+  });
 });

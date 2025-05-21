@@ -24,7 +24,7 @@ export const createOperations = <
 >(
     firestore: FirebaseFirestore.Firestore,
     definition: Definition<V, S, L1, L2, L3, L4, L5>,
-  // eslint-disable-next-line max-params
+   
   ): Library.Operations<V, S, L1, L2, L3, L4, L5> => {
 
   logger.debug('createOperations', { firestore, definition });

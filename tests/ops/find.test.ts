@@ -1,111 +1,91 @@
-import { Definition } from '@/Definition';
-import { getFindOperation } from '@/ops/find';
-import { Item, LocKeyArray } from '@fjell/core';
-import * as Library from '@fjell/lib';
-import { Operations } from '@fjell/lib';
+import { jest } from '@jest/globals';
 
-jest.mock('@fjell/logging', () => {
-  return {
-    get: jest.fn().mockReturnThis(),
-    getLogger: jest.fn().mockReturnThis(),
-    default: jest.fn(),
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
-    emergency: jest.fn(),
-    alert: jest.fn(),
-    critical: jest.fn(),
-    notice: jest.fn(),
-    time: jest.fn().mockReturnThis(),
-    end: jest.fn(),
-    log: jest.fn(),
-  }
+// Mock logger to suppress output and allow assertions
+const mockLogger = {
+  debug: jest.fn(),
+  default: jest.fn(),
+  error: jest.fn(),
+};
+const mockLoggerGet = jest.fn(() => mockLogger);
+
+jest.unstable_mockModule('@/logger', () => ({
+  default: { get: mockLoggerGet },
+}));
+
+// Import after mocks
+let getFindOperation: any;
+beforeAll(async () => {
+  ({ getFindOperation } = await import('@/ops/find'));
 });
 
-describe('find', () => {
-  let mockLibOptions: Library.Options<any, any>;
-  let mockFinderFn: jest.Mock;
-  type TestItem = Item<'test'>;
-  let definitionMock: jest.Mocked<Definition<TestItem, 'test'>>;
-  let operations: jest.Mocked<Operations<TestItem, 'test'>>;
+describe('getFindOperation', () => {
+  const mockFinderResult: any = [{ foo: 'bar' }];
+  const finderParams = { param1: 'value1' };
+  const locations = ['loc1'];
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockFinderFn = jest.fn();
-    mockLibOptions = {
-      finders: {
-        testFinder: mockFinderFn
-      }
-    } as any;
-    definitionMock = {
-      collectionNames: ['test'],
-      coordinate: { kta: ['test'] },
-      options: mockLibOptions
-    } as any;
-    operations = {
-      find: jest.fn()
-    } as any;
   });
 
-  it('should call finder function with correct parameters', async () => {
-    const find = getFindOperation<TestItem, 'test'>(definitionMock, operations);
-    const finderParams = { param1: 'value1', param2: 123 };
-    const locations: [] = [];
-    
-    await find('testFinder', finderParams, locations);
-
-    expect(mockFinderFn).toHaveBeenCalledWith(finderParams, locations);
+  it('calls the correct finder and returns its result', async () => {
+    // @ts-ignore
+    const mockFinder: any = jest.fn().mockResolvedValue(mockFinderResult);
+    const definition: any = {
+      options: {
+        finders: {
+          myFinder: mockFinder,
+        },
+      },
+    };
+    const operations: any = {};
+    const find = getFindOperation(definition, operations);
+    const result = await find('myFinder', finderParams as any, locations as any);
+    expect(mockFinder).toHaveBeenCalledWith(finderParams, locations);
+    expect(result).toBe(mockFinderResult);
+    expect(mockLogger.default).toHaveBeenCalledWith('Find', expect.objectContaining({ finder: 'myFinder' }));
   });
 
-  it('should return results from finder function', async () => {
-    const expectedResults = [
-      { id: '1', name: 'Item 1' },
-      { id: '2', name: 'Item 2' }
-    ];
-    mockFinderFn.mockResolvedValue(expectedResults);
-
-    const find = getFindOperation<TestItem, 'test'>(definitionMock, operations);
-    const result = await find('testFinder', {});
-
-    expect(result).toEqual(expectedResults);
+  it('throws if the finder throws', async () => {
+    // @ts-ignore
+    const mockFinder: any = jest.fn().mockRejectedValue(new Error('Finder error'));
+    const definition: any = {
+      options: {
+        finders: {
+          myFinder: mockFinder,
+        },
+      },
+    };
+    const operations: any = {};
+    const find = getFindOperation(definition, operations);
+    await expect(find('myFinder', finderParams as any, locations as any)).rejects.toThrow('Finder error');
+    expect(mockFinder).toHaveBeenCalledWith(finderParams, locations);
   });
 
-  it('should throw error when finder not found', async () => {
-    const find = getFindOperation<TestItem, 'test'>(definitionMock, operations);
-
-    await expect(
-      find('nonExistentFinder', {})
-    ).rejects.toThrow('No finders found');
+  it('throws if the finder does not exist', async () => {
+    const definition: any = {
+      options: {
+        finders: {
+          otherFinder: jest.fn(),
+        },
+      },
+    };
+    const operations: any = {};
+    const find = getFindOperation(definition, operations);
+    await expect(find('missingFinder', finderParams as any, locations as any)).rejects.toThrow('No finders found');
+    expect(mockLogger.error).toHaveBeenCalledWith('No finders have been defined for this lib.  Requested finder %s with params %j', 'missingFinder', finderParams);
   });
 
-  it('should throw error when no finders defined', async () => {
-    const libOptionsWithoutFinders = {} as Library.Options<any, any>;
-    definitionMock.options = libOptionsWithoutFinders;
-    const find = getFindOperation<TestItem, 'test'>(definitionMock, operations);
-
-    await expect(
-      find('testFinder', {})
-    ).rejects.toThrow('No finders found');
-  });
-
-  it('should handle locations parameter', async () => {
-  
-    const mockLibOptions = {
-      finders: {
-        testFinder: mockFinderFn
-      }
-    } as any;
-
-    definitionMock.options = mockLibOptions;
-
-    const find = getFindOperation<Item<'test', 'order'>, 'test', 'order'>(definitionMock as any, operations);
-    const locations: LocKeyArray<'order'> = [{ kt: 'order', lk: '123' }];
-
-    await find('testFinder', {}, locations);
-
-    expect(mockFinderFn).toHaveBeenCalledWith({}, locations);
+  it('throws if no finders are defined', async () => {
+    const definition: any = {
+      options: {},
+    };
+    const operations: any = {};
+    const find = getFindOperation(definition, operations);
+    await expect(find('anyFinder', finderParams as any, locations as any)).rejects.toThrow('No finders found');
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'No finders have been defined for this lib.  Requested finder %s with params %j',
+      'anyFinder',
+      finderParams
+    );
   });
 });

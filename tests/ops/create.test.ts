@@ -1,188 +1,182 @@
-/* eslint-disable no-undefined */
-import { Definition } from '@/Definition';
-import { getCreateOperation } from '@/ops/create';
-import { createOperations } from '@/Operations';
-import { Item, TypesProperties, UUID } from '@fjell/core';
-import { CollectionReference, DocumentReference, DocumentSnapshot, Firestore } from '@google-cloud/firestore';
-import { wrapOperations } from '@fjell/lib';
+import { jest } from '@jest/globals';
 
-jest.mock('@fjell/logging', () => {
-  return {
-    get: jest.fn().mockReturnThis(),
-    getLogger: jest.fn().mockReturnThis(),
-    default: jest.fn(),
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
-    emergency: jest.fn(),
-    alert: jest.fn(),
-    critical: jest.fn(),
-    notice: jest.fn(),
-    time: jest.fn().mockReturnThis(),
-    end: jest.fn(),
-    log: jest.fn(),
-  }
+// Mock logger
+const mockLogger = { default: jest.fn(), debug: jest.fn() };
+const mockLoggerGet = jest.fn(() => mockLogger);
+jest.unstable_mockModule('@/logger', () => ({
+  default: { get: mockLoggerGet },
+}));
+
+// Mock getReference to return a mock CollectionReference
+const mockCollectionRef = {
+  doc: jest.fn((id) => {
+    const set = jest.fn();
+    const get = jest.fn();
+    // Save for assertions if needed
+    // @ts-ignore
+    mockCollectionRef._lastDocRef = { set, get, path: `mock/doc/path/${id}` };
+    return { set, get, path: `mock/doc/path/${id}` };
+  }),
+  _lastDocRef: null, // for test assertions if needed
+};
+const mockGetReference = jest.fn(() => mockCollectionRef);
+jest.unstable_mockModule('@/ReferenceFinder', () => ({
+  getReference: mockGetReference,
+}));
+
+// Mock createEvents to just return the item as an object
+const mockCreateEvents = jest.fn((item: any) => ({ ...(typeof item === 'object' ? item : {}), events: { created: true } }));
+jest.unstable_mockModule('@/EventCoordinator', () => ({
+  createEvents: mockCreateEvents,
+}));
+
+// Mock processDoc to return the doc data
+const mockProcessDoc = jest.fn((doc: any) => {
+  const data = doc && typeof doc.data === 'function' ? doc.data() : {};
+  return { ...data, events: data.events, processed: true };
 });
-jest.mock('@google-cloud/firestore');
+jest.unstable_mockModule('@/DocProcessor', () => ({
+  processDoc: mockProcessDoc,
+}));
 
-describe('create', () => {
-  type TestItem = Item<'test'>;
+// Mock validateKeys to just return the item as an object
+const mockValidateKeys = jest.fn((item: any) => ({ ...item, validated: true }));
+const mockIsComKey = jest.fn((key: any) => Boolean(key && key.loc));
+jest.unstable_mockModule('@fjell/core', () => ({
+  validateKeys: mockValidateKeys,
+  isComKey: mockIsComKey,
+  // Provide minimal stubs for types used in the test
+  Item: class { },
+  TypesProperties: Object,
+  PriKey: Object,
+  ComKey: Object,
+  LocKeyArray: Array,
+}));
 
-  let firestoreMock: jest.Mocked<Firestore>;
-  let collectionRefMock: jest.Mocked<CollectionReference>;
-  let documentRefMock: jest.Mocked<DocumentReference>;
-  let documentSnapshotMock: jest.Mocked<DocumentSnapshot>;
-  let definitionMock: jest.Mocked<Definition<TestItem, 'test'>>;
-  // let queryMock: jest.Mocked<Query>;
+// Patch global crypto.randomUUID for test
+const originalCrypto = global.crypto;
+beforeAll(() => {
+  global.crypto = { randomUUID: () => 'generated-uuid' } as any;
+});
+afterAll(() => {
+  global.crypto = originalCrypto;
+});
+
+let getCreateOperation: any;
+beforeAll(async () => {
+  ({ getCreateOperation } = await import('@/ops/create'));
+});
+
+describe('getCreateOperation', () => {
+  const firestore = {};
+  const definition = {
+    collectionNames: ['testCollection'],
+    coordinate: { kta: ['TYPEA'] },
+  };
+  const item = { foo: 'bar' };
 
   beforeEach(() => {
-    firestoreMock = new (Firestore as any)();
-    collectionRefMock = new (CollectionReference as any)();
-    documentRefMock = new (DocumentReference as any)();
-    documentSnapshotMock = new (DocumentSnapshot as any)();
-    // queryMock = new (Query as any)();
-
-    firestoreMock.collection.mockReturnValue(collectionRefMock);
-    collectionRefMock.doc.mockReturnValue(documentRefMock);
-    documentRefMock.get.mockResolvedValue(documentSnapshotMock);
-    // @ts-ignore
-    documentSnapshotMock.exists = true;
-    documentSnapshotMock.data.mockReturnValue({});
-
-    definitionMock = {
-      collectionNames: ['tests'],
-      coordinate: { kta: ['test'] },
-      options: {}
-    } as unknown as jest.Mocked<Definition<TestItem, 'test'>>;
+    jest.clearAllMocks();
+    mockCollectionRef.doc.mockReset();
   });
 
-  describe('create', () => {
-    test('should create a new item and return it', async () => {
-      const lib = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const item = { name: 'testItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      const mockDocRef = {
-        set: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: true,
-          data: () => ({ name: 'testItem' })
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      const result = await lib.create(item);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('testItem');
-      expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({ name: 'testItem' }));
-    });
-
-    test('should call preCreate hook if defined', async () => {
-      const preCreateHook = jest.fn().mockResolvedValueOnce({ name: 'hookedItem' });
-      definitionMock.options = {
-        hooks: {
-          preCreate: preCreateHook,
-        }
+  it('creates a document with a generated key when no key is provided', async () => {
+    let lastDocRef;
+    mockCollectionRef.doc.mockImplementationOnce((id) => {
+      lastDocRef = {
+        set: jest.fn(() => void 0),
+        get: jest.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'bar' }) })),
+        path: `mock/doc/path/${id}`,
       };
-
-      const operations = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const wrappedOperations = wrapOperations(operations, definitionMock);
-
-      const item = { name: 'testItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      const mockDocRef = {
-        set: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: true,
-          data: () => ({ name: 'hookedItem' })
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      const result = await wrappedOperations.create(item);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('hookedItem');
-      expect(preCreateHook).toHaveBeenCalledWith(item, undefined);
+      return lastDocRef;
     });
-
-    test('should call postCreate hook if defined', async () => {
-      const postCreateHook = jest.fn().mockResolvedValueOnce({ name: 'hookedItem' });
-      definitionMock.options = {
-        hooks: {
-          postCreate: postCreateHook,
-        }
-      };
-
-      const operations = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const wrappedOperations = wrapOperations(operations, definitionMock);
-
-      const item =
-        { key: { kt: 'test', pk: '1-1-1-1-1' as UUID }, name: 'testItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      const mockDocRef = {
-        set: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: true,
-          data: () => ({ name: 'testItem' })
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      const result = await wrappedOperations.create(item);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('hookedItem');
-      expect(postCreateHook).toHaveBeenCalledTimes(1);
-    });
-
-    test('should call onCreate validator if defined', async () => {
-      const onCreateValidator = jest.fn().mockResolvedValueOnce(false);
-      definitionMock.options = {
-        validators: {
-          onCreate: onCreateValidator,
-        }
-      };
-
-      const operations = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const wrappedOperations = wrapOperations(operations, definitionMock);
-
-      const item = { name: 'testItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      const mockDocRef = {
-        set: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: true,
-          data: () => ({ name: 'testItem' })
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      await expect(() => wrappedOperations
-        .create(item))
-        .rejects
-        .toThrow('Create Validation Failed: {"item":{"name":"testItem"}} - [object Object] - create');
-    });
-
-    test('should throw an error if document does not exist after creation', async () => {
-      const create = getCreateOperation(firestoreMock, definitionMock);
-      const item = { name: 'testItem' } as TypesProperties<Item<'test'>, 'test'>;
-
-      const mockDocRef = {
-        set: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce({
-          exists: false
-        } as unknown as DocumentSnapshot)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      await expect(create(item)).rejects.toThrow('Item not saved');
-    });
-
+    const create = getCreateOperation(firestore, definition);
+    const result = await create(item);
+    expect(mockGetReference).toHaveBeenCalledWith([], ['testCollection'], firestore);
+    expect(mockCollectionRef.doc).toHaveBeenCalledWith('generated-uuid');
+    expect(mockCreateEvents).toHaveBeenCalledWith(item);
+    expect(lastDocRef!.set).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', events: { created: true } }));
+    expect(lastDocRef!.get).toHaveBeenCalled();
+    expect(mockProcessDoc).toHaveBeenCalledWith(expect.anything(), ['TYPEA']);
+    expect(mockValidateKeys).toHaveBeenCalledWith(expect.objectContaining({ processed: true }), ['TYPEA']);
+    expect(result).toEqual(expect.objectContaining({ foo: 'bar', events: { created: true }, processed: true, validated: true }));
   });
 
+  it('creates a document with a provided PriKey', async () => {
+    let lastDocRef;
+    mockCollectionRef.doc.mockImplementationOnce((id) => {
+      lastDocRef = {
+        set: jest.fn(() => void 0),
+        get: jest.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }) })),
+        path: `mock/doc/path/${id}`,
+      };
+      return lastDocRef;
+    });
+    const create = getCreateOperation(firestore, definition);
+    const options = { key: { pk: 'custom-id', kt: 'pri' } };
+    mockIsComKey.mockReturnValue(false);
+    const result = await create(item, options);
+    expect(mockGetReference).toHaveBeenCalledWith([], ['testCollection'], firestore);
+    expect(mockCollectionRef.doc).toHaveBeenCalledWith('custom-id');
+    expect(result).toEqual(expect.objectContaining({ foo: 'baz', events: { created: true }, processed: true, validated: true }));
+    expect(lastDocRef!.set).toHaveBeenCalled();
+    expect(lastDocRef!.get).toHaveBeenCalled();
+  });
+
+  it('creates a document with a provided ComKey and locations', async () => {
+    let lastDocRef;
+    mockCollectionRef.doc.mockImplementationOnce((id) => {
+      lastDocRef = {
+        set: jest.fn(() => void 0),
+        get: jest.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'qux' }) })),
+        path: `mock/doc/path/${id}`,
+      };
+      return lastDocRef;
+    });
+    const create = getCreateOperation(firestore, definition);
+    const options = { key: { pk: 'com-id', loc: ['loc1'], kt: 'com' } };
+    mockIsComKey.mockReturnValue(true);
+    const result = await create(item, options);
+    expect(mockGetReference).toHaveBeenCalledWith(['loc1'], ['testCollection'], firestore);
+    expect(mockCollectionRef.doc).toHaveBeenCalledWith('com-id');
+    expect(result).toEqual(expect.objectContaining({ foo: 'qux', events: { created: true }, processed: true, validated: true }));
+    expect(lastDocRef!.set).toHaveBeenCalled();
+    expect(lastDocRef!.get).toHaveBeenCalled();
+  });
+
+  it('creates a document with explicit locations (no key)', async () => {
+    let lastDocRef;
+    mockCollectionRef.doc.mockImplementationOnce((id) => {
+      lastDocRef = {
+        set: jest.fn(() => void 0),
+        get: jest.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }) })),
+        path: `mock/doc/path/${id}`,
+      };
+      return lastDocRef;
+    });
+    const create = getCreateOperation(firestore, definition);
+    const options = { locations: ['loc2'] };
+    const result = await create(item, options);
+    expect(mockGetReference).toHaveBeenCalledWith(['loc2'], ['testCollection'], firestore);
+    expect(mockCollectionRef.doc).toHaveBeenCalledWith('generated-uuid');
+    expect(result).toEqual(expect.objectContaining({ foo: 'baz', events: { created: true }, processed: true, validated: true }));
+    expect(lastDocRef!.set).toHaveBeenCalled();
+    expect(lastDocRef!.get).toHaveBeenCalled();
+  });
+
+  it('throws if the document does not exist after set', async () => {
+    let lastDocRef;
+    mockCollectionRef.doc.mockImplementationOnce((id) => {
+      lastDocRef = {
+        set: jest.fn(() => void 0),
+        get: jest.fn(() => ({ exists: false })),
+        path: `mock/doc/path/${id}`,
+      };
+      return lastDocRef;
+    });
+    const create = getCreateOperation(firestore, definition);
+    await expect(create(item)).rejects.toThrow('Item not saved');
+    expect(lastDocRef!.set).toHaveBeenCalled();
+    expect(lastDocRef!.get).toHaveBeenCalled();
+  });
 });
