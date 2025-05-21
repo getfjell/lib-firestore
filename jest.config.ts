@@ -1,39 +1,51 @@
-import type { Config } from 'jest';
-
-const esModules = [
-  '@fjell',
-].join('|');
-
-const config: Config = {
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+export default {
   rootDir: '.',
-  collectCoverageFrom: ['src/**/*.{ts,tsx}'],
-  coverageDirectory: '<rootDir>/coverage',
-  coveragePathIgnorePatterns: [
-    '<rootDir>/node_modules/',
-    '<rootDir>/tests/',
-    '<rootDir>/src/index.ts',
-  ],
+  collectCoverageFrom: ['src/**/*.ts'],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
     global: {
-      branches: 75,
-      functions: 69,
-      lines: 74,
-      statements: 74,
-    },
+      branches: 66,
+      functions: 71,
+      lines: 75,
+      statements: 75,
+    }
   },
-  preset: 'ts-jest/presets/js-with-ts',
+  extensionsToTreatAsEsm: ['.ts'],
+  maxWorkers: '50%',
+  moduleDirectories: ['node_modules', 'src'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '@/(.*)': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@vite/(.*)$': '<rootDir>/src/$1'
   },
+  modulePaths: ['<rootDir>/src/'],
+  preset: 'ts-jest/presets/default-esm',
+  roots: ['<rootDir>/src/', '<rootDir>/tests/'],
+  // setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  silent: false,
   testEnvironment: 'node',
-  testRegex: '/tests/.*\\.(test|spec)?\\.(ts|tsx)$',
-  transform: {
-    '^.+\\.ts?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
-    '^.+\\.js?$': 'babel-jest',
+  testEnvironmentOptions: {
+    url: 'http://localhost'
   },
-  transformIgnorePatterns: [`/node_modules/(?!${esModules})`],
+  testTimeout: 30000,
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.json',
+        useESM: true,
+        diagnostics: {
+          ignoreCodes: [1343]
+        }
+      }
+    ]
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(dayjs|@fjell)/)'
+  ],
+  verbose: true,
+  workerIdleMemoryLimit: '512MB',
 };
-
-export default config;

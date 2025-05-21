@@ -1,290 +1,198 @@
 /* eslint-disable no-undefined */
 import { addKey, removeKey } from '@/KeyMaster';
-import { Item } from '@fjell/core';
-import { CollectionReference, DocumentReference, DocumentSnapshot, Firestore } from '@google-cloud/firestore';
+import { Item, ItemProperties } from '@fjell/core';
 
-jest.mock('@fjell/logging', () => {
-  return {
-    get: jest.fn().mockReturnThis(),
-    getLogger: jest.fn().mockReturnThis(),
-    default: jest.fn(),
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
-    emergency: jest.fn(),
-    alert: jest.fn(),
-    critical: jest.fn(),
-    notice: jest.fn(),
-    time: jest.fn().mockReturnThis(),
-    end: jest.fn(),
-    log: jest.fn(),
+// Mock FirebaseFirestore
+const mockDoc = (id: string, parentStructure: string[] = []) => {
+  const doc: any = { id };
+  const currentParentRef: any = {};
+  doc.ref = { parent: currentParentRef };
+
+  let currentLevel = currentParentRef;
+  for (let i = 0; i < parentStructure.length; i++) {
+    currentLevel.parent = { id: parentStructure[i] };
+    if (i < parentStructure.length - 1) {
+      currentLevel.parent.parent = {};
+      currentLevel = currentLevel.parent.parent;
+    }
   }
-});
-jest.mock('@google-cloud/firestore');
+  // Ensure the final parent.parent is undefined if not specified, or if it's the root
+  if (parentStructure.length > 0) {
+    let deepestParent = doc.ref;
+    for (let i = 0; i < parentStructure.length; ++i) {
+      if (deepestParent.parent && deepestParent.parent.parent) {
+        deepestParent = deepestParent.parent.parent;
+      } else if (deepestParent.parent && i === parentStructure.length - 1) {
+        // final parent, its own parent is undefined
+        delete deepestParent.parent.parent;
+      } else {
+        // structure is shorter than expected
+        break;
+      }
+    }
+  }
+
+  return doc as FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>;
+};
 
 describe('KeyMaster', () => {
-  let firestoreMock: jest.Mocked<Firestore>;
-  let collectionRefMock: jest.Mocked<CollectionReference>;
-  let documentRefMock: jest.Mocked<DocumentReference>;
-  let documentSnapshotMock: jest.Mocked<DocumentSnapshot>;
-  // let queryMock: jest.Mocked<Query>;
-
-  beforeEach(() => {
-    firestoreMock = new (Firestore as any)();
-    collectionRefMock = new (CollectionReference as any)();
-    documentRefMock = new (DocumentReference as any)();
-    documentSnapshotMock = new (DocumentSnapshot as any)();
-    // queryMock = new (Query as any)();
-
-    firestoreMock.collection.mockReturnValue(collectionRefMock);
-    collectionRefMock.doc.mockReturnValue(documentRefMock);
-    documentRefMock.get.mockResolvedValue(documentSnapshotMock);
-    // @ts-ignore
-    documentSnapshotMock.exists = true;
-    documentSnapshotMock.data.mockReturnValue({});
-  });
-
   describe('removeKey', () => {
-    test('should remove the key from the item', () => {
-      const item = { key: 'some-key' } as any;
+    it('should remove the key property from an item', () => {
+      const item: ItemProperties<'S1'> & { key?: object } = {
+        prop1: 'value1',
+        key: { kt: 'S1', pk: 'id1' },
+      };
       const result = removeKey(item);
-      expect(result.key).toBeUndefined();
+      expect(result).not.toHaveProperty('key');
+      expect(result.prop1).toBe('value1');
     });
 
-    test('should not affect other properties of the item', () => {
-      const item = { key: 'some-key', otherProp: 'some-value' } as any;
+    it('should return the item as is if key property does not exist', () => {
+      const item: ItemProperties<'S1'> = {
+        prop1: 'value1',
+      };
       const result = removeKey(item);
-      expect(result.key).toBeUndefined();
-      expect(result.otherProp).toBe('some-value');
-    });
-
-    test('should handle items without a key property gracefully', () => {
-      const item = { otherProp: 'some-value' } as any;
-      const result = removeKey(item);
-      expect(result.key).toBeUndefined();
-      expect(result.otherProp).toBe('some-value');
-    });
-
-    test('should handle empty items gracefully', () => {
-      const item = {} as any;
-      const result = removeKey(item);
-      expect(result.key).toBeUndefined();
+      expect(result).not.toHaveProperty('key');
+      expect(result.prop1).toBe('value1');
     });
   });
 
   describe('addKey', () => {
+    it('should add a simple key for a single key type', () => {
+      const item: Partial<Item<'TYPEA'>> = {};
+      const doc = mockDoc('docId1');
+      const keyTypes = ['TYPEA'] as const;
+      addKey<'TYPEA'>(item, doc, keyTypes);
+      expect(item.key).toEqual({ kt: 'TYPEA', pk: 'docId1' });
+    });
 
-    test('should add a key to the item when keyTypes length is greater than 1', () => {
-      const item = {} as Partial<Item<'test', 'container'>>;
-      const doc = {
-        id: 'doc-id',
-        ref: {
-          parent: {
-            parent: {
-              id: 'parent-id'
-            }
-          }
-        }
-      } as unknown as DocumentSnapshot;
-
-      addKey(item, doc, ['test', 'container']);
-
-      expect(item.key).toBeDefined();
+    it('should add a key with one level of location', () => {
+      const item: Partial<Item<'TYPEA', 'LTYPE1'>> = {};
+      const doc = mockDoc('docId1', ['parentId1']);
+      const keyTypes = ['TYPEA', 'LTYPE1'] as const;
+      addKey<'TYPEA', 'LTYPE1'>(item, doc, keyTypes);
       expect(item.key).toEqual({
-        kt: 'test', pk: 'doc-id',
-        loc: [{ kt: 'container', lk: 'parent-id' }]
+        kt: 'TYPEA',
+        pk: 'docId1',
+        loc: [{ kt: 'LTYPE1', lk: 'parentId1' }],
       });
     });
 
-    test('should add a key to the item when keyTypes length is greater than 2', () => {
-      const item = {} as Partial<Item<'test', 'container', 'supercontainer'>>;
-      const doc = {
-        id: 'doc-id',
-        ref: {
-          parent: {
-            parent: {
-              id: 'parent-id',
-              parent: {
-                parent: {
-                  id: 'superparent-id'
-                }
-              }
-            }
-          }
-        }
-      } as unknown as DocumentSnapshot;
-
-      addKey(item, doc, ['test', 'container', 'supercontainer']);
-
-      expect(item.key).toBeDefined();
+    it('should add a key with two levels of location', () => {
+      const item: Partial<Item<'TYPEA', 'LTYPE1', 'LTYPE2'>> = {};
+      const doc = mockDoc('docId1', ['parentId1', 'grandParentId1']);
+      const keyTypes = ['TYPEA', 'LTYPE1', 'LTYPE2'] as const;
+      addKey<'TYPEA', 'LTYPE1', 'LTYPE2'>(item, doc, keyTypes);
       expect(item.key).toEqual({
-        kt: 'test', pk: 'doc-id',
+        kt: 'TYPEA',
+        pk: 'docId1',
         loc: [
-          { kt: 'container', lk: 'parent-id' },
-          { kt: 'supercontainer', lk: 'superparent-id' },
-        ]
+          { kt: 'LTYPE1', lk: 'parentId1' },
+          { kt: 'LTYPE2', lk: 'grandParentId1' },
+        ],
       });
     });
 
-    test('should add a key to the item when keyTypes length is greater than 3', () => {
-      const item = {} as Partial<Item<'test', 'container', 'supercontainer', 'super2container'>>;
-      const doc = {
-        id: 'doc-id',
-        ref: {
-          parent: {
-            parent: {
-              id: 'parent-id',
-              parent: {
-                parent: {
-                  id: 'superparent-id',
-                  parent: {
-                    parent: {
-                      id: 'super2parent-id'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      } as unknown as DocumentSnapshot;
-
-      addKey(item, doc, ['test', 'container', 'supercontainer', 'super2container']);
-
-      expect(item.key).toBeDefined();
+    it('should add a key with three levels of location', () => {
+      const item: Partial<Item<'TYPEA', 'LTYPE1', 'LTYPE2', 'LTYPE3'>> = {};
+      const doc = mockDoc('docId1', ['parentId1', 'grandParentId1', 'greatGrandParentId1']);
+      const keyTypes = ['TYPEA', 'LTYPE1', 'LTYPE2', 'LTYPE3'] as const;
+      addKey<'TYPEA', 'LTYPE1', 'LTYPE2', 'LTYPE3'>(item, doc, keyTypes);
       expect(item.key).toEqual({
-        kt: 'test', pk: 'doc-id',
+        kt: 'TYPEA',
+        pk: 'docId1',
         loc: [
-          { kt: 'container', lk: 'parent-id' },
-          { kt: 'supercontainer', lk: 'superparent-id' },
-          { kt: 'super2container', lk: 'super2parent-id' },
-        ]
+          { kt: 'LTYPE1', lk: 'parentId1' },
+          { kt: 'LTYPE2', lk: 'grandParentId1' },
+          { kt: 'LTYPE3', lk: 'greatGrandParentId1' },
+        ],
       });
     });
 
-    test('should add a key to the item when keyTypes length is greater than 4', () => {
-      const item = {} as Partial<Item<'test', 'container', 'supercontainer', 'super2container', 'super3container'>>;
-      const doc = {
-        id: 'doc-id',
-        ref: {
-          parent: {
-            parent: {
-              id: 'parent-id',
-              parent: {
-                parent: {
-                  id: 'superparent-id',
-                  parent: {
-                    parent: {
-                      id: 'super2parent-id',
-                      parent: {
-                        parent: {
-                          id: 'super3parent-id'
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      } as unknown as DocumentSnapshot;
-
-      addKey(item, doc, ['test', 'container', 'supercontainer', 'super2container', 'super3container']);
-
-      expect(item.key).toBeDefined();
+    it('should add a key with four levels of location', () => {
+      const item: Partial<Item<'T', 'L1', 'L2', 'L3', 'L4'>> = {};
+      const doc = mockDoc('docId1', ['p1', 'p2', 'p3', 'p4']);
+      const keyTypes = ['T', 'L1', 'L2', 'L3', 'L4'] as const;
+      addKey<'T', 'L1', 'L2', 'L3', 'L4'>(item, doc, keyTypes);
       expect(item.key).toEqual({
-        kt: 'test', pk: 'doc-id',
+        kt: 'T',
+        pk: 'docId1',
         loc: [
-          { kt: 'container', lk: 'parent-id' },
-          { kt: 'supercontainer', lk: 'superparent-id' },
-          { kt: 'super2container', lk: 'super2parent-id' },
-          { kt: 'super3container', lk: 'super3parent-id' },
-        ]
+          { kt: 'L1', lk: 'p1' },
+          { kt: 'L2', lk: 'p2' },
+          { kt: 'L3', lk: 'p3' },
+          { kt: 'L4', lk: 'p4' },
+        ],
       });
     });
 
-    test('should add a key to the item when keyTypes length is greater than 5', () => {
-      const item = {} as
-        Partial<Item<'test', 'container', 'supercontainer', 'super2container', 'super3container', 'super4container'>>;
-      const doc = {
-        id: 'doc-id',
-        ref: {
-          parent: {
-            parent: {
-              id: 'parent-id',
-              parent: {
-                parent: {
-                  id: 'superparent-id',
-                  parent: {
-                    parent: {
-                      id: 'super2parent-id',
-                      parent: {
-                        parent: {
-                          id: 'super3parent-id',
-                          parent: {
-                            parent: {
-                              id: 'super4parent-id'
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      } as unknown as DocumentSnapshot;
-
-      addKey(
-        item, doc, ['test', 'container', 'supercontainer', 'super2container', 'super3container', 'super4container']);
-
-      expect(item.key).toBeDefined();
+    it('should add a key with five levels of location', () => {
+      const item: Partial<Item<'T', 'L1', 'L2', 'L3', 'L4', 'L5'>> = {};
+      const doc = mockDoc('docId1', ['p1', 'p2', 'p3', 'p4', 'p5']);
+      const keyTypes = ['T', 'L1', 'L2', 'L3', 'L4', 'L5'] as const;
+      addKey<'T', 'L1', 'L2', 'L3', 'L4', 'L5'>(item, doc, keyTypes);
       expect(item.key).toEqual({
-        kt: 'test', pk: 'doc-id',
+        kt: 'T',
+        pk: 'docId1',
         loc: [
-          { kt: 'container', lk: 'parent-id' },
-          { kt: 'supercontainer', lk: 'superparent-id' },
-          { kt: 'super2container', lk: 'super2parent-id' },
-          { kt: 'super3container', lk: 'super3parent-id' },
-          { kt: 'super4container', lk: 'super4parent-id' },
-        ]
+          { kt: 'L1', lk: 'p1' },
+          { kt: 'L2', lk: 'p2' },
+          { kt: 'L3', lk: 'p3' },
+          { kt: 'L4', lk: 'p4' },
+          { kt: 'L5', lk: 'p5' },
+        ],
       });
     });
 
-    test('should add a key to the item when keyTypes length is 1', () => {
-      const item = {} as Partial<Item<'test'>>;
-      const doc = { id: 'doc-id' } as DocumentSnapshot;
-
-      addKey(item, doc, ['test']);
-
-      expect(item.key).toBeDefined();
-      expect(item.key).toEqual({ kt: 'test', pk: 'doc-id' });
+    it('should handle missing parent ids gracefully by setting lk to undefined', () => {
+      const item: Partial<Item<'TYPEA', 'LTYPE1', 'LTYPE2'>> = {};
+      // Only one parentId provided, but two location types expected
+      const doc = mockDoc('docId1', ['parentId1']);
+      const keyTypes = ['TYPEA', 'LTYPE1', 'LTYPE2'] as const;
+      addKey<'TYPEA', 'LTYPE1', 'LTYPE2'>(item, doc, keyTypes);
+      expect(item.key).toEqual({
+        kt: 'TYPEA',
+        pk: 'docId1',
+        loc: [
+          { kt: 'LTYPE1', lk: 'parentId1' },
+          { kt: 'LTYPE2', lk: undefined },
+        ],
+      });
     });
 
-    test('should handle items without a key property gracefully', () => {
-      const item = {} as Partial<Item<'test'>>;
-      const doc = { id: 'doc-id' } as DocumentSnapshot;
-
-      addKey(item, doc, ['test']);
-
-      expect(item.key).toBeDefined();
-      expect(item.key).toEqual({ kt: 'test', pk: 'doc-id' });
+    it('should handle deeply nested missing parent ids gracefully', () => {
+      const item: Partial<Item<'T', 'L1', 'L2', 'L3', 'L4', 'L5'>> = {};
+      // Only p1 and p2 are present
+      const doc = mockDoc('docId1', ['p1', 'p2']);
+      const keyTypes = ['T', 'L1', 'L2', 'L3', 'L4', 'L5'] as const;
+      addKey<'T', 'L1', 'L2', 'L3', 'L4', 'L5'>(item, doc, keyTypes);
+      expect(item.key).toEqual({
+        kt: 'T',
+        pk: 'docId1',
+        loc: [
+          { kt: 'L1', lk: 'p1' },
+          { kt: 'L2', lk: 'p2' },
+          { kt: 'L3', lk: undefined },
+          { kt: 'L4', lk: undefined },
+          { kt: 'L5', lk: undefined },
+        ],
+      });
     });
 
-    test('should handle empty items gracefully', () => {
-      const item = {} as Partial<Item<'test'>>;
-      const doc = { id: 'doc-id' } as DocumentSnapshot;
+    it('should handle no parent ids when location types are present', () => {
+      const item: Partial<Item<'TYPEA', 'LTYPE1'>> = {};
+      const doc = mockDoc('docId1', []); // No parent IDs
+      const keyTypes = ['TYPEA', 'LTYPE1'] as const;
+      addKey<'TYPEA', 'LTYPE1'>(item, doc, keyTypes);
+      expect(item.key).toEqual({
+        kt: 'TYPEA',
+        pk: 'docId1',
+        loc: [
 
-      addKey(item, doc, ['test']);
-
-      expect(item.key).toBeDefined();
-      expect(item.key).toEqual({ kt: 'test', pk: 'doc-id' });
+          { kt: 'LTYPE1', lk: undefined }
+        ],
+      });
     });
+
   });
-
 });

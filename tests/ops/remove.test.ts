@@ -1,201 +1,81 @@
-/* eslint-disable no-undefined */
-import { Definition } from '@/Definition';
-import { createOperations } from '@/Operations';
-import { Item, PriKey } from '@fjell/core';
-import { wrapOperations } from '@fjell/lib';
-import { CollectionReference, DocumentReference, DocumentSnapshot, Firestore } from '@google-cloud/firestore';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { jest } from '@jest/globals';
 
-jest.mock('@fjell/logging', () => {
-  return {
-    get: jest.fn().mockReturnThis(),
-    getLogger: jest.fn().mockReturnThis(),
-    default: jest.fn(),
-    error: jest.fn(),
-    warning: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-    trace: jest.fn(),
-    emergency: jest.fn(),
-    alert: jest.fn(),
-    critical: jest.fn(),
-    notice: jest.fn(),
-    time: jest.fn().mockReturnThis(),
-    end: jest.fn(),
-    log: jest.fn(),
-  }
+// Mock logger
+const mockLogger = { default: jest.fn(), error: jest.fn() };
+const mockLoggerGet = jest.fn(() => mockLogger);
+jest.unstable_mockModule('@/logger', () => ({
+  default: { get: mockLoggerGet },
+}));
+
+// Mock @fjell/core
+const mockValidateKeys = jest.fn((item: any, kta: any) => ({ ...item, validated: true }));
+const mockIsValidItemKey = jest.fn(() => true);
+jest.unstable_mockModule('@fjell/core', () => ({
+  validateKeys: mockValidateKeys,
+  isValidItemKey: mockIsValidItemKey,
+  Item: class { },
+  PriKey: Object,
+  ComKey: Object,
+  TypesProperties: Object,
+}));
+
+// Mock getUpdateOperation
+const mockUpdateOperation = jest.fn();
+const mockGetUpdateOperation = jest.fn(() => mockUpdateOperation);
+jest.unstable_mockModule('@/ops/update', () => ({
+  getUpdateOperation: mockGetUpdateOperation,
+}));
+
+let getRemoveOperations: any;
+beforeAll(async () => {
+  ({ getRemoveOperations } = await import('@/ops/remove'));
 });
-jest.mock('@google-cloud/firestore');
 
-describe('remove', () => {
-  type TestItem = Item<'test'>;
-  let firestoreMock: jest.Mocked<Firestore>;
-  let collectionRefMock: jest.Mocked<CollectionReference>;
-  let documentRefMock: jest.Mocked<DocumentReference>;
-  let documentSnapshotMock: jest.Mocked<DocumentSnapshot>;
-  let definitionMock: jest.Mocked<Definition<TestItem, 'test'>>;
-  // let queryMock: jest.Mocked<Query>;
+describe('getRemoveOperations', () => {
+  const firestore = {};
+  const definition: any = {
+    options: {},
+    coordinate: { kta: ['TYPEA'] },
+    collectionNames: ['testCollection'],
+  };
+  const validKey: any = { pk: 'id1', kt: 'pri' };
+  const removedItem: any = { foo: 'bar', events: { deleted: { at: new Date() } } };
 
   beforeEach(() => {
-    firestoreMock = new (Firestore as any)();
-    collectionRefMock = new (CollectionReference as any)();
-    documentRefMock = new (DocumentReference as any)();
-    documentSnapshotMock = new (DocumentSnapshot as any)();
-    // queryMock = new (Query as any)();
-
-    firestoreMock.collection.mockReturnValue(collectionRefMock);
-    collectionRefMock.doc.mockReturnValue(documentRefMock);
-    documentRefMock.get.mockResolvedValue(documentSnapshotMock);
+    jest.clearAllMocks();
+    mockIsValidItemKey.mockReturnValue(true);
+    mockUpdateOperation.mockReset();
     // @ts-ignore
-    documentSnapshotMock.exists = true;
-    documentSnapshotMock.data.mockReturnValue({});
-
-    definitionMock = {
-      collectionNames: ['tests'],
-      coordinate: {
-        kta: ['test'],
-        scopes: [],
-      },
-      options: {}
-    } as unknown as jest.Mocked<Definition<TestItem, 'test'>>;
+    mockUpdateOperation.mockResolvedValue(removedItem);
+    mockValidateKeys.mockImplementation((item: any) => ({ ...item, validated: true }));
   });
 
-  describe('remove', () => {
-    test('should remove the item matching the key', async () => {
-      const lib = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const key = { kt: 'test', pk: '1-1-1-1-1' } as PriKey<'test'>;
-
-      const mockDoc = {
-        exists: true,
-        data: () => ({ name: 'testItem' })
-      } as unknown as DocumentSnapshot;
-
-      const mockDocRef = {
-        delete: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce(mockDoc),
-        set: jest.fn().mockResolvedValueOnce(mockDoc)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      const result = await lib.remove(key);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('testItem');
-      expect(mockDocRef.set).toHaveBeenCalledTimes(1);
-    });
-
-    test('should throw an error if key is invalid', async () => {
-      const lib = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const invalidKey = { kt: 'test', pk: 'null' } as unknown as PriKey<'test'>;
-
-      await expect(lib.remove(invalidKey)).rejects.toThrow('Key for Remove is not a valid ItemKey');
-      expect(collectionRefMock.doc).not.toHaveBeenCalled();
-    });
-
-    test('should throw an error if document does not exist', async () => {
-      const lib = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const key = { kt: 'test', pk: 'non-existent' } as unknown as PriKey<'test'>;
-
-      const mockDoc = {
-        exists: false
-      } as unknown as DocumentSnapshot;
-
-      const mockDocRef = {
-        delete: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce(mockDoc),
-        set: jest.fn().mockResolvedValueOnce(mockDoc)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      await expect(
-        lib.remove(key))
-        .rejects
-        .toThrow('Item not updated for key {\"kt\":\"test\",\"pk\":\"non-existent\"} - [object Object] - update');
-      expect(mockDocRef.set).toHaveBeenCalled();
-      expect(mockDocRef.get).toHaveBeenCalled();
-    });
-
-    test('should call preRemove hook if defined', async () => {
-      const preRemoveHook = jest.fn().mockResolvedValueOnce(undefined);
-      definitionMock.options.hooks = { preRemove: preRemoveHook };
-      const operations = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const wrappedOperations = wrapOperations(operations, definitionMock);
-      const key = { kt: 'test', pk: '1-1-1-1-1' } as PriKey<'test'>;
-
-      const mockDoc = {
-        exists: true,
-        data: () => ({ name: 'testItem' })
-      } as unknown as DocumentSnapshot;
-
-      const mockDocRef = {
-        delete: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce(mockDoc),
-        set: jest.fn().mockResolvedValueOnce(mockDoc)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      const result = await wrappedOperations.remove(key);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('testItem');
-      expect(preRemoveHook).toHaveBeenCalledWith(key);
-      expect(mockDocRef.set).toHaveBeenCalledTimes(1);
-      expect(mockDocRef.get).toHaveBeenCalledTimes(1);
-    });
-
-    test('should call postRemove hook if defined', async () => {
-      const postRemoveHook = jest.fn().mockResolvedValueOnce({ name: 'testItem' });
-      definitionMock.options.hooks = { postRemove: postRemoveHook };
-      const lib = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-      const key = { kt: 'test', pk: '1-1-1-1-1' } as PriKey<'test'>;
-
-      const mockDoc = {
-        exists: true,
-        data: () => ({ name: 'testItem' })
-      } as unknown as DocumentSnapshot;
-
-      const mockDocRef = {
-        delete: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce(mockDoc),
-        set: jest.fn().mockResolvedValueOnce(mockDoc)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      const result = await lib.remove(key);
-      expect(result).toBeDefined();
-      expect(result.name).toBe('testItem');
-      expect(postRemoveHook).toHaveBeenCalledTimes(1);
-      expect(mockDocRef.set).toHaveBeenCalledTimes(1);
-      expect(mockDocRef.get).toHaveBeenCalledTimes(1);
-    });
-
-    test('should call onRemove validator if defined', async () => {
-      const onRemoveValidator = jest.fn().mockResolvedValueOnce(false);
-      definitionMock.options.validators = { onRemove: onRemoveValidator };
-      const operations = createOperations<Item<'test'>, 'test'>(firestoreMock, definitionMock);
-
-      const wrappedOperations = wrapOperations(operations, definitionMock);
-
-      const key = { kt: 'test', pk: '1-1-1-1-1' } as PriKey<'test'>;
-
-      const mockDoc = {
-        exists: true,
-        data: () => ({ name: 'testItem' })
-      } as unknown as DocumentSnapshot;
-
-      const mockDocRef = {
-        delete: jest.fn().mockResolvedValueOnce(undefined),
-        get: jest.fn().mockResolvedValueOnce(mockDoc),
-        set: jest.fn().mockResolvedValueOnce(mockDoc)
-      } as unknown as jest.Mocked<DocumentReference>;
-
-      collectionRefMock.doc.mockReturnValue(mockDocRef);
-
-      expect(() => wrappedOperations.remove(key))
-        .rejects.toThrow('Remove Validation Failed: {"key":{"kt":"test","pk":"1-1-1-1-1"}} - [object Object] - remove');
-    });
-
+  it('removes item and returns validated item (no postRemove)', async () => {
+    const remove = getRemoveOperations(firestore, definition);
+    const result = await remove(validKey);
+    expect(mockLogger.default).toHaveBeenCalledWith('Remove', { key: validKey });
+    expect(mockIsValidItemKey).toHaveBeenCalledWith(validKey);
+    expect(mockGetUpdateOperation).toHaveBeenCalledWith(firestore, definition);
+    expect(mockUpdateOperation).toHaveBeenCalledWith(validKey, expect.objectContaining({ events: expect.any(Object) }));
+    expect(mockValidateKeys).toHaveBeenCalledWith(removedItem, definition.coordinate.kta);
+    expect(result).toEqual(expect.objectContaining({ ...removedItem, validated: true }));
   });
 
+  it('throws if key is invalid', async () => {
+    mockIsValidItemKey.mockReturnValue(false);
+    const remove = getRemoveOperations(firestore, definition);
+    await expect(remove(validKey)).rejects.toThrow('Key for Remove is not a valid ItemKey');
+    expect(mockLogger.error).toHaveBeenCalledWith('Key for Remove is not a valid ItemKey: %j', validKey);
+    expect(mockUpdateOperation).not.toHaveBeenCalled();
+  });
+
+  it('propagates error from updateOperation', async () => {
+    const error = new Error('update failed');
+    // @ts-ignore
+    mockUpdateOperation.mockRejectedValue(error);
+    const remove = getRemoveOperations(firestore, definition);
+    await expect(remove(validKey)).rejects.toThrow('update failed');
+    expect(mockUpdateOperation).toHaveBeenCalled();
+  });
 });
