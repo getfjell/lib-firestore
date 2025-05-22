@@ -9,13 +9,13 @@ importers:
   .:
     dependencies:
       '@fjell/core':
-        specifier: ^4.4.2
+        specifier: ^4.4
         version: 4.4.2(@swc/core@1.11.24)(typescript@5.8.3)
       '@fjell/lib':
-        specifier: ^4.4.0
+        specifier: ^4.4
         version: 4.4.0(@swc/core@1.11.24)(typescript@5.8.3)
       '@fjell/logging':
-        specifier: ^4.4.2
+        specifier: ^4.4
         version: 4.4.2(@swc/core@1.11.24)(typescript@5.8.3)
       '@google-cloud/firestore':
         specifier: ^7.11.1
