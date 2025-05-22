@@ -1,6 +1,6 @@
 import { LocKey, PriKey } from '@fjell/core';
 import type { Mock } from 'vitest';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock declarations for logger
 const mockLoggerDebug = vi.fn();
