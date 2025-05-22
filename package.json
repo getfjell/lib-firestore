@@ -6,15 +6,15 @@
   "engines": {
     "node": ">=21"
   },
-  "main": "dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     }
   },
-  "type": "module",
   "scripts": {
     "build": "tsc --noEmit && vite build",
     "lint": "eslint . --ext .ts --fix",

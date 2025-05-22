@@ -37,17 +37,26 @@ export default defineConfig({
     outDir: 'dist',
     lib: {
       entry: './src/index.ts',
-      formats: ['es'],
+      formats: ['es', 'cjs'],
     },
     rollupOptions: {
       input: 'src/index.ts',
-      output: {
-        format: 'esm',
-        entryFileNames: '[name].js',
-        preserveModules: true,
-        exports: 'named',
-        sourcemap: 'inline',
-      },
+      output: [
+        {
+          format: 'esm',
+          entryFileNames: '[name].js',
+          preserveModules: true,
+          exports: 'named',
+          sourcemap: 'inline',
+        },
+        {
+          format: 'cjs',
+          entryFileNames: '[name].cjs',
+          preserveModules: true,
+          exports: 'named',
+          sourcemap: 'inline',
+        },
+      ],
     },
     // Make sure Vite generates ESM-compatible code
     modulePreload: false,
