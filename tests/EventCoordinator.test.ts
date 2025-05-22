@@ -1,17 +1,10 @@
 import { createEvents, updateEvents } from '@/EventCoordinator';
 import { ItemProperties } from '@fjell/core';
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('EventCoordinator', () => {
-  // Mock the logger to prevent console output and allow assertions
-  const mockLoggerInstance = { debug: jest.fn() };
-  const mockLoggerGet = jest.fn(() => mockLoggerInstance);
-  jest.unstable_mockModule('@/logger', () => ({
-    default: { get: mockLoggerGet },
-  }));
-
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createEvents', () => {

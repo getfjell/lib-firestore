@@ -1,48 +1,49 @@
-import { jest } from '@jest/globals';
+import type { Mock } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger to suppress output and allow assertions
 const mockLogger = {
-  debug: jest.fn(),
-  default: jest.fn(),
+  debug: vi.fn(),
+  default: vi.fn(),
 };
-const mockLoggerGet = jest.fn(() => mockLogger);
+const mockLoggerGet = vi.fn(() => mockLogger);
 
-jest.unstable_mockModule('@/logger', () => ({
+vi.mock('@/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
 // Mock buildQuery to just return the collection reference (chainable)
-const mockBuildQuery = jest.fn((itemQuery: any, colRef: any) => colRef);
-jest.unstable_mockModule('@/QueryBuilder', () => ({
+const mockBuildQuery = vi.fn((itemQuery: any, colRef: any) => colRef);
+vi.mock('@/QueryBuilder', () => ({
   buildQuery: mockBuildQuery,
 }));
 
 // Mock processDoc to return the doc data with a key
-const mockProcessDoc = jest.fn((doc: any, kta: any) => {
+const mockProcessDoc = vi.fn((doc: any, kta: any) => {
 
   void kta; // suppress unused
   return { ...doc.data(), key: { kt: kta[0], pk: doc.id } };
 });
-jest.unstable_mockModule('@/DocProcessor', () => ({
+vi.mock('@/DocProcessor', () => ({
   processDoc: mockProcessDoc,
 }));
 
 // Mock getReference to return a mock CollectionReference
 const mockColRef = {
-  get: jest.fn() as jest.Mock,
+  get: vi.fn() as Mock,
 };
-const mockGetReference = jest.fn(() => mockColRef);
-jest.unstable_mockModule('@/ReferenceFinder', () => ({
+const mockGetReference = vi.fn(() => mockColRef);
+vi.mock('@/ReferenceFinder', () => ({
   getReference: mockGetReference,
 }));
 
 // Mock validateKeys to just return the item, or throw if item.key.kt === 'THROW'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const mockValidateKeys = jest.fn((item: any, kta: any) => {
+const mockValidateKeys = vi.fn((item: any, kta: any) => {
   if (item.key && item.key.kt === 'THROW') throw new Error('Key validation error');
   return item;
 });
-jest.unstable_mockModule('@fjell/core', () => ({
+vi.mock('@fjell/core', () => ({
   validateKeys: mockValidateKeys,
   // Provide minimal stubs for types used in the test
   Item: class { },
@@ -66,7 +67,7 @@ describe('getAllOperation', () => {
   const locations: any[] = [];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns processed and validated items from Firestore', async () => {

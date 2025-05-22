@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite';
-import { VitePluginNode } from 'vite-plugin-node';
-import dts from 'vite-plugin-dts';
 import path from 'path';
+import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
+import { VitePluginNode } from 'vite-plugin-node';
+import { configDefaults } from 'vitest/config';
 
 export default defineConfig({
   server: {
@@ -52,5 +53,24 @@ export default defineConfig({
     modulePreload: false,
     minify: false,
     sourcemap: true
+  },
+  test: {
+    globals: true,
+    environment: 'node',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      thresholds: {
+        statements: 79,
+        branches: 80,
+        functions: 73,
+        lines: 79,
+      },
+      exclude: [
+        ...((configDefaults.coverage.exclude ?? []) as string[]),
+        'tests/**/*',
+        'dist/**/*',
+      ],
+    },
   },
 });

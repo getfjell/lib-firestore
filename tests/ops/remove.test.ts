@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger
-const mockLogger = { default: jest.fn(), error: jest.fn() };
-const mockLoggerGet = jest.fn(() => mockLogger);
-jest.unstable_mockModule('@/logger', () => ({
+const mockLogger = { default: vi.fn(), error: vi.fn() };
+const mockLoggerGet = vi.fn(() => mockLogger);
+vi.mock('@/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
 // Mock @fjell/core
-const mockValidateKeys = jest.fn((item: any, kta: any) => ({ ...item, validated: true }));
-const mockIsValidItemKey = jest.fn(() => true);
-jest.unstable_mockModule('@fjell/core', () => ({
+const mockValidateKeys = vi.fn((item: any, kta: any) => ({ ...item, validated: true }));
+const mockIsValidItemKey = vi.fn(() => true);
+vi.mock('@fjell/core', () => ({
   validateKeys: mockValidateKeys,
   isValidItemKey: mockIsValidItemKey,
   Item: class { },
@@ -21,9 +21,9 @@ jest.unstable_mockModule('@fjell/core', () => ({
 }));
 
 // Mock getUpdateOperation
-const mockUpdateOperation = jest.fn();
-const mockGetUpdateOperation = jest.fn(() => mockUpdateOperation);
-jest.unstable_mockModule('@/ops/update', () => ({
+const mockUpdateOperation = vi.fn();
+const mockGetUpdateOperation = vi.fn(() => mockUpdateOperation);
+vi.mock('@/ops/update', () => ({
   getUpdateOperation: mockGetUpdateOperation,
 }));
 
@@ -43,7 +43,7 @@ describe('getRemoveOperations', () => {
   const removedItem: any = { foo: 'bar', events: { deleted: { at: new Date() } } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsValidItemKey.mockReturnValue(true);
     mockUpdateOperation.mockReset();
     // @ts-ignore

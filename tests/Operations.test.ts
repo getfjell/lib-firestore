@@ -1,42 +1,42 @@
-import { Item } from '@fjell/core';
 import { Definition } from '@/Definition';
-import { jest } from '@jest/globals';
+import { Item } from '@fjell/core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock individual operation creators
-const mockGetAllOperation = jest.fn();
-const mockGetOneOperation = jest.fn();
-const mockGetCreateOperation = jest.fn();
-const mockGetUpdateOperation = jest.fn();
-const mockGetGetOperation = jest.fn();
-const mockGetRemoveOperations = jest.fn();
-const mockGetFindOperation = jest.fn();
+const mockGetAllOperation = vi.fn();
+const mockGetOneOperation = vi.fn();
+const mockGetCreateOperation = vi.fn();
+const mockGetUpdateOperation = vi.fn();
+const mockGetGetOperation = vi.fn();
+const mockGetRemoveOperations = vi.fn();
+const mockGetFindOperation = vi.fn();
 
 // Mock the logger
-const mockLoggerGet = jest.fn();
-const mockLoggerDebug = jest.fn();
+const mockLoggerGet = vi.fn();
+const mockLoggerDebug = vi.fn();
 
-jest.unstable_mockModule('../src/ops/all', () => ({
+vi.mock('../src/ops/all', () => ({
   getAllOperation: mockGetAllOperation,
 }));
-jest.unstable_mockModule('../src/ops/one', () => ({
+vi.mock('../src/ops/one', () => ({
   getOneOperation: mockGetOneOperation,
 }));
-jest.unstable_mockModule('../src/ops/create', () => ({
+vi.mock('../src/ops/create', () => ({
   getCreateOperation: mockGetCreateOperation,
 }));
-jest.unstable_mockModule('../src/ops/update', () => ({
+vi.mock('../src/ops/update', () => ({
   getUpdateOperation: mockGetUpdateOperation,
 }));
-jest.unstable_mockModule('../src/ops/get', () => ({
+vi.mock('../src/ops/get', () => ({
   getGetOperation: mockGetGetOperation,
 }));
-jest.unstable_mockModule('../src/ops/remove', () => ({
+vi.mock('../src/ops/remove', () => ({
   getRemoveOperations: mockGetRemoveOperations,
 }));
-jest.unstable_mockModule('../src/ops/find', () => ({
+vi.mock('../src/ops/find', () => ({
   getFindOperation: mockGetFindOperation,
 }));
-jest.unstable_mockModule('../src/logger', () => ({
+vi.mock('../src/logger', () => ({
   default: {
     get: mockLoggerGet.mockReturnValue({ debug: mockLoggerDebug }),
   },
@@ -48,11 +48,11 @@ describe('createOperations', () => {
 
   beforeEach(() => {
     // Reset mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Setup mock Firestore and Definition
     mockFirestore = {
-      collection: jest.fn(),
+      collection: vi.fn(),
       // Add other Firestore methods if needed by operations
     };
     mockDefinition = {
@@ -86,13 +86,13 @@ describe('createOperations', () => {
   });
 
   it('should return an operations object with all defined operations', async () => {
-    const mockAll = jest.fn();
-    const mockOne = jest.fn();
-    const mockCreate = jest.fn();
-    const mockUpdate = jest.fn();
-    const mockGet = jest.fn();
-    const mockRemove = jest.fn();
-    const mockFind = jest.fn();
+    const mockAll = vi.fn();
+    const mockOne = vi.fn();
+    const mockCreate = vi.fn();
+    const mockUpdate = vi.fn();
+    const mockGet = vi.fn();
+    const mockRemove = vi.fn();
+    const mockFind = vi.fn();
 
     mockGetAllOperation.mockReturnValue(mockAll);
     mockGetOneOperation.mockReturnValue(mockOne);

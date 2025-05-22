@@ -1,41 +1,28 @@
 import { ItemTypeArray } from '@fjell/core';
 // import LibLogger from '@/logger'; // Removed as no longer directly used in tests
-import { jest } from '@jest/globals';
 import type { Options } from '@fjell/lib';
-
-// Define a stable mock logger instance
-const mockLoggerInstance = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
-
-// Mock logger to consistently return the same mock instance
-jest.mock('@/logger', () => ({
-  get: jest.fn().mockReturnValue(mockLoggerInstance),
-}));
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Define top-level mocks for createDefinition and createOperations
-const mockCreateDefinition = jest.fn();
-const mockCreateOperations = jest.fn();
+const mockCreateDefinition = vi.fn();
+const mockCreateOperations = vi.fn();
 
 // Define a holder for @fjell/lib mock functions
 const fjellLibMocks = {
-  wrapOperations: jest.fn((ops) => ops),
+  wrapOperations: vi.fn((ops) => ops),
 };
 
 // Use unstable_mockModule to mock Definition and Operations modules
-jest.unstable_mockModule('@/Definition', () => ({
+vi.mock('@/Definition', () => ({
   createDefinition: mockCreateDefinition,
 }));
 
-jest.unstable_mockModule('@/Operations', () => ({
+vi.mock('@/Operations', () => ({
   createOperations: mockCreateOperations,
 }));
 
 // Update @fjell/lib mock to use the externally defined mock function
-jest.mock('@fjell/lib', () => ({
+vi.mock('@fjell/lib', () => ({
   wrapOperations: fjellLibMocks.wrapOperations,
 }));
 
@@ -45,12 +32,12 @@ let createInstance: (...args: any[]) => any;
 
 describe('Instance', () => {
   beforeEach(async () => {
-    jest.resetModules();
+    vi.resetModules();
 
     const instanceModule = await import('@/Instance');
     createInstance = instanceModule.createInstance;
 
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Definition = await import('@/Definition'); // Removed
     // Operations = await import('@/Operations'); // Removed
@@ -65,7 +52,7 @@ describe('Instance', () => {
 
     beforeEach(() => {
       // Reset mocks state again (specifically for mock call arguments if testing multiple scenarios in one it block, though clearAllMocks above mostly handles it)
-      // jest.clearAllMocks(); // This might be redundant if the outer one is sufficient.
+      // vi.clearAllMocks(); // This might be redundant if the outer one is sufficient.
 
       mockFirestore = { app: {} };
       mockKeyTypes = ['ITEM_TYPE'] as any;
@@ -76,9 +63,9 @@ describe('Instance', () => {
       // Set mock return values using global mock functions
       const mockDefReturn = { keyTypes: mockKeyTypes, scopes: mockScopes, collectionNames: mockCollectionNames };
       mockCreateDefinition.mockReturnValue(mockDefReturn);
-      mockCreateOperations.mockReturnValue({ someOperation: jest.fn() });
-      // fjellLibMocks.wrapOperations is already jest.fn((ops) => ops), can be overridden if needed
-      // mockLoggerInstance.debug is jest.fn(), no specific return value needed for it to be called
+      mockCreateOperations.mockReturnValue({ someOperation: vi.fn() });
+      // fjellLibMocks.wrapOperations is already vi.fn((ops) => ops), can be overridden if needed
+      // mockLoggerInstance.debug is vi.fn(), no specific return value needed for it to be called
     });
 
     it('should create an instance with definition, operations, and firestore', () => {

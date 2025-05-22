@@ -1,22 +1,22 @@
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger instance
-const mockLoggerInstance = { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
 // Mocked dependency functions
-const mockCreateDefinition = jest.fn();
-const mockCreateOperations = jest.fn();
-const mockWrapOperations = jest.fn((ops: any, def: any) => ({ wrapped: ops, def }));
+const mockCreateDefinition = vi.fn();
+const mockCreateOperations = vi.fn();
+const mockWrapOperations = vi.fn((ops: any, def: any) => ({ wrapped: ops, def }));
 
 // ESM module mocks
-jest.unstable_mockModule('@/logger', () => ({
-  get: jest.fn(() => mockLoggerInstance),
+vi.mock('@/logger', () => ({
+  get: vi.fn(() => mockLoggerInstance),
   __esModule: true,
-  default: { get: jest.fn(() => mockLoggerInstance) },
+  default: { get: vi.fn(() => mockLoggerInstance) },
 }));
-jest.unstable_mockModule('@/Definition', () => ({ createDefinition: mockCreateDefinition }));
-jest.unstable_mockModule('@/Operations', () => ({ createOperations: mockCreateOperations }));
-jest.unstable_mockModule('@fjell/lib', () => ({
+vi.mock('@/Definition', () => ({ createDefinition: mockCreateDefinition }));
+vi.mock('@/Operations', () => ({ createOperations: mockCreateOperations }));
+vi.mock('@fjell/lib', () => ({
   Contained: { wrapOperations: mockWrapOperations },
 }));
 
@@ -24,7 +24,7 @@ let createInstance: (...args: any[]) => any;
 
 describe('contained/Instance createInstance', () => {
   beforeEach(async () => {
-    jest.resetModules();
+    vi.resetModules();
     mockCreateDefinition.mockReset();
     mockCreateOperations.mockReset();
     mockWrapOperations.mockReset();

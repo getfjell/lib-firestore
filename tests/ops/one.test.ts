@@ -1,20 +1,20 @@
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger to suppress output and allow assertions
-const mockLogger = { default: jest.fn() };
-const mockLoggerGet = jest.fn(() => mockLogger);
-jest.unstable_mockModule('@/logger', () => ({
+const mockLogger = { default: vi.fn() };
+const mockLoggerGet = vi.fn(() => mockLogger);
+vi.mock('@/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
 // Mock getAllOperation to control its return value
-const mockGetAllOperation = jest.fn();
-jest.unstable_mockModule('@/ops/all', () => ({
+const mockGetAllOperation = vi.fn();
+vi.mock('@/ops/all', () => ({
   getAllOperation: mockGetAllOperation,
 }));
 
 // Mock @fjell/core types for type compatibility
-jest.unstable_mockModule('@fjell/core', () => ({
+vi.mock('@fjell/core', () => ({
   Item: class { },
   ItemQuery: Object,
   LocKeyArray: Array,
@@ -33,7 +33,7 @@ describe('getOneOperation', () => {
   const locations: any[] = [];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the first item if getAllOperation returns items', async () => {
