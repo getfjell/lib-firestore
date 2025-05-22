@@ -1,5 +1,5 @@
 import type { Mock } from 'vitest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger to suppress output and allow assertions
 const mockLogger = {
