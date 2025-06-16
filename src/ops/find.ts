@@ -2,20 +2,22 @@ import { Item, LocKeyArray } from "@fjell/core";
 
 import { Definition } from "@/Definition";
 import LibLogger from "@/logger";
-import { Operations } from "@fjell/lib";
+import { Operations, Registry } from "@fjell/lib";
 
 const logger = LibLogger.get('ops', 'find');
 
 export const getFindOperation = <
-V extends Item<S, L1, L2, L3, L4, L5>,
-S extends string,
-L1 extends string = never,
-L2 extends string = never,
-L3 extends string = never,
-L4 extends string = never,
-L5 extends string = never>(
+  V extends Item<S, L1, L2, L3, L4, L5>,
+  S extends string,
+  L1 extends string = never,
+  L2 extends string = never,
+  L3 extends string = never,
+  L4 extends string = never,
+  L5 extends string = never>(
     definition: Definition<V, S, L1, L2, L3, L4, L5>,
     operations: Operations<V, S, L1, L2, L3, L4, L5>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    registry: Registry,
   ) => {
   const { options } = definition;
 
@@ -26,13 +28,13 @@ L5 extends string = never>(
     finderParams: Record<string, string | number | boolean | Date | Array<string | number | boolean | Date>>,
     locations?: LocKeyArray<L1, L2, L3, L4, L5> | []
   ): Promise<V[]> => {
-  
+
     logger.default('Find', { finder, finderParams, locations, options });
 
     // Note that we execute the createFinders function here because we want to make sure we're always getting the
     // most up to date methods.
-    if(options.finders && options.finders[finder]) {
-      const finderMethod  = options.finders[finder];
+    if (options.finders && options.finders[finder]) {
+      const finderMethod = options.finders[finder];
       if (finderMethod) {
         return finderMethod(finderParams, locations);
       } else {

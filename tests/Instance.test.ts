@@ -1,6 +1,6 @@
 import { ItemTypeArray } from '@fjell/core';
 // import LibLogger from '@/logger'; // Removed as no longer directly used in tests
-import type { Options } from '@fjell/lib';
+import type { Options, Registry } from '@fjell/lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Define top-level mocks for createDefinition and createOperations
@@ -11,6 +11,13 @@ const mockCreateOperations = vi.fn();
 const fjellLibMocks = {
   wrapOperations: vi.fn((ops) => ops),
 };
+
+// Mock registry
+const mockRegistry = {
+  get: vi.fn(),
+  libTree: vi.fn() as unknown as Registry['libTree'],
+  register: vi.fn(),
+} as Registry;
 
 // Use unstable_mockModule to mock Definition and Operations modules
 vi.mock('@/Definition', () => ({
@@ -74,7 +81,8 @@ describe('Instance', () => {
         mockCollectionNames,
         mockFirestore,
         mockLibOptions,
-        mockScopes
+        mockScopes,
+        mockRegistry
       );
 
       expect(instance).toHaveProperty('definition');
@@ -89,7 +97,8 @@ describe('Instance', () => {
         mockCollectionNames,
         mockFirestore,
         mockLibOptions,
-        mockScopes
+        mockScopes,
+        mockRegistry
       );
 
       expect(mockCreateDefinition).toHaveBeenCalledTimes(1); // Use global mock
@@ -110,15 +119,16 @@ describe('Instance', () => {
         mockCollectionNames,
         mockFirestore,
         mockLibOptions,
-        mockScopes
+        mockScopes,
+        mockRegistry
       );
 
       expect(mockCreateOperations).toHaveBeenCalledTimes(1); // Use global mock
-      expect(mockCreateOperations).toHaveBeenCalledWith(mockFirestore, mockDef); // Use global mock
+      expect(mockCreateOperations).toHaveBeenCalledWith(mockFirestore, mockDef, mockRegistry); // Use global mock
     });
 
     it('should use default libOptions and scopes if not provided', () => {
-      createInstance(mockKeyTypes, mockCollectionNames, mockFirestore);
+      createInstance(mockKeyTypes, mockCollectionNames, mockFirestore, null, null, mockRegistry);
 
       expect(mockCreateDefinition).toHaveBeenCalledWith( // Use global mock
         mockKeyTypes,

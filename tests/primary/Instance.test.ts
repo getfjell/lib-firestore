@@ -1,3 +1,4 @@
+import type { Registry } from '@fjell/lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
@@ -5,6 +6,13 @@ const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error
 const mockCreateDefinition = vi.fn();
 const mockCreateOperations = vi.fn();
 const mockWrapOperations = vi.fn((ops) => ops);
+
+// Mock registry
+const mockRegistry = {
+  get: vi.fn(),
+  libTree: vi.fn() as unknown as Registry['libTree'],
+  register: vi.fn(),
+} as Registry;
 
 // Use unstable_mockModule for ESM mocking
 vi.mock('@/logger', () => ({
@@ -46,7 +54,7 @@ describe('primary/Instance createInstance', () => {
     mockCreateOperations.mockReturnValue(mockOps);
     mockWrapOperations.mockImplementation((ops) => ({ wrapped: ops }));
 
-    const result = createInstance(keyType, collectionName, firestore, libOptions, scopes);
+    const result = createInstance(keyType, collectionName, firestore, libOptions, scopes, mockRegistry);
     expect(result.definition).toMatchObject({
       collectionNames: [collectionName],
       coordinate: { kta: [keyType], scopes: ['firestore', ...scopes] },
@@ -65,7 +73,7 @@ describe('primary/Instance createInstance', () => {
     const scopes = ['scope2'];
     mockCreateDefinition.mockReturnValue({});
     mockCreateOperations.mockReturnValue({});
-    createInstance(keyType, collectionName, firestore, libOptions, scopes);
+    createInstance(keyType, collectionName, firestore, libOptions, scopes, mockRegistry);
     expect(mockLoggerInstance.debug).toHaveBeenCalledWith('createInstance', {
       keyType,
       collectionName,
@@ -87,9 +95,9 @@ describe('primary/Instance createInstance', () => {
     };
     mockCreateDefinition.mockReturnValue(mockDef);
     mockCreateOperations.mockReturnValue({});
-    createInstance(keyType, collectionName, firestore, libOptions, scopes);
+    createInstance(keyType, collectionName, firestore, libOptions, scopes, mockRegistry);
     expect(mockCreateDefinition).toHaveBeenCalledWith([keyType], scopes, [collectionName], libOptions);
-    expect(mockCreateOperations).toHaveBeenCalledWith(firestore, mockDef);
+    expect(mockCreateOperations).toHaveBeenCalledWith(firestore, mockDef, mockRegistry);
   });
 
   it('uses default libOptions and scopes if not provided', () => {
@@ -98,7 +106,7 @@ describe('primary/Instance createInstance', () => {
     const firestore = { app: {} };
     mockCreateDefinition.mockReturnValue({});
     mockCreateOperations.mockReturnValue({});
-    createInstance(keyType, collectionName, firestore);
+    createInstance(keyType, collectionName, firestore, null, null, mockRegistry);
     expect(mockCreateDefinition).toHaveBeenCalledWith([keyType], [], [collectionName], {});
   });
 });

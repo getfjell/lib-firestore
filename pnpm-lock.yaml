@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@fjell/lib': link:../fjell-lib
+
 importers:
 
   .:
@@ -12,8 +15,8 @@ importers:
         specifier: ^4.4.2
         version: 4.4.2(@swc/core@1.11.29)(typescript@5.8.3)
       '@fjell/lib':
-        specifier: ^4.4.0
-        version: 4.4.0(@swc/core@1.11.29)(typescript@5.8.3)
+        specifier: link:../fjell-lib
+        version: link:../fjell-lib
       '@fjell/logging':
         specifier: ^4.4.2
         version: 4.4.2(@swc/core@1.11.29)(typescript@5.8.3)
@@ -857,10 +860,6 @@ packages:
   '@fjell/core@4.4.2':
     resolution: {integrity: sha512-qWXIx0n6Fn79PZzvPgWLbgtGyc3KThud4ymyJWRYNfc06YwuMYt/ZpcYMZ5VzatuvCZEWUqhWI0p949szpXLIA==}
 
-  '@fjell/lib@4.4.0':
-    resolution: {integrity: sha512-4LHFkfwOpCm8lcDNCJimoeoEpFcKvi/LBcibTUwUDuPc0gBw6hnKj+JNG1jgi0KuKnVRQUOndlGBBDKvLZv4DA==}
-    engines: {node: '>=21'}
-
   '@fjell/logging@4.4.2':
     resolution: {integrity: sha512-SVK2XjAE9905va4aJX4iC863fecZ7xZIL99XqQ7JyxTbRBu5nxT5FJN6m88I6oVLtDIwLWmAI3Dy9oZ62+ed8Q==}
 
@@ -1306,9 +1305,6 @@ packages:
   '@types/triple-beam@1.3.5':
     resolution: {integrity: sha512-6WaYesThRMCl19iryMYP7/x2OVgCtbIVflDGFpWnb9irXI3UjYE4AzmYuiUKY1AJstGijoY+MgUszMgRxIYTYw==}
 
-  '@types/validator@13.15.1':
-    resolution: {integrity: sha512-9gG6ogYcoI2mCMLdcO0NYI0AYrbxIjv0MDmy/5Ywo6CpWWrqYayc+mmgxRsCgtcGJm9BSbXkMsmxGah1iGHAAQ==}
-
   '@typescript-eslint/eslint-plugin@8.32.1':
     resolution: {integrity: sha512-6u6Plg9nP/J1GRpe/vcjjabo6Uc5YQPAMxsgQyGC/I0RuukiG1wIe3+Vtg3IrSCVJDmqK3j8adrtzXSENRtFgg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -1727,9 +1723,6 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
-  dottie@2.0.6:
-    resolution: {integrity: sha512-iGCHkfUc5kFekGiqhe8B/mdaurD+lakO9txNnTvKtA6PISrw86LgqHvRzWYPyoE2Ph5aMIrCw9/uko6XHTKCwA==}
-
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
@@ -2082,10 +2075,6 @@ packages:
     resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
     engines: {node: '>=0.8.19'}
 
-  inflection@1.13.4:
-    resolution: {integrity: sha512-6I/HUDeYFfuNCVS3td055BaXBwKYuzw7K3ExVMStBowKo9oOAMJIXIHvdyR3iboTCp1b+1i5DSkIZTcwIktuDw==}
-    engines: {'0': node >= 0.4.0}
-
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 
@@ -2329,12 +2318,6 @@ packages:
   mlly@1.7.4:
     resolution: {integrity: sha512-qmdSIPC4bDJXgZTCR7XosJiNKySV7O215tsPtDN9iEO/7q/76b/ijtgRu/+epFXSJhijtTCCGp3DWS549P3xKw==}
 
-  moment-timezone@0.5.48:
-    resolution: {integrity: sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==}
-
-  moment@2.30.1:
-    resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
-
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
@@ -2445,9 +2428,6 @@ packages:
     resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
     engines: {node: '>= 14.16'}
 
-  pg-connection-string@2.9.0:
-    resolution: {integrity: sha512-P2DEBKuvh5RClafLngkAuGe9OUlFV7ebu8w1kmaaOgPcpJd1RIFh7otETfI6hAR8YupOLFTY7nuvvIn7PLciUQ==}
-
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -2554,9 +2534,6 @@ packages:
     engines: {node: '>= 0.4'}
     hasBin: true
 
-  retry-as-promised@7.1.1:
-    resolution: {integrity: sha512-hMD7odLOt3LkTjcif8aRZqi/hybjpLNgSk5oF5FCowfCjok6LukpN2bDX7R5wDmbgBQFn7YoBxSagmtXHaJYJw==}
-
   retry-request@7.0.2:
     resolution: {integrity: sha512-dUOvLMJ0/JJYEn8NrpOaGNE7X3vpI5XlZS/u0ANjqtcZVKnIxP7IgCFwrKTxENw29emmwug53awKtaMm4i9g5w==}
     engines: {node: '>=14'}
@@ -2608,43 +2585,6 @@ packages:
     resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
     engines: {node: '>=10'}
     hasBin: true
-
-  sequelize-pool@7.1.0:
-    resolution: {integrity: sha512-G9c0qlIWQSK29pR/5U2JF5dDQeqqHRragoyahj/Nx4KOOQ3CPPfzxnfqFPCSB7x5UgjOgnZ61nSxz+fjDpRlJg==}
-    engines: {node: '>= 10.0.0'}
-
-  sequelize@6.37.7:
-    resolution: {integrity: sha512-mCnh83zuz7kQxxJirtFD7q6Huy6liPanI67BSlbzSYgVNl5eXVdE2CN1FuAeZwG1SNpGsNRCV+bJAVVnykZAFA==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      ibm_db: '*'
-      mariadb: '*'
-      mysql2: '*'
-      oracledb: '*'
-      pg: '*'
-      pg-hstore: '*'
-      snowflake-sdk: '*'
-      sqlite3: '*'
-      tedious: '*'
-    peerDependenciesMeta:
-      ibm_db:
-        optional: true
-      mariadb:
-        optional: true
-      mysql2:
-        optional: true
-      oracledb:
-        optional: true
-      pg:
-        optional: true
-      pg-hstore:
-        optional: true
-      snowflake-sdk:
-        optional: true
-      sqlite3:
-        optional: true
-      tedious:
-        optional: true
 
   shebang-command@2.0.0:
     resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
@@ -2802,9 +2742,6 @@ packages:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
 
-  toposort-class@1.0.1:
-    resolution: {integrity: sha512-OsLcGGbYF3rMjPUf8oKktyvCiUxSbqMMS39m33MAjLTC1DVIH6x3WSt63/M77ihI09+Sdfk1AXvfhCEeUmC7mg==}
-
   touch@3.1.1:
     resolution: {integrity: sha512-r0eojU4bI8MnHr8c5bNo7lJDdI2qXlWWJk6a9EAFG7vbhTjElYhBVS3/miuE0uOuoLdb8Mc/rVfsmm6eo5o9GA==}
     hasBin: true
@@ -2924,10 +2861,6 @@ packages:
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
-  validator@13.15.0:
-    resolution: {integrity: sha512-36B2ryl4+oL5QxZ3AzD0t5SsMNGvTtQHpjgFO5tbNxfXbMFkY822ktCDe1MnlqV3301QQI9SLHDNJokDI+Z9pA==}
-    engines: {node: '>= 0.10'}
-
   vite-node@3.1.4:
     resolution: {integrity: sha512-6enNwYnpyDo4hEgytbmc6mYWHXDHYEn0D1/rw4Q+tnHUGtKTJsn8T1YkX6Q18wI5LCrS8CTYlBaiCqxOy2kvUA==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
@@ -3045,9 +2978,6 @@ packages:
   winston@3.17.0:
     resolution: {integrity: sha512-DLiFIXYC5fMPxaRg832S6F5mJYvePtmO5G9v9IgUFPhXm9/GkXarH/TUrBAVzhTCzAj9anE/+GjrgXp/54nOgw==}
     engines: {node: '>= 12.0.0'}
-
-  wkx@0.5.0:
-    resolution: {integrity: sha512-Xng/d4Ichh8uN4l0FToV/258EjMGU9MGcA0HV2d9B/ZpZB3lqQm7nkOdZdm5GhKtLLhAE7PiVQwN4eN+2YJJUg==}
 
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
@@ -3956,34 +3886,6 @@ snapshots:
       - '@swc/wasm'
       - typescript
 
-  '@fjell/lib@4.4.0(@swc/core@1.11.29)(typescript@5.8.3)':
-    dependencies:
-      '@fjell/core': 4.4.2(@swc/core@1.11.29)(typescript@5.8.3)
-      '@fjell/logging': 4.4.2(@swc/core@1.11.29)(typescript@5.8.3)
-      '@google-cloud/firestore': 7.11.1
-      '@google-cloud/storage': 7.16.0
-      dayjs: 1.11.13
-      deepmerge: 4.3.1
-      multer: 1.4.5-lts.2
-      sequelize: 6.37.7
-      specifier-resolution-node: 1.1.4
-      winston: 3.17.0
-    transitivePeerDependencies:
-      - '@swc/core'
-      - '@swc/wasm'
-      - encoding
-      - ibm_db
-      - mariadb
-      - mysql2
-      - oracledb
-      - pg
-      - pg-hstore
-      - snowflake-sdk
-      - sqlite3
-      - supports-color
-      - tedious
-      - typescript
-
   '@fjell/logging@4.4.2(@swc/core@1.11.29)(typescript@5.8.3)':
     dependencies:
       '@eslint/js': 9.27.0
@@ -4358,6 +4260,7 @@ snapshots:
   '@types/debug@4.1.12':
     dependencies:
       '@types/ms': 2.1.0
+    optional: true
 
   '@types/estree@1.0.7': {}
 
@@ -4382,7 +4285,8 @@ snapshots:
 
   '@types/mime@1.3.5': {}
 
-  '@types/ms@2.1.0': {}
+  '@types/ms@2.1.0':
+    optional: true
 
   '@types/multer@1.4.12':
     dependencies:
@@ -4421,8 +4325,6 @@ snapshots:
   '@types/tough-cookie@4.0.5': {}
 
   '@types/triple-beam@1.3.5': {}
-
-  '@types/validator@13.15.1': {}
 
   '@typescript-eslint/eslint-plugin@8.32.1(@typescript-eslint/parser@8.32.1(eslint@9.27.0)(typescript@5.8.3))(eslint@9.27.0)(typescript@5.8.3)':
     dependencies:
@@ -4904,8 +4806,6 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
-  dottie@2.0.6: {}
-
   dunder-proto@1.0.1:
     dependencies:
       call-bind-apply-helpers: 1.0.2
@@ -5335,8 +5235,6 @@ snapshots:
 
   imurmurhash@0.1.4: {}
 
-  inflection@1.13.4: {}
-
   inherits@2.0.4: {}
 
   is-arrayish@0.3.2: {}
@@ -5563,12 +5461,6 @@ snapshots:
       pkg-types: 1.3.1
       ufo: 1.6.1
 
-  moment-timezone@0.5.48:
-    dependencies:
-      moment: 2.30.1
-
-  moment@2.30.1: {}
-
   ms@2.1.3: {}
 
   muggle-string@0.4.1: {}
@@ -5668,8 +5560,6 @@ snapshots:
   pathe@2.0.3: {}
 
   pathval@2.0.0: {}
-
-  pg-connection-string@2.9.0: {}
 
   picocolors@1.1.1: {}
 
@@ -5787,8 +5677,6 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  retry-as-promised@7.1.1: {}
-
   retry-request@7.0.2:
     dependencies:
       '@types/request': 2.48.12
@@ -5854,29 +5742,6 @@ snapshots:
       lru-cache: 6.0.0
 
   semver@7.7.2: {}
-
-  sequelize-pool@7.1.0: {}
-
-  sequelize@6.37.7:
-    dependencies:
-      '@types/debug': 4.1.12
-      '@types/validator': 13.15.1
-      debug: 4.4.1(supports-color@5.5.0)
-      dottie: 2.0.6
-      inflection: 1.13.4
-      lodash: 4.17.21
-      moment: 2.30.1
-      moment-timezone: 0.5.48
-      pg-connection-string: 2.9.0
-      retry-as-promised: 7.1.1
-      semver: 7.7.2
-      sequelize-pool: 7.1.0
-      toposort-class: 1.0.1
-      uuid: 8.3.2
-      validator: 13.15.0
-      wkx: 0.5.0
-    transitivePeerDependencies:
-      - supports-color
 
   shebang-command@2.0.0:
     dependencies:
@@ -6014,8 +5879,6 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
-  toposort-class@1.0.1: {}
-
   touch@3.1.1: {}
 
   tr46@0.0.3: {}
@@ -6113,8 +5976,6 @@ snapshots:
   uuid@9.0.1: {}
 
   v8-compile-cache-lib@3.0.1: {}
-
-  validator@13.15.0: {}
 
   vite-node@3.1.4(@types/node@20.17.50):
     dependencies:
@@ -6256,10 +6117,6 @@ snapshots:
       stack-trace: 0.0.10
       triple-beam: 1.4.1
       winston-transport: 4.9.0
-
-  wkx@0.5.0:
-    dependencies:
-      '@types/node': 20.17.50
 
   word-wrap@1.2.5: {}
 

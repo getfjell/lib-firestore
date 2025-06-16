@@ -8,6 +8,13 @@ const mockAbstractCreateOperations = vi.fn();
 const mockGetAllOperation = vi.fn();
 const mockGetOneOperation = vi.fn();
 
+// Mock registry
+const mockRegistry = {
+  get: vi.fn(),
+  libTree: vi.fn(),
+  register: vi.fn(),
+};
+
 // ESM module mocks
 vi.mock('@/logger', () => ({
   get: vi.fn(() => mockLoggerInstance),
@@ -37,7 +44,7 @@ describe('contained/Operations createOperations', () => {
     mockAbstractCreateOperations.mockReturnValue({});
     mockGetAllOperation.mockReturnValue(vi.fn());
     mockGetOneOperation.mockReturnValue(vi.fn());
-    createOperations(firestore, definition);
+    createOperations(firestore, definition, mockRegistry);
     expect(mockLoggerInstance.debug).toHaveBeenCalledWith('createOperations', { firestore, definition });
   });
 
@@ -50,10 +57,10 @@ describe('contained/Operations createOperations', () => {
     mockAbstractCreateOperations.mockReturnValue(mockOps);
     mockGetAllOperation.mockReturnValue(mockAll);
     mockGetOneOperation.mockReturnValue(mockOne);
-    const result = createOperations(firestore, definition);
-    expect(mockAbstractCreateOperations).toHaveBeenCalledWith(firestore, definition);
-    expect(mockGetAllOperation).toHaveBeenCalledWith(firestore, definition);
-    expect(mockGetOneOperation).toHaveBeenCalledWith(firestore, definition);
+    const result = createOperations(firestore, definition, mockRegistry);
+    expect(mockAbstractCreateOperations).toHaveBeenCalledWith(firestore, definition, mockRegistry);
+    expect(mockGetAllOperation).toHaveBeenCalledWith(firestore, definition, mockRegistry);
+    expect(mockGetOneOperation).toHaveBeenCalledWith(firestore, definition, mockRegistry);
     expect(result).toMatchObject({ ...mockOps, all: mockAll, one: mockOne });
   });
 
@@ -66,7 +73,7 @@ describe('contained/Operations createOperations', () => {
     mockAbstractCreateOperations.mockReturnValue(mockOps);
     mockGetAllOperation.mockReturnValue(mockAll);
     mockGetOneOperation.mockReturnValue(mockOne);
-    const result = createOperations(firestore, definition);
+    const result = createOperations(firestore, definition, mockRegistry);
     expect(result.all).toBe(mockAll);
     expect(result.one).toBe(mockOne);
     expect(result.opA).toBe(mockOps.opA);

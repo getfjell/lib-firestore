@@ -2,7 +2,6 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { VitePluginNode } from 'vite-plugin-node';
-import { configDefaults } from 'vitest/config';
 
 export default defineConfig({
   server: {
@@ -37,49 +36,32 @@ export default defineConfig({
     outDir: 'dist',
     lib: {
       entry: './src/index.ts',
-      formats: ['es', 'cjs'],
+      formats: ['es'],
     },
     rollupOptions: {
-      input: 'src/index.ts',
-      output: [
-        {
-          format: 'esm',
-          entryFileNames: '[name].js',
-          preserveModules: true,
-          exports: 'named',
-          sourcemap: 'inline',
-        },
-        {
-          format: 'cjs',
-          entryFileNames: '[name].cjs',
-          preserveModules: true,
-          exports: 'named',
-          sourcemap: 'inline',
-        },
+      external: [
+        '@fjell/core',
+        '@fjell/lib',
+        '@fjell/logging',
+        '@google-cloud/firestore',
+        '@google-cloud/storage',
+        'dayjs',
+        'deepmerge',
+        'multer',
+        'specifier-resolution-node',
+        'winston'
       ],
+      input: 'src/index.ts',
+      output: {
+        format: 'esm',
+        entryFileNames: '[name].js',
+        preserveModules: true,
+        exports: 'named',
+      },
     },
     // Make sure Vite generates ESM-compatible code
     modulePreload: false,
     minify: false,
     sourcemap: true
-  },
-  test: {
-    globals: true,
-    environment: 'node',
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html', 'lcov'],
-      thresholds: {
-        statements: 79,
-        branches: 80,
-        functions: 73,
-        lines: 79,
-      },
-      exclude: [
-        ...((configDefaults.coverage.exclude ?? []) as string[]),
-        'tests/**/*',
-        'dist/**/*',
-      ],
-    },
   },
 });

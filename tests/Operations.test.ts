@@ -1,5 +1,6 @@
 import { Definition } from '@/Definition';
 import { Item } from '@fjell/core';
+import { Registry } from '@fjell/lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock individual operation creators
@@ -14,6 +15,13 @@ const mockGetFindOperation = vi.fn();
 // Mock the logger
 const mockLoggerGet = vi.fn();
 const mockLoggerDebug = vi.fn();
+
+// Mock the registry
+const mockRegistry = {
+  register: vi.fn(),
+  libTree: vi.fn(),
+  get: vi.fn(),
+} as unknown as Registry;
 
 vi.mock('../src/ops/all', () => ({
   getAllOperation: mockGetAllOperation,
@@ -66,23 +74,43 @@ describe('createOperations', () => {
   it('should initialize logger with "Operations"', async () => {
     // Dynamically import after mocks are set up
     const { createOperations: createOps } = await import('../src/Operations');
-    createOps(mockFirestore, mockDefinition);
+    createOps(mockFirestore, mockDefinition, mockRegistry);
     expect(mockLoggerGet).toHaveBeenCalledWith('Operations');
   });
 
   it('should call each get<OperationName>Operation with firestore and definition', async () => {
-    const { createOperations: createOps } = await import('../src/Operations');
-    createOps(mockFirestore, mockDefinition);
+    const mockFirestore = {} as FirebaseFirestore.Firestore;
+    const mockDefinition = {
+      collectionNames: ['testCollection'],
+      coordinate: {
+        kta: ['testDefinition'] as [string],
+        scopes: ['firestore'],
+        toString: () => ''
+      },
+      options: {
+        fields: {},
+        hooks: {
+          preCreate: () => { },
+          preUpdate: () => { }
+        }
+      }
+    } as any; // Using any here since we're just testing the function calls
+    const mockRegistry = {
+      get: vi.fn(),
+      libTree: vi.fn() as unknown as Registry['libTree'],
+      register: vi.fn()
+    } as Registry;
 
-    expect(mockGetAllOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetOneOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetCreateOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetUpdateOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetGetOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetRemoveOperations).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    // For find, it's called with definition and the operations object itself
-    // We'll test this more specifically if needed, for now, just check it's called.
-    expect(mockGetFindOperation).toHaveBeenCalledWith(mockDefinition, expect.any(Object));
+    const { createOperations: createOps } = await import('../src/Operations');
+    createOps(mockFirestore, mockDefinition, mockRegistry);
+
+    expect(mockGetAllOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetOneOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetCreateOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetUpdateOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetGetOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetRemoveOperations).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetFindOperation).toHaveBeenCalledWith(mockDefinition, expect.any(Object), mockRegistry);
   });
 
   it('should return an operations object with all defined operations', async () => {
@@ -103,7 +131,7 @@ describe('createOperations', () => {
     mockGetFindOperation.mockReturnValue(mockFind);
 
     const { createOperations: createOps } = await import('../src/Operations');
-    const operations = createOps(mockFirestore, mockDefinition);
+    const operations = createOps(mockFirestore, mockDefinition, mockRegistry);
 
     expect(operations.all).toBe(mockAll);
     expect(operations.one).toBe(mockOne);
@@ -116,7 +144,7 @@ describe('createOperations', () => {
 
   it('should include an upsert operation that throws "Not implemented"', async () => {
     const { createOperations: createOps } = await import('../src/Operations');
-    const operations = createOps(mockFirestore, mockDefinition);
+    const operations = createOps(mockFirestore, mockDefinition, mockRegistry);
     expect(() => operations.upsert({} as any, {} as any)).toThrow('Not implemented');
   });
 });
