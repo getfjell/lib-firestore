@@ -1,42 +1,50 @@
-import { Item } from '@fjell/core';
 import { Definition } from '@/Definition';
-import { jest } from '@jest/globals';
+import { Item } from '@fjell/core';
+import { Registry } from '@fjell/lib';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock individual operation creators
-const mockGetAllOperation = jest.fn();
-const mockGetOneOperation = jest.fn();
-const mockGetCreateOperation = jest.fn();
-const mockGetUpdateOperation = jest.fn();
-const mockGetGetOperation = jest.fn();
-const mockGetRemoveOperations = jest.fn();
-const mockGetFindOperation = jest.fn();
+const mockGetAllOperation = vi.fn();
+const mockGetOneOperation = vi.fn();
+const mockGetCreateOperation = vi.fn();
+const mockGetUpdateOperation = vi.fn();
+const mockGetGetOperation = vi.fn();
+const mockGetRemoveOperations = vi.fn();
+const mockGetFindOperation = vi.fn();
 
 // Mock the logger
-const mockLoggerGet = jest.fn();
-const mockLoggerDebug = jest.fn();
+const mockLoggerGet = vi.fn();
+const mockLoggerDebug = vi.fn();
 
-jest.unstable_mockModule('../src/ops/all', () => ({
+// Mock the registry
+const mockRegistry = {
+  register: vi.fn(),
+  libTree: vi.fn(),
+  get: vi.fn(),
+} as unknown as Registry;
+
+vi.mock('../src/ops/all', () => ({
   getAllOperation: mockGetAllOperation,
 }));
-jest.unstable_mockModule('../src/ops/one', () => ({
+vi.mock('../src/ops/one', () => ({
   getOneOperation: mockGetOneOperation,
 }));
-jest.unstable_mockModule('../src/ops/create', () => ({
+vi.mock('../src/ops/create', () => ({
   getCreateOperation: mockGetCreateOperation,
 }));
-jest.unstable_mockModule('../src/ops/update', () => ({
+vi.mock('../src/ops/update', () => ({
   getUpdateOperation: mockGetUpdateOperation,
 }));
-jest.unstable_mockModule('../src/ops/get', () => ({
+vi.mock('../src/ops/get', () => ({
   getGetOperation: mockGetGetOperation,
 }));
-jest.unstable_mockModule('../src/ops/remove', () => ({
+vi.mock('../src/ops/remove', () => ({
   getRemoveOperations: mockGetRemoveOperations,
 }));
-jest.unstable_mockModule('../src/ops/find', () => ({
+vi.mock('../src/ops/find', () => ({
   getFindOperation: mockGetFindOperation,
 }));
-jest.unstable_mockModule('../src/logger', () => ({
+vi.mock('../src/logger', () => ({
   default: {
     get: mockLoggerGet.mockReturnValue({ debug: mockLoggerDebug }),
   },
@@ -48,11 +56,11 @@ describe('createOperations', () => {
 
   beforeEach(() => {
     // Reset mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Setup mock Firestore and Definition
     mockFirestore = {
-      collection: jest.fn(),
+      collection: vi.fn(),
       // Add other Firestore methods if needed by operations
     };
     mockDefinition = {
@@ -66,33 +74,53 @@ describe('createOperations', () => {
   it('should initialize logger with "Operations"', async () => {
     // Dynamically import after mocks are set up
     const { createOperations: createOps } = await import('../src/Operations');
-    createOps(mockFirestore, mockDefinition);
+    createOps(mockFirestore, mockDefinition, mockRegistry);
     expect(mockLoggerGet).toHaveBeenCalledWith('Operations');
   });
 
   it('should call each get<OperationName>Operation with firestore and definition', async () => {
-    const { createOperations: createOps } = await import('../src/Operations');
-    createOps(mockFirestore, mockDefinition);
+    const mockFirestore = {} as FirebaseFirestore.Firestore;
+    const mockDefinition = {
+      collectionNames: ['testCollection'],
+      coordinate: {
+        kta: ['testDefinition'] as [string],
+        scopes: ['firestore'],
+        toString: () => ''
+      },
+      options: {
+        fields: {},
+        hooks: {
+          preCreate: () => { },
+          preUpdate: () => { }
+        }
+      }
+    } as any; // Using any here since we're just testing the function calls
+    const mockRegistry = {
+      get: vi.fn(),
+      libTree: vi.fn() as unknown as Registry['libTree'],
+      register: vi.fn()
+    } as Registry;
 
-    expect(mockGetAllOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetOneOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetCreateOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetUpdateOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetGetOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    expect(mockGetRemoveOperations).toHaveBeenCalledWith(mockFirestore, mockDefinition);
-    // For find, it's called with definition and the operations object itself
-    // We'll test this more specifically if needed, for now, just check it's called.
-    expect(mockGetFindOperation).toHaveBeenCalledWith(mockDefinition, expect.any(Object));
+    const { createOperations: createOps } = await import('../src/Operations');
+    createOps(mockFirestore, mockDefinition, mockRegistry);
+
+    expect(mockGetAllOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetOneOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetCreateOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetUpdateOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetGetOperation).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetRemoveOperations).toHaveBeenCalledWith(mockFirestore, mockDefinition, mockRegistry);
+    expect(mockGetFindOperation).toHaveBeenCalledWith(mockDefinition, expect.any(Object), mockRegistry);
   });
 
   it('should return an operations object with all defined operations', async () => {
-    const mockAll = jest.fn();
-    const mockOne = jest.fn();
-    const mockCreate = jest.fn();
-    const mockUpdate = jest.fn();
-    const mockGet = jest.fn();
-    const mockRemove = jest.fn();
-    const mockFind = jest.fn();
+    const mockAll = vi.fn();
+    const mockOne = vi.fn();
+    const mockCreate = vi.fn();
+    const mockUpdate = vi.fn();
+    const mockGet = vi.fn();
+    const mockRemove = vi.fn();
+    const mockFind = vi.fn();
 
     mockGetAllOperation.mockReturnValue(mockAll);
     mockGetOneOperation.mockReturnValue(mockOne);
@@ -103,7 +131,7 @@ describe('createOperations', () => {
     mockGetFindOperation.mockReturnValue(mockFind);
 
     const { createOperations: createOps } = await import('../src/Operations');
-    const operations = createOps(mockFirestore, mockDefinition);
+    const operations = createOps(mockFirestore, mockDefinition, mockRegistry);
 
     expect(operations.all).toBe(mockAll);
     expect(operations.one).toBe(mockOne);
@@ -116,7 +144,7 @@ describe('createOperations', () => {
 
   it('should include an upsert operation that throws "Not implemented"', async () => {
     const { createOperations: createOps } = await import('../src/Operations');
-    const operations = createOps(mockFirestore, mockDefinition);
+    const operations = createOps(mockFirestore, mockDefinition, mockRegistry);
     expect(() => operations.upsert({} as any, {} as any)).toThrow('Not implemented');
   });
 });

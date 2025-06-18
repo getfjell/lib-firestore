@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { DocumentData } from "@google-cloud/firestore";
 
 import { DocumentReference, Firestore } from "@google-cloud/firestore";
@@ -17,23 +18,25 @@ import { processDoc } from "@/DocProcessor";
 import { createEvents } from "@/EventCoordinator";
 import LibLogger from "@/logger";
 import { getReference } from "@/ReferenceFinder";
+import { Registry } from "@fjell/lib";
 import { CollectionReference } from "@google-cloud/firestore";
 
 const logger = LibLogger.get('ops', 'create');
 
 export const getCreateOperation = <
-V extends Item<S, L1, L2, L3, L4, L5>,
-S extends string,
-L1 extends string = never,
-L2 extends string = never,
-L3 extends string = never,
-L4 extends string = never,
-L5 extends string = never
+  V extends Item<S, L1, L2, L3, L4, L5>,
+  S extends string,
+  L1 extends string = never,
+  L2 extends string = never,
+  L3 extends string = never,
+  L4 extends string = never,
+  L5 extends string = never
 >(
-    firestore: FirebaseFirestore.Firestore,
-    definition: Definition<V, S, L1, L2, L3, L4, L5>,
-   
-  ) => {
+  firestore: FirebaseFirestore.Firestore,
+  definition: Definition<V, S, L1, L2, L3, L4, L5>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  registry: Registry,
+) => {
 
   const { collectionNames, coordinate } = definition;
   const { kta } = coordinate;
@@ -50,14 +53,14 @@ L5 extends string = never
   ): Promise<V> => {
     let locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = [];
     let newItemId: string | undefined;
-    
+
     // Process Options
-    if(options?.locations) {
+    if (options?.locations) {
       locations = options.locations
     }
 
-    if(options?.key) {
-      if(isComKey(options.key)) {
+    if (options?.key) {
+      if (isComKey(options.key)) {
         locations = (options.key as ComKey<S, L1, L2, L3, L4, L5>).loc;
       }
       newItemId = (options.key as ComKey<S, L1, L2, L3, L4, L5>).pk;
@@ -71,7 +74,7 @@ L5 extends string = never
     const reference:
       CollectionReference<DocumentData, DocumentData> |
       Firestore =
-        getReference(loc, [...collectionNames], firestore) as CollectionReference<DocumentData, DocumentData> |
+      getReference(loc, [...collectionNames], firestore) as CollectionReference<DocumentData, DocumentData> |
       Firestore;
     logger.default('Got Reference', { reference })
 

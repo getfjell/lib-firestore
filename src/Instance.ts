@@ -1,8 +1,9 @@
-import * as Library from '@fjell/lib';
+import LibLogger from '@/logger';
 import { Item, ItemTypeArray } from '@fjell/core';
+import * as Library from '@fjell/lib';
+import { Registry } from '@fjell/lib';
 import { createDefinition } from './Definition';
 import { createOperations } from './Operations';
-import LibLogger from '@/logger';
 
 const logger = LibLogger.get('Instance');
 
@@ -33,15 +34,16 @@ export function createInstance<
   firestore: FirebaseFirestore.Firestore,
   libOptions: Library.Options<V, S, L1, L2, L3, L4, L5> = {},
   scopes: string[] = [],
+  registry: Registry
 ): Instance<V, S, L1, L2, L3, L4, L5> {
   logger.debug('createInstance', { keyTypes, collectionNames, firestore, libOptions, scopes });
-  const definition = createDefinition(keyTypes, scopes, collectionNames, libOptions);
-  const operations = createOperations(firestore, definition);
+  const definition = createDefinition(keyTypes, scopes || [], collectionNames, libOptions || {});
+  const operations = createOperations(firestore, definition, registry);
 
   return {
     definition,
-    operations: Library.wrapOperations(operations, definition),
-    firestore
+    operations: Library.wrapOperations(operations, definition, registry),
+    firestore,
+    registry
   }
-
 }

@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { buildQuery } from "@/QueryBuilder";
 import { CollectionGroup, Query } from "@google-cloud/firestore";
 
@@ -8,8 +9,9 @@ import { Definition } from "@/Definition";
 import { processDoc } from "@/DocProcessor";
 import { getReference } from "@/ReferenceFinder";
 import LibLogger from "@/logger";
+import { Registry } from "@fjell/lib";
 
-const logger = LibLogger.get('contained','ops', 'all');
+const logger = LibLogger.get('contained', 'ops', 'all');
 
 export const getAllOperation = <
   V extends Item<S, L1, L2, L3, L4, L5>,
@@ -20,9 +22,11 @@ export const getAllOperation = <
   L4 extends string = never,
   L5 extends string = never
 >(
-    firestore: FirebaseFirestore.Firestore,
-    definition: Definition<V, S, L1, L2, L3, L4, L5>,
-  ) => {
+  firestore: FirebaseFirestore.Firestore,
+  definition: Definition<V, S, L1, L2, L3, L4, L5>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  registry: Registry,
+) => {
 
   const { collectionNames, coordinate } = definition;
   const { kta } = coordinate;
@@ -59,11 +63,11 @@ export const getAllOperation = <
 
     let firestoreQuery: Query = colRef;
     firestoreQuery = buildQuery(itemQuery, colRef);
-      
+
     logger.default('Configured this Item Query', { itemQuery, firestoreQuery });
-      
+
     const matchingItems = await firestoreQuery.get();
-      
+
     // this.logger.default('Matching Items', { matchingItems });
     // TODO: Move this up.
     const docs = matchingItems.docs.map(doc => validateKeys(processDoc(doc, kta), kta));

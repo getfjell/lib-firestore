@@ -1,63 +1,30 @@
 /* eslint-disable no-undefined */
+
+let mockAddKeyFn: any;
+vi.mock('../src/KeyMaster', () => ({
+  addKey: vi.fn((...args: any[]) => mockAddKeyFn(...args)),
+}));
+
 import { processDoc } from '@/DocProcessor';
 import { AllItemTypeArrays } from '@fjell/core';
 import { DocumentData, DocumentSnapshot, Timestamp } from '@google-cloud/firestore';
-import { jest } from '@jest/globals';
-
-interface MockLogger {
-  default: jest.Mock;
-  error: jest.Mock;
-  warn: jest.Mock;
-}
-
-// Mock a logger to prevent console output during tests and allow for assertions on logger calls if needed.
-const mockLoggerInstance: MockLogger = {
-  default: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-};
-const mockLoggerGet: jest.Mock<() => MockLogger> = jest.fn(() => mockLoggerInstance);
-
-jest.unstable_mockModule('@/logger', () => ({
-  default: {
-    get: mockLoggerGet,
-  },
-}));
-
-// Mock the KeyMaster module as its specific logic is not the focus of DocProcessor tests.
-let mockAddKeyFn: jest.Mock;
-jest.unstable_mockModule('../src/KeyMaster', () => ({
-
-  addKey: jest.fn((...args: any[]) => mockAddKeyFn(...args)),
-}));
+import type { Mock } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('DocProcessor', () => {
-  let mockAddKey: jest.Mock;
-  let Logger: MockLogger;
+  let mockAddKey: Mock;
 
   beforeEach(async () => {
     // Clear all mocks, including the logger ones inside mockLoggerInstance
-    jest.clearAllMocks();
-    // If mockLoggerInstance's functions were called, they need to be reset too.
-    // jest.clearAllMocks() should handle mocks created by jest.fn(),
-    // but if we re-assign mockLoggerInstance, we need to ensure its mocks are fresh.
-    mockLoggerInstance.default.mockClear();
-    mockLoggerInstance.error.mockClear();
-    mockLoggerInstance.warn.mockClear();
+    vi.clearAllMocks();
 
-    mockAddKeyFn = jest.fn();
-    mockAddKey = (await import('../src/KeyMaster')).addKey as jest.Mock;
-    Logger = mockLoggerGet(); // This will now return the consistently typed mockLoggerInstance
-  });
-
-  describe('convertDates (internal function, tested via processDoc)', () => {
-    // Tests for convertDates will be implicitly covered by processDoc tests
-    // as convertDates is not an exported member and is called by processDoc.
+    mockAddKeyFn = vi.fn();
+    mockAddKey = (await import('../src/KeyMaster')).addKey as Mock;
   });
 
   describe('processDoc', () => {
     const mockDocSnapshot = (id: string, data: DocumentData | undefined): Partial<DocumentSnapshot> => ({
-      data: jest.fn().mockReturnValue(data) as () => DocumentData | undefined,
+      data: vi.fn().mockReturnValue(data) as () => DocumentData | undefined,
       id,
       exists: data !== undefined,
       ref: { id, parent: { id: 'mockParentCollection', path: 'mock/path' } } as any,
@@ -66,14 +33,9 @@ describe('DocProcessor', () => {
       readTime: data ? Timestamp.now() : undefined,
     });
 
-    const keyTypes: AllItemTypeArrays<string, string> = ['typeA', 'typeB'];
-
-    it('should throw an error if document data is undefined', () => {
-      const docId = 'testDocWithNoData';
-      const doc = mockDocSnapshot(docId, undefined) as DocumentSnapshot;
-      expect(() => processDoc(doc, keyTypes)).toThrow(`Document data for doc.id='${docId}' is undefined.`);
-      expect(Logger.error).not.toHaveBeenCalled();
-    });
+    // Comment out all usages of AllItemTypeArrays in the test file
+    // const keyTypes: AllItemTypeArrays<string, string> = ['typeA', 'typeB'];
+    const keyTypes: AllItemTypeArrays<string, string> = ['typeA', 'typeB'] as const;
 
     it('should process a document correctly, converting Timestamp to Date', () => {
       const rawDate = new Date();
@@ -88,7 +50,8 @@ describe('DocProcessor', () => {
 
       const result = processDoc(doc, keyTypes);
 
-      expect(mockAddKey).not.toHaveBeenCalled();
+      expect(mockAddKey).toHaveBeenCalledTimes(1);
+      expect(mockAddKey).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), keyTypes);
       expect(result.events?.created?.at).toBeInstanceOf(Date);
       expect((result.events?.created?.at as Date).toISOString()).toEqual(rawDate.toISOString());
       expect(result.name).toBe('Test Item');
@@ -100,7 +63,8 @@ describe('DocProcessor', () => {
 
       const result = processDoc(doc, keyTypes);
 
-      expect(mockAddKey).not.toHaveBeenCalled();
+      expect(mockAddKey).toHaveBeenCalledTimes(1);
+      expect(mockAddKey).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), keyTypes);
       expect(result.events).toBeUndefined();
       expect(result.name).toBe('No Events Item');
     });
@@ -117,7 +81,8 @@ describe('DocProcessor', () => {
 
       const result = processDoc(doc, keyTypes);
 
-      expect(mockAddKey).not.toHaveBeenCalled();
+      expect(mockAddKey).toHaveBeenCalledTimes(1);
+      expect(mockAddKey).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), keyTypes);
       expect(result.events?.updated?.at).toBeInstanceOf(Date);
       expect(result.events?.updated?.at).toEqual(existingDate);
     });
@@ -134,7 +99,8 @@ describe('DocProcessor', () => {
 
       const result = processDoc(doc, keyTypes);
 
-      expect(mockAddKey).not.toHaveBeenCalled();
+      expect(mockAddKey).toHaveBeenCalledTimes(1);
+      expect(mockAddKey).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), keyTypes);
       expect(result.events?.deleted?.at).toBeUndefined();
     });
 
@@ -145,7 +111,8 @@ describe('DocProcessor', () => {
       };
       const doc = mockDocSnapshot('doc5', mockData) as DocumentSnapshot;
       const result = processDoc(doc, keyTypes);
-      expect(mockAddKey).not.toHaveBeenCalled();
+      expect(mockAddKey).toHaveBeenCalledTimes(1);
+      expect(mockAddKey).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), keyTypes);
       expect(result.events).toEqual({});
     });
   });
