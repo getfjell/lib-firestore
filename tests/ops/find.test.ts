@@ -1,14 +1,14 @@
-import { jest } from '@jest/globals';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger to suppress output and allow assertions
 const mockLogger = {
-  debug: jest.fn(),
-  default: jest.fn(),
-  error: jest.fn(),
+  debug: vi.fn(),
+  default: vi.fn(),
+  error: vi.fn(),
 };
-const mockLoggerGet = jest.fn(() => mockLogger);
+const mockLoggerGet = vi.fn(() => mockLogger);
 
-jest.unstable_mockModule('@/logger', () => ({
+vi.mock('@/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
@@ -24,12 +24,12 @@ describe('getFindOperation', () => {
   const locations = ['loc1'];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls the correct finder and returns its result', async () => {
     // @ts-ignore
-    const mockFinder: any = jest.fn().mockResolvedValue(mockFinderResult);
+    const mockFinder: any = vi.fn().mockResolvedValue(mockFinderResult);
     const definition: any = {
       options: {
         finders: {
@@ -47,7 +47,7 @@ describe('getFindOperation', () => {
 
   it('throws if the finder throws', async () => {
     // @ts-ignore
-    const mockFinder: any = jest.fn().mockRejectedValue(new Error('Finder error'));
+    const mockFinder: any = vi.fn().mockRejectedValue(new Error('Finder error'));
     const definition: any = {
       options: {
         finders: {
@@ -65,7 +65,7 @@ describe('getFindOperation', () => {
     const definition: any = {
       options: {
         finders: {
-          otherFinder: jest.fn(),
+          otherFinder: vi.fn(),
         },
       },
     };

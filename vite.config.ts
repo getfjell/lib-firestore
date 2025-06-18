@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
-import { VitePluginNode } from 'vite-plugin-node';
-import dts from 'vite-plugin-dts';
 import path from 'path';
+import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
+import { VitePluginNode } from 'vite-plugin-node';
 
 export default defineConfig({
   server: {
@@ -39,13 +39,24 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
+      external: [
+        '@fjell/core',
+        '@fjell/lib',
+        '@fjell/logging',
+        '@google-cloud/firestore',
+        '@google-cloud/storage',
+        'dayjs',
+        'deepmerge',
+        'multer',
+        'specifier-resolution-node',
+        'winston'
+      ],
       input: 'src/index.ts',
       output: {
         format: 'esm',
         entryFileNames: '[name].js',
         preserveModules: true,
         exports: 'named',
-        sourcemap: 'inline',
       },
     },
     // Make sure Vite generates ESM-compatible code

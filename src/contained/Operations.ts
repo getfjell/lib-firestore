@@ -3,7 +3,7 @@ import * as Abstract from "@/Operations";
 import { getAllOperation } from "@/contained/ops/all";
 import { getOneOperation } from "@/contained/ops/one";
 import { Item } from "@fjell/core";
-import { Operations } from "@fjell/lib";
+import { Operations, Registry } from "@fjell/lib";
 
 import LibLogger from '@/logger';
 
@@ -17,14 +17,18 @@ export const createOperations = <
   L3 extends string = never,
   L4 extends string = never,
   L5 extends string = never
->(firestore: FirebaseFirestore.Firestore, definition: Definition<V, S, L1, L2, L3, L4, L5>):
+>(
+    firestore: FirebaseFirestore.Firestore,
+    definition: Definition<V, S, L1, L2, L3, L4, L5>,
+    registry: Registry,
+  ):
   Operations<V, S, L1, L2, L3, L4, L5> => {
   logger.debug('createOperations', { firestore, definition });
 
-  const operations = Abstract.createOperations(firestore, definition);
+  const operations = Abstract.createOperations(firestore, definition, registry);
   return {
     ...operations,
-    all: getAllOperation(firestore, definition),
-    one: getOneOperation(firestore, definition),
+    all: getAllOperation(firestore, definition, registry),
+    one: getOneOperation(firestore, definition, registry),
   }
 }

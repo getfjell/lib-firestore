@@ -1,17 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { jest } from '@jest/globals';
+import type { Registry } from '@fjell/lib';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger
-const mockLogger = { default: jest.fn(), error: jest.fn() };
-const mockLoggerGet = jest.fn(() => mockLogger);
-jest.unstable_mockModule('@/logger', () => ({
+const mockLogger = { default: vi.fn(), error: vi.fn() };
+const mockLoggerGet = vi.fn(() => mockLogger);
+vi.mock('@/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
+// Mock registry
+const mockRegistry = {
+  get: vi.fn(),
+  libTree: vi.fn() as unknown as Registry['libTree'],
+  register: vi.fn(),
+} as Registry;
+
 // Mock @fjell/core
-const mockValidateKeys = jest.fn((item: any, kta: any) => ({ ...item, validated: true }));
-const mockIsValidItemKey = jest.fn(() => true);
-jest.unstable_mockModule('@fjell/core', () => ({
+const mockValidateKeys = vi.fn((item: any, kta: any) => ({ ...item, validated: true }));
+const mockIsValidItemKey = vi.fn(() => true);
+vi.mock('@fjell/core', () => ({
   validateKeys: mockValidateKeys,
   isValidItemKey: mockIsValidItemKey,
   Item: class { },
@@ -21,9 +29,9 @@ jest.unstable_mockModule('@fjell/core', () => ({
 }));
 
 // Mock getUpdateOperation
-const mockUpdateOperation = jest.fn();
-const mockGetUpdateOperation = jest.fn(() => mockUpdateOperation);
-jest.unstable_mockModule('@/ops/update', () => ({
+const mockUpdateOperation = vi.fn();
+const mockGetUpdateOperation = vi.fn(() => mockUpdateOperation);
+vi.mock('@/ops/update', () => ({
   getUpdateOperation: mockGetUpdateOperation,
 }));
 
@@ -43,7 +51,7 @@ describe('getRemoveOperations', () => {
   const removedItem: any = { foo: 'bar', events: { deleted: { at: new Date() } } };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockIsValidItemKey.mockReturnValue(true);
     mockUpdateOperation.mockReset();
     // @ts-ignore
@@ -52,11 +60,11 @@ describe('getRemoveOperations', () => {
   });
 
   it('removes item and returns validated item (no postRemove)', async () => {
-    const remove = getRemoveOperations(firestore, definition);
+    const remove = getRemoveOperations(firestore, definition, mockRegistry);
     const result = await remove(validKey);
     expect(mockLogger.default).toHaveBeenCalledWith('Remove', { key: validKey });
     expect(mockIsValidItemKey).toHaveBeenCalledWith(validKey);
-    expect(mockGetUpdateOperation).toHaveBeenCalledWith(firestore, definition);
+    expect(mockGetUpdateOperation).toHaveBeenCalledWith(firestore, definition, mockRegistry);
     expect(mockUpdateOperation).toHaveBeenCalledWith(validKey, expect.objectContaining({ events: expect.any(Object) }));
     expect(mockValidateKeys).toHaveBeenCalledWith(removedItem, definition.coordinate.kta);
     expect(result).toEqual(expect.objectContaining({ ...removedItem, validated: true }));
@@ -64,7 +72,7 @@ describe('getRemoveOperations', () => {
 
   it('throws if key is invalid', async () => {
     mockIsValidItemKey.mockReturnValue(false);
-    const remove = getRemoveOperations(firestore, definition);
+    const remove = getRemoveOperations(firestore, definition, mockRegistry);
     await expect(remove(validKey)).rejects.toThrow('Key for Remove is not a valid ItemKey');
     expect(mockLogger.error).toHaveBeenCalledWith('Key for Remove is not a valid ItemKey: %j', validKey);
     expect(mockUpdateOperation).not.toHaveBeenCalled();
@@ -74,7 +82,7 @@ describe('getRemoveOperations', () => {
     const error = new Error('update failed');
     // @ts-ignore
     mockUpdateOperation.mockRejectedValue(error);
-    const remove = getRemoveOperations(firestore, definition);
+    const remove = getRemoveOperations(firestore, definition, mockRegistry);
     await expect(remove(validKey)).rejects.toThrow('update failed');
     expect(mockUpdateOperation).toHaveBeenCalled();
   });
