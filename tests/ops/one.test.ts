@@ -1,20 +1,28 @@
-import { jest } from '@jest/globals';
+import type { Registry } from '@fjell/lib';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger to suppress output and allow assertions
-const mockLogger = { default: jest.fn() };
-const mockLoggerGet = jest.fn(() => mockLogger);
-jest.unstable_mockModule('@/logger', () => ({
+const mockLogger = { default: vi.fn() };
+const mockLoggerGet = vi.fn(() => mockLogger);
+vi.mock('@/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
 // Mock getAllOperation to control its return value
-const mockGetAllOperation = jest.fn();
-jest.unstable_mockModule('@/ops/all', () => ({
+const mockGetAllOperation = vi.fn();
+vi.mock('@/ops/all', () => ({
   getAllOperation: mockGetAllOperation,
 }));
 
+// Mock registry
+const mockRegistry = {
+  get: vi.fn(),
+  libTree: vi.fn() as unknown as Registry['libTree'],
+  register: vi.fn(),
+} as Registry;
+
 // Mock @fjell/core types for type compatibility
-jest.unstable_mockModule('@fjell/core', () => ({
+vi.mock('@fjell/core', () => ({
   Item: class { },
   ItemQuery: Object,
   LocKeyArray: Array,
@@ -33,22 +41,22 @@ describe('getOneOperation', () => {
   const locations: any[] = [];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('returns the first item if getAllOperation returns items', async () => {
     const items = [{ foo: 'bar' }, { foo: 'baz' }];
     // getAllOperation returns a function (the op) that returns items
     mockGetAllOperation.mockReturnValue(() => Promise.resolve(items));
-    const one = getOneOperation(firestore, definition);
+    const one = getOneOperation(firestore, definition, mockRegistry);
     const result = await one(itemQuery, locations);
-    expect(mockGetAllOperation).toHaveBeenCalledWith(firestore, definition);
+    expect(mockGetAllOperation).toHaveBeenCalledWith(firestore, definition, mockRegistry);
     expect(result).toEqual(items[0]);
   });
 
   it('returns null if getAllOperation returns an empty array', async () => {
     mockGetAllOperation.mockReturnValue(() => Promise.resolve([]));
-    const one = getOneOperation(firestore, definition);
+    const one = getOneOperation(firestore, definition, mockRegistry);
     const result = await one(itemQuery, locations);
     expect(result).toBeNull();
   });
@@ -56,7 +64,7 @@ describe('getOneOperation', () => {
   it('throws if getAllOperation throws', async () => {
     const error = new Error('getAllOperation failed');
     mockGetAllOperation.mockReturnValue(() => Promise.reject(error));
-    const one = getOneOperation(firestore, definition);
+    const one = getOneOperation(firestore, definition, mockRegistry);
     await expect(one(itemQuery, locations)).rejects.toThrow('getAllOperation failed');
   });
 });
