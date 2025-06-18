@@ -1,9 +1,9 @@
-import { Instance as AbstractFirestoreInstance } from '@/Instance';
-import { Item } from '@fjell/core';
-import { Primary } from '@fjell/lib';
 import { createDefinition } from '@/Definition';
+import { Instance as AbstractFirestoreInstance } from '@/Instance';
 import { createOperations } from '@/Operations';
 import LibLogger from '@/logger';
+import { Item } from '@fjell/core';
+import { Primary, Registry } from '@fjell/lib';
 
 const logger = LibLogger.get('Instance');
 
@@ -24,17 +24,19 @@ export function createInstance<
   firestore: FirebaseFirestore.Firestore,
   libOptions: Primary.Options<V, S> = {},
   scopes: string[] = [],
+  registry: Registry
 ): Instance<V, S> {
 
   logger.debug('createInstance', { keyType, collectionName, libOptions, scopes });
 
-  const definition = createDefinition([keyType], scopes, [collectionName], libOptions);
-  const operations = createOperations(firestore, definition);
+  const definition = createDefinition([keyType], scopes || [], [collectionName], libOptions || {});
+  const operations = createOperations(firestore, definition, registry);
 
   return {
     definition,
-    operations: Primary.wrapOperations(operations, definition),
-    firestore
+    operations: Primary.wrapOperations(operations, definition, registry),
+    firestore,
+    registry
   } as Instance<V, S>;
 
 }

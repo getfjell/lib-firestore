@@ -1,6 +1,7 @@
 /* eslint-disable no-undefined */
 import { addKey, removeKey } from '@/KeyMaster';
 import { Item, ItemProperties } from '@fjell/core';
+import { describe, expect, it } from 'vitest';
 
 // Mock FirebaseFirestore
 const mockDoc = (id: string, parentStructure: string[] = []) => {

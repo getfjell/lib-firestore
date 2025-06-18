@@ -1,7 +1,7 @@
+import { createDefinition } from '@/Definition';
 import { Instance as AbstractFirestoreInstance } from '@/Instance';
 import { Item, ItemTypeArray } from '@fjell/core';
-import { Contained } from '@fjell/lib';
-import { createDefinition } from '@/Definition';
+import { Contained, Registry } from '@fjell/lib';
 import { createOperations } from './Operations';
 
 import LibLogger from '@/logger';
@@ -35,17 +35,19 @@ export function createInstance<
   firestore: FirebaseFirestore.Firestore,
   libOptions: Contained.Options<V, S, L1, L2, L3, L4, L5> = {},
   scopes: string[] = [],
+  registry: Registry,
 ): Instance<V, S, L1, L2, L3, L4, L5> {
 
   logger.debug('createInstance', { keyTypes, collectionNames, firestore, libOptions, scopes });
 
-  const definition = createDefinition(keyTypes, scopes, collectionNames, libOptions);
-  const operations = createOperations(firestore, definition);
+  const definition = createDefinition(keyTypes, scopes || [], collectionNames, libOptions || {});
+  const operations = createOperations(firestore, definition, registry);
 
   return {
     definition,
-    operations: Contained.wrapOperations(operations, definition),
-    firestore
+    operations: Contained.wrapOperations(operations, definition, registry),
+    firestore,
+    registry
   } as Instance<V, S, L1, L2, L3, L4, L5>;
 
 }

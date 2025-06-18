@@ -1,28 +1,35 @@
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger instance
-const mockLoggerInstance = { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
 // Mocked dependency functions
-const mockAbstractCreateOperations = jest.fn();
-const mockGetAllOperation = jest.fn();
-const mockGetOneOperation = jest.fn();
+const mockAbstractCreateOperations = vi.fn();
+const mockGetAllOperation = vi.fn();
+const mockGetOneOperation = vi.fn();
+
+// Mock registry
+const mockRegistry = {
+  get: vi.fn(),
+  libTree: vi.fn(),
+  register: vi.fn(),
+};
 
 // ESM module mocks
-jest.unstable_mockModule('@/logger', () => ({
-  get: jest.fn(() => mockLoggerInstance),
+vi.mock('@/logger', () => ({
+  get: vi.fn(() => mockLoggerInstance),
   __esModule: true,
-  default: { get: jest.fn(() => mockLoggerInstance) },
+  default: { get: vi.fn(() => mockLoggerInstance) },
 }));
-jest.unstable_mockModule('@/Operations', () => ({ createOperations: mockAbstractCreateOperations }));
-jest.unstable_mockModule('@/contained/ops/all', () => ({ getAllOperation: mockGetAllOperation }));
-jest.unstable_mockModule('@/contained/ops/one', () => ({ getOneOperation: mockGetOneOperation }));
+vi.mock('@/Operations', () => ({ createOperations: mockAbstractCreateOperations }));
+vi.mock('@/contained/ops/all', () => ({ getAllOperation: mockGetAllOperation }));
+vi.mock('@/contained/ops/one', () => ({ getOneOperation: mockGetOneOperation }));
 
 let createOperations: any;
 
 describe('contained/Operations createOperations', () => {
   beforeEach(async () => {
-    jest.resetModules();
+    vi.resetModules();
     mockAbstractCreateOperations.mockReset();
     mockGetAllOperation.mockReset();
     mockGetOneOperation.mockReset();
@@ -35,9 +42,9 @@ describe('contained/Operations createOperations', () => {
     const firestore = { app: {} };
     const definition = { foo: 'bar' };
     mockAbstractCreateOperations.mockReturnValue({});
-    mockGetAllOperation.mockReturnValue(jest.fn());
-    mockGetOneOperation.mockReturnValue(jest.fn());
-    createOperations(firestore, definition);
+    mockGetAllOperation.mockReturnValue(vi.fn());
+    mockGetOneOperation.mockReturnValue(vi.fn());
+    createOperations(firestore, definition, mockRegistry);
     expect(mockLoggerInstance.debug).toHaveBeenCalledWith('createOperations', { firestore, definition });
   });
 
@@ -45,28 +52,28 @@ describe('contained/Operations createOperations', () => {
     const firestore = { app: {} };
     const definition = { foo: 'baz' };
     const mockOps = { op: true };
-    const mockAll = jest.fn();
-    const mockOne = jest.fn();
+    const mockAll = vi.fn();
+    const mockOne = vi.fn();
     mockAbstractCreateOperations.mockReturnValue(mockOps);
     mockGetAllOperation.mockReturnValue(mockAll);
     mockGetOneOperation.mockReturnValue(mockOne);
-    const result = createOperations(firestore, definition);
-    expect(mockAbstractCreateOperations).toHaveBeenCalledWith(firestore, definition);
-    expect(mockGetAllOperation).toHaveBeenCalledWith(firestore, definition);
-    expect(mockGetOneOperation).toHaveBeenCalledWith(firestore, definition);
+    const result = createOperations(firestore, definition, mockRegistry);
+    expect(mockAbstractCreateOperations).toHaveBeenCalledWith(firestore, definition, mockRegistry);
+    expect(mockGetAllOperation).toHaveBeenCalledWith(firestore, definition, mockRegistry);
+    expect(mockGetOneOperation).toHaveBeenCalledWith(firestore, definition, mockRegistry);
     expect(result).toMatchObject({ ...mockOps, all: mockAll, one: mockOne });
   });
 
   it('returns an operations object with all, one, and spread abstract ops', () => {
     const firestore = { app: {} };
     const definition = { foo: 'qux' };
-    const mockOps = { opA: jest.fn(), opB: jest.fn() };
-    const mockAll = jest.fn();
-    const mockOne = jest.fn();
+    const mockOps = { opA: vi.fn(), opB: vi.fn() };
+    const mockAll = vi.fn();
+    const mockOne = vi.fn();
     mockAbstractCreateOperations.mockReturnValue(mockOps);
     mockGetAllOperation.mockReturnValue(mockAll);
     mockGetOneOperation.mockReturnValue(mockOne);
-    const result = createOperations(firestore, definition);
+    const result = createOperations(firestore, definition, mockRegistry);
     expect(result.all).toBe(mockAll);
     expect(result.one).toBe(mockOne);
     expect(result.opA).toBe(mockOps.opA);

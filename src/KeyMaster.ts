@@ -8,6 +8,18 @@ import LibLogger from '@/logger';
 
 const logger = LibLogger.get('KeyMaster');
 
+/**
+ * Removes the 'key' property from an item's properties.
+ *
+ * @template S - The primary type string
+ * @template L1 - The first location type string (optional)
+ * @template L2 - The second location type string (optional)
+ * @template L3 - The third location type string (optional)
+ * @template L4 - The fourth location type string (optional)
+ * @template L5 - The fifth location type string (optional)
+ * @param {ItemProperties<S, L1, L2, L3, L4, L5>} item - The item properties from which to remove the key
+ * @returns {ItemProperties<S, L1, L2, L3, L4, L5>} The item properties with the key removed
+ */
 export const removeKey = <
   S extends string,
   L1 extends string = never,
@@ -22,6 +34,21 @@ export const removeKey = <
   return item;
 }
 
+/**
+ * Adds a key structure to an item based on the document snapshot and key types.
+ * The key structure includes the primary key and location keys based on the document's path hierarchy.
+ *
+ * @template S - The primary type string
+ * @template L1 - The first location type string (optional)
+ * @template L2 - The second location type string (optional)
+ * @template L3 - The third location type string (optional)
+ * @template L4 - The fourth location type string (optional)
+ * @template L5 - The fifth location type string (optional)
+ * @param {Partial<Item<S, L1, L2, L3, L4, L5>>} item - The item to add the key to
+ * @param {FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>} doc - The Firestore document snapshot
+ * @param {AllItemTypeArrays<S, L1, L2, L3, L4, L5>} keyTypes - Array of key types defining the hierarchy
+ * @returns {void}
+ */
 export const addKey = <
   S extends string,
   L1 extends string = never,

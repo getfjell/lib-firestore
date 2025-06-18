@@ -1,17 +1,17 @@
-import { jest } from '@jest/globals';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger
-const mockLogger = { default: jest.fn(), debug: jest.fn() };
-const mockLoggerGet = jest.fn(() => mockLogger);
-jest.unstable_mockModule('@/logger', () => ({
+const mockLogger = { default: vi.fn(), debug: vi.fn() };
+const mockLoggerGet = vi.fn(() => mockLogger);
+vi.mock('@/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
 // Mock getReference to return a mock CollectionReference
 const mockCollectionRef = {
-  doc: jest.fn((id) => {
-    const set = jest.fn();
-    const get = jest.fn();
+  doc: vi.fn((id) => {
+    const set = vi.fn();
+    const get = vi.fn();
     // Save for assertions if needed
     // @ts-ignore
     mockCollectionRef._lastDocRef = { set, get, path: `mock/doc/path/${id}` };
@@ -19,30 +19,30 @@ const mockCollectionRef = {
   }),
   _lastDocRef: null, // for test assertions if needed
 };
-const mockGetReference = jest.fn(() => mockCollectionRef);
-jest.unstable_mockModule('@/ReferenceFinder', () => ({
+const mockGetReference = vi.fn(() => mockCollectionRef);
+vi.mock('@/ReferenceFinder', () => ({
   getReference: mockGetReference,
 }));
 
 // Mock createEvents to just return the item as an object
-const mockCreateEvents = jest.fn((item: any) => ({ ...(typeof item === 'object' ? item : {}), events: { created: true } }));
-jest.unstable_mockModule('@/EventCoordinator', () => ({
+const mockCreateEvents = vi.fn((item: any) => ({ ...(typeof item === 'object' ? item : {}), events: { created: true } }));
+vi.mock('@/EventCoordinator', () => ({
   createEvents: mockCreateEvents,
 }));
 
 // Mock processDoc to return the doc data
-const mockProcessDoc = jest.fn((doc: any) => {
+const mockProcessDoc = vi.fn((doc: any) => {
   const data = doc && typeof doc.data === 'function' ? doc.data() : {};
   return { ...data, events: data.events, processed: true };
 });
-jest.unstable_mockModule('@/DocProcessor', () => ({
+vi.mock('@/DocProcessor', () => ({
   processDoc: mockProcessDoc,
 }));
 
 // Mock validateKeys to just return the item as an object
-const mockValidateKeys = jest.fn((item: any) => ({ ...item, validated: true }));
-const mockIsComKey = jest.fn((key: any) => Boolean(key && key.loc));
-jest.unstable_mockModule('@fjell/core', () => ({
+const mockValidateKeys = vi.fn((item: any) => ({ ...item, validated: true }));
+const mockIsComKey = vi.fn((key: any) => Boolean(key && key.loc));
+vi.mock('@fjell/core', () => ({
   validateKeys: mockValidateKeys,
   isComKey: mockIsComKey,
   // Provide minimal stubs for types used in the test
@@ -54,12 +54,19 @@ jest.unstable_mockModule('@fjell/core', () => ({
 }));
 
 // Patch global crypto.randomUUID for test
-const originalCrypto = global.crypto;
+let originalRandomUUID: any;
 beforeAll(() => {
-  global.crypto = { randomUUID: () => 'generated-uuid' } as any;
+  if (!global.crypto) {
+    (global as any).crypto = { randomUUID: () => '00000000-0000-0000-0000-000000000000' };
+  } else {
+    originalRandomUUID = global.crypto.randomUUID;
+    global.crypto.randomUUID = () => '00000000-0000-0000-0000-000000000000';
+  }
 });
 afterAll(() => {
-  global.crypto = originalCrypto;
+  if (originalRandomUUID) {
+    global.crypto.randomUUID = originalRandomUUID;
+  }
 });
 
 let getCreateOperation: any;
@@ -76,7 +83,7 @@ describe('getCreateOperation', () => {
   const item = { foo: 'bar' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockCollectionRef.doc.mockReset();
   });
 
@@ -84,8 +91,8 @@ describe('getCreateOperation', () => {
     let lastDocRef;
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
-        set: jest.fn(() => void 0),
-        get: jest.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'bar' }) })),
+        set: vi.fn(() => void 0),
+        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'bar' }) })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;
@@ -93,7 +100,7 @@ describe('getCreateOperation', () => {
     const create = getCreateOperation(firestore, definition);
     const result = await create(item);
     expect(mockGetReference).toHaveBeenCalledWith([], ['testCollection'], firestore);
-    expect(mockCollectionRef.doc).toHaveBeenCalledWith('generated-uuid');
+    expect(mockCollectionRef.doc).toHaveBeenCalledWith('00000000-0000-0000-0000-000000000000');
     expect(mockCreateEvents).toHaveBeenCalledWith(item);
     expect(lastDocRef!.set).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', events: { created: true } }));
     expect(lastDocRef!.get).toHaveBeenCalled();
@@ -106,8 +113,8 @@ describe('getCreateOperation', () => {
     let lastDocRef;
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
-        set: jest.fn(() => void 0),
-        get: jest.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }) })),
+        set: vi.fn(() => void 0),
+        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }) })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;
@@ -127,8 +134,8 @@ describe('getCreateOperation', () => {
     let lastDocRef;
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
-        set: jest.fn(() => void 0),
-        get: jest.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'qux' }) })),
+        set: vi.fn(() => void 0),
+        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'qux' }) })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;
@@ -148,8 +155,8 @@ describe('getCreateOperation', () => {
     let lastDocRef;
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
-        set: jest.fn(() => void 0),
-        get: jest.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }) })),
+        set: vi.fn(() => void 0),
+        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }) })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;
@@ -158,7 +165,7 @@ describe('getCreateOperation', () => {
     const options = { locations: ['loc2'] };
     const result = await create(item, options);
     expect(mockGetReference).toHaveBeenCalledWith(['loc2'], ['testCollection'], firestore);
-    expect(mockCollectionRef.doc).toHaveBeenCalledWith('generated-uuid');
+    expect(mockCollectionRef.doc).toHaveBeenCalledWith('00000000-0000-0000-0000-000000000000');
     expect(result).toEqual(expect.objectContaining({ foo: 'baz', events: { created: true }, processed: true, validated: true }));
     expect(lastDocRef!.set).toHaveBeenCalled();
     expect(lastDocRef!.get).toHaveBeenCalled();
@@ -168,8 +175,8 @@ describe('getCreateOperation', () => {
     let lastDocRef;
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
-        set: jest.fn(() => void 0),
-        get: jest.fn(() => ({ exists: false })),
+        set: vi.fn(() => void 0),
+        get: vi.fn(() => ({ exists: false })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;

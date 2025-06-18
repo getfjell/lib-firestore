@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Definition } from "@/Definition";
 import { processDoc } from "@/DocProcessor";
 import { getReference } from "@/ReferenceFinder";
@@ -9,18 +10,19 @@ import { DocumentReference } from "@google-cloud/firestore";
 const logger = LibLogger.get('ops', 'get');
 
 export const getGetOperation = <
-V extends Item<S, L1, L2, L3, L4, L5>,
-S extends string,
-L1 extends string = never,
-L2 extends string = never,
-L3 extends string = never,
-L4 extends string = never,
-L5 extends string = never
+  V extends Item<S, L1, L2, L3, L4, L5>,
+  S extends string,
+  L1 extends string = never,
+  L2 extends string = never,
+  L3 extends string = never,
+  L4 extends string = never,
+  L5 extends string = never
 >(
-    firestore: FirebaseFirestore.Firestore,
-    definition: Definition<V, S, L1, L2, L3, L4, L5>,
-   
-  ) => {
+  firestore: FirebaseFirestore.Firestore,
+  definition: Definition<V, S, L1, L2, L3, L4, L5>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  registry: Library.Registry,
+) => {
 
   const get = async (
     key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
@@ -34,13 +36,13 @@ L5 extends string = never
       logger.error('Key for Get is not a valid ItemKey: %j', key);
       throw new Error('Key for Get is not a valid ItemKey');
     }
-    
+
     const itemKey = key;
-    
+
     const docRef =
-        getReference(
-          itemKey as ComKey<S, L1, L2, L3, L4, L5> | PriKey<S>, collectionNames, firestore) as DocumentReference;
-    
+      getReference(
+        itemKey as ComKey<S, L1, L2, L3, L4, L5> | PriKey<S>, collectionNames, firestore) as DocumentReference;
+
     const doc = await docRef.get();
     if (!doc.exists) {
       throw new Library.NotFoundError<S, L1, L2, L3, L4, L5>('get', coordinate, key);
@@ -51,4 +53,3 @@ L5 extends string = never
 
   return get;
 }
-    

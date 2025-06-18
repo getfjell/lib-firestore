@@ -1,6 +1,6 @@
-import * as Library from '@fjell/lib';
 import { Item } from '@fjell/core';
-import { jest } from '@jest/globals';
+import * as Library from '@fjell/lib';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Define a generic item type for testing purposes
 interface MockItem extends Item<string, 'l1', 'l2', 'l3', 'l4', 'l5'> {
@@ -12,8 +12,8 @@ interface MockItem extends Item<string, 'l1', 'l2', 'l3', 'l4', 'l5'> {
 }
 
 // Mock the @fjell/lib module
-const mockLibCreateOptions = jest.fn();
-jest.unstable_mockModule('@fjell/lib', () => ({
+const mockLibCreateOptions = vi.fn();
+vi.mock('@fjell/lib', () => ({
   createOptions: mockLibCreateOptions,
 }));
 

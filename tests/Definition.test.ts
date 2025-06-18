@@ -1,24 +1,24 @@
 /* eslint-disable no-undefined */
 import { ItemTypeArray } from '@fjell/core';
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies
-const mockLibCreateDefinition = jest.fn();
-const mockCreateCoordinate = jest.fn();
-const mockCreateOptions = jest.fn();
+const mockLibCreateDefinition = vi.fn();
+const mockCreateCoordinate = vi.fn();
+const mockCreateOptions = vi.fn();
 
 // @ts-ignore
-jest.unstable_mockModule('@fjell/lib', () => ({
+vi.mock('@fjell/lib', () => ({
   createDefinition: mockLibCreateDefinition,
 }));
 
 // @ts-ignore
-jest.unstable_mockModule('../src/Coordinate', () => ({
+vi.mock('../src/Coordinate', () => ({
   createCoordinate: mockCreateCoordinate,
 }));
 
 // @ts-ignore
-jest.unstable_mockModule('../src/Options', () => ({
+vi.mock('../src/Options', () => ({
   createOptions: mockCreateOptions,
 }));
 

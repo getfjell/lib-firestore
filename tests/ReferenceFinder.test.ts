@@ -1,16 +1,17 @@
 import { LocKey, PriKey } from '@fjell/core';
-import { jest } from '@jest/globals';
+import type { Mock } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock declarations for logger
-const mockLoggerDebug = jest.fn();
-const mockLoggerError = jest.fn();
-const mockLoggerGet = jest.fn(() => ({
+const mockLoggerDebug = vi.fn();
+const mockLoggerError = vi.fn();
+const mockLoggerGet = vi.fn(() => ({
   debug: mockLoggerDebug,
   error: mockLoggerError,
 }));
 
 // @ts-ignore
-jest.unstable_mockModule('@/logger', () => ({
+vi.mock('@/logger', () => ({
   __esModule: true,
   default: {
     get: mockLoggerGet,
@@ -18,11 +19,11 @@ jest.unstable_mockModule('@/logger', () => ({
 }));
 
 // Mock declarations for @fjell/core
-const mockGenerateKeyArray = jest.fn();
-const mockIsPriKey = jest.fn();
+const mockGenerateKeyArray = vi.fn();
+const mockIsPriKey = vi.fn();
 
 // @ts-ignore
-jest.unstable_mockModule('@fjell/core', () => ({
+vi.mock('@fjell/core', () => ({
   __esModule: true,
   generateKeyArray: mockGenerateKeyArray,
   isPriKey: mockIsPriKey,
@@ -31,9 +32,9 @@ jest.unstable_mockModule('@fjell/core', () => ({
 
 // Mock declarations for @google-cloud/firestore
 // These will be functions that return mock instances/objects
-let mockFirestoreCollectionMethod: jest.Mock;
-let mockDocCollectionMethod: jest.Mock;
-let mockCollectionDocMethod: jest.Mock;
+let mockFirestoreCollectionMethod: Mock;
+let mockDocCollectionMethod: Mock;
+let mockCollectionDocMethod: Mock;
 
 const initializeFirestoreMocks = () => {
   // Functions to create mock Firestore objects with chainable methods
@@ -44,7 +45,7 @@ const initializeFirestoreMocks = () => {
     };
     // A DocumentReference can have .collection()
     // @ts-ignore
-    ref.collection = jest.fn((name) => createMockCollectionRef(name, ref.path));
+    ref.collection = vi.fn((name) => createMockCollectionRef(name, ref.path));
     mockDocCollectionMethod = ref.collection; // Capture for assertions if needed generally
     return ref;
   };
@@ -56,16 +57,16 @@ const initializeFirestoreMocks = () => {
     };
     // A CollectionReference can have .doc()
     // @ts-ignore
-    ref.doc = jest.fn((name) => createMockDocRef(name));
+    ref.doc = vi.fn((name) => createMockDocRef(name));
     mockCollectionDocMethod = ref.doc; // Capture for assertions
     return ref;
   };
 
   // @ts-ignore
-  mockFirestoreCollectionMethod = jest.fn((name) => createMockCollectionRef(name));
+  mockFirestoreCollectionMethod = vi.fn((name) => createMockCollectionRef(name));
 
   return {
-    Firestore: jest.fn(() => ({ // Mock Firestore class constructor
+    Firestore: vi.fn(() => ({ // Mock Firestore class constructor
       collection: mockFirestoreCollectionMethod,
     })),
     // DocumentReference and CollectionReference are not directly instantiated with `new` in the code,
@@ -75,7 +76,7 @@ const initializeFirestoreMocks = () => {
 };
 
 // @ts-ignore
-jest.unstable_mockModule('@google-cloud/firestore', () => initializeFirestoreMocks());
+vi.mock('@google-cloud/firestore', () => initializeFirestoreMocks());
 
 // Dynamically import the module under test after mocks are set up
 let addReference: any;
@@ -98,7 +99,7 @@ describe('ReferenceFinder', () => {
 
     // Firestore mocks are reset by virtue of initializeFirestoreMocks being called by Jest
     // or by clearing the top-level mock functions if they were defined outside.
-    // With the current setup, jest.fn() inside createMockDocRef/createMockCollectionRef
+    // With the current setup, vi.fn() inside createMockDocRef/createMockCollectionRef
     // will create fresh mocks for each chain, which is good.
     // We also reset the main entry points captured for general assertions if any.
     if (mockFirestoreCollectionMethod) mockFirestoreCollectionMethod.mockClear();
@@ -115,9 +116,9 @@ describe('ReferenceFinder', () => {
       const firestoreMockFactory = initializeFirestoreMocks();
       mockFirestoreTestInstance = firestoreMockFactory.Firestore(); // Get a new mocked Firestore instance
       // A mock DocumentReference for when 'base' is a DocumentReference
-      mockBaseDocRef = { collection: jest.fn(), path: 'baseDoc/doc1' };
+      mockBaseDocRef = { collection: vi.fn(), path: 'baseDoc/doc1' };
       // Ensure its collection method also returns a chainable structure
-      const mockCollForBaseDoc = { doc: jest.fn().mockReturnValue({ path: 'finalStepFromBaseDoc' }) };
+      const mockCollForBaseDoc = { doc: vi.fn().mockReturnValue({ path: 'finalStepFromBaseDoc' }) };
       mockBaseDocRef.collection.mockReturnValue(mockCollForBaseDoc);
     });
 
@@ -133,7 +134,7 @@ describe('ReferenceFinder', () => {
       mockIsPriKey.mockReturnValue(true);
 
       const finalDoc = { path: 'col1/doc1' };
-      const colRef = { doc: jest.fn().mockReturnValue(finalDoc) };
+      const colRef = { doc: vi.fn().mockReturnValue(finalDoc) };
       mockFirestoreTestInstance.collection.mockReturnValue(colRef);
 
       const result = addReference(mockFirestoreTestInstance, [...keys], [...collections]);
@@ -149,7 +150,7 @@ describe('ReferenceFinder', () => {
       mockIsPriKey.mockReturnValue(false);
 
       const finalDoc = { path: 'baseDoc/doc1/subcol1/loc1' };
-      const subColRef = { doc: jest.fn().mockReturnValue(finalDoc) };
+      const subColRef = { doc: vi.fn().mockReturnValue(finalDoc) };
       mockBaseDocRef.collection.mockReturnValue(subColRef);
 
       const result = addReference(mockBaseDocRef, [...keys], [...collections]);
@@ -167,12 +168,12 @@ describe('ReferenceFinder', () => {
       mockIsPriKey.mockReturnValue(true); // Assume all are PriKeys
 
       const finalDocRef = { path: 'col1/doc1/col2/doc2' };
-      const intermediateDocRef = { collection: jest.fn(), path: 'col1/doc1' };
+      const intermediateDocRef = { collection: vi.fn(), path: 'col1/doc1' };
 
-      const colRef2 = { doc: jest.fn().mockReturnValue(finalDocRef) };
+      const colRef2 = { doc: vi.fn().mockReturnValue(finalDocRef) };
       intermediateDocRef.collection.mockReturnValue(colRef2);
 
-      const colRef1 = { doc: jest.fn().mockReturnValue(intermediateDocRef) };
+      const colRef1 = { doc: vi.fn().mockReturnValue(intermediateDocRef) };
       mockFirestoreTestInstance.collection.mockReturnValue(colRef1);
 
       const result = addReference(mockFirestoreTestInstance, [...keys], [...collections]);
@@ -208,7 +209,7 @@ describe('ReferenceFinder', () => {
       mockIsPriKey.mockReturnValue(true);
 
       const finalDoc = { path: 'final' };
-      const colRef = { doc: jest.fn().mockReturnValue(finalDoc) };
+      const colRef = { doc: vi.fn().mockReturnValue(finalDoc) };
       mockFirestoreTestInstance.collection.mockReturnValue(colRef);
 
       // Pass arrays directly to test mutation
@@ -264,7 +265,7 @@ describe('ReferenceFinder', () => {
       mockGenerateKeyArray.mockReturnValue([{ pk: 'doc1', kt: 'pri' }]); // Key from input
 
       const expectedDoc = { path: 'col1/doc1FromPriKey' };
-      const colRef = { doc: jest.fn().mockReturnValue(expectedDoc) };
+      const colRef = { doc: vi.fn().mockReturnValue(expectedDoc) };
       firestoreInstanceForGetRef.collection.mockReturnValue(colRef);
 
       const result = getReference(pkInput, collectionNames, firestoreInstanceForGetRef);
@@ -290,9 +291,9 @@ describe('ReferenceFinder', () => {
       const veryFinalCollection = { path: 'finalSegment/intermediateDoc/parentDocCollection' };
       const intermediateDoc = {
         path: 'finalSegment/intermediateDoc',
-        collection: jest.fn().mockReturnValue(veryFinalCollection) // This is the key for the last step
+        collection: vi.fn().mockReturnValue(veryFinalCollection) // This is the key for the last step
       };
-      const colRefForAddRef = { doc: jest.fn().mockReturnValue(intermediateDoc) };
+      const colRefForAddRef = { doc: vi.fn().mockReturnValue(intermediateDoc) };
       firestoreInstanceForGetRef.collection.mockReturnValue(colRefForAddRef); // For .collection('finalCollectionSegment')
 
       const result = getReference(locKeyArrayInput as any, collectionNames, firestoreInstanceForGetRef);
@@ -314,9 +315,9 @@ describe('ReferenceFinder', () => {
       const finalCollFromDocRef = { path: 'docRefForCopyTest/col1' };
       const docRef = {
         path: 'docRefForCopyTest',
-        collection: jest.fn().mockReturnValue(finalCollFromDocRef)
+        collection: vi.fn().mockReturnValue(finalCollFromDocRef)
       };
-      const colRef = { doc: jest.fn().mockReturnValue(docRef) };
+      const colRef = { doc: vi.fn().mockReturnValue(docRef) };
       firestoreInstanceForGetRef.collection.mockReturnValue(colRef);
 
       getReference(pkInput, originalCollectionNames, firestoreInstanceForGetRef);

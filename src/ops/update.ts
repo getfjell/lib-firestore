@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { validateKeys } from "@fjell/core";
 
 import { ComKey, isValidItemKey, Item, PriKey, TypesProperties } from "@fjell/core";
@@ -14,18 +15,19 @@ import { DocumentReference } from "@google-cloud/firestore";
 const logger = LibLogger.get('ops', 'update');
 
 export const getUpdateOperation = <
-V extends Item<S, L1, L2, L3, L4, L5>,
-S extends string,
-L1 extends string = never,
-L2 extends string = never,
-L3 extends string = never,
-L4 extends string = never,
-L5 extends string = never
+  V extends Item<S, L1, L2, L3, L4, L5>,
+  S extends string,
+  L1 extends string = never,
+  L2 extends string = never,
+  L3 extends string = never,
+  L4 extends string = never,
+  L5 extends string = never
 >(
-    firestore: FirebaseFirestore.Firestore,
-    definition: Definition<V, S, L1, L2, L3, L4, L5>,
-   
-  ) => {
+  firestore: FirebaseFirestore.Firestore,
+  definition: Definition<V, S, L1, L2, L3, L4, L5>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  registry: Library.Registry,
+) => {
 
   const { collectionNames, coordinate } = definition;
   const { kta } = coordinate;

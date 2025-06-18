@@ -1,22 +1,30 @@
-import { jest } from '@jest/globals';
+import type { Registry } from '@fjell/lib';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger instance
-const mockLoggerInstance = { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() };
+const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
 
 // Mocked dependency functions
-const mockCreateDefinition = jest.fn();
-const mockCreateOperations = jest.fn();
-const mockWrapOperations = jest.fn((ops: any, def: any) => ({ wrapped: ops, def }));
+const mockCreateDefinition = vi.fn();
+const mockCreateOperations = vi.fn();
+const mockWrapOperations = vi.fn((ops: any, def: any) => ({ wrapped: ops, def }));
+
+// Mock registry
+const mockRegistry = {
+  get: vi.fn(),
+  libTree: vi.fn() as unknown as Registry['libTree'],
+  register: vi.fn(),
+} as Registry;
 
 // ESM module mocks
-jest.unstable_mockModule('@/logger', () => ({
-  get: jest.fn(() => mockLoggerInstance),
+vi.mock('@/logger', () => ({
+  get: vi.fn(() => mockLoggerInstance),
   __esModule: true,
-  default: { get: jest.fn(() => mockLoggerInstance) },
+  default: { get: vi.fn(() => mockLoggerInstance) },
 }));
-jest.unstable_mockModule('@/Definition', () => ({ createDefinition: mockCreateDefinition }));
-jest.unstable_mockModule('@/Operations', () => ({ createOperations: mockCreateOperations }));
-jest.unstable_mockModule('@fjell/lib', () => ({
+vi.mock('@/Definition', () => ({ createDefinition: mockCreateDefinition }));
+vi.mock('@/Operations', () => ({ createOperations: mockCreateOperations }));
+vi.mock('@fjell/lib', () => ({
   Contained: { wrapOperations: mockWrapOperations },
 }));
 
@@ -24,7 +32,7 @@ let createInstance: (...args: any[]) => any;
 
 describe('contained/Instance createInstance', () => {
   beforeEach(async () => {
-    jest.resetModules();
+    vi.resetModules();
     mockCreateDefinition.mockReset();
     mockCreateOperations.mockReset();
     mockWrapOperations.mockReset();
@@ -45,7 +53,7 @@ describe('contained/Instance createInstance', () => {
     mockCreateOperations.mockReturnValue(mockOps);
     mockWrapOperations.mockImplementation((ops, def) => ({ wrapped: ops, def }));
 
-    const result = createInstance(keyTypes, collectionNames, firestore, libOptions, scopes);
+    const result = createInstance(keyTypes, collectionNames, firestore, libOptions, scopes, mockRegistry);
     expect(result).toHaveProperty('definition', mockDef);
     expect(result).toHaveProperty('operations');
     expect(result.operations).toMatchObject({ wrapped: expect.objectContaining({ op: true }), def: mockDef });
@@ -60,7 +68,7 @@ describe('contained/Instance createInstance', () => {
     const scopes = ['scope2'];
     mockCreateDefinition.mockReturnValue({ coordinate: { kta: [] } });
     mockCreateOperations.mockReturnValue({});
-    createInstance(keyTypes, collectionNames, firestore, libOptions, scopes);
+    createInstance(keyTypes, collectionNames, firestore, libOptions, scopes, mockRegistry);
     expect(mockLoggerInstance.debug).toHaveBeenCalledWith('createInstance', {
       keyTypes,
       collectionNames,
@@ -79,25 +87,37 @@ describe('contained/Instance createInstance', () => {
     const mockDef = { keyTypes, scopes, collectionNames, coordinate: { kta: [] } };
     mockCreateDefinition.mockReturnValue(mockDef);
     mockCreateOperations.mockReturnValue({});
-    createInstance(keyTypes, collectionNames, firestore, libOptions, scopes);
+    createInstance(keyTypes, collectionNames, firestore, libOptions, scopes, mockRegistry);
     expect(mockCreateDefinition).toHaveBeenCalledWith(keyTypes, scopes, collectionNames, libOptions);
-    expect(mockCreateOperations).toHaveBeenCalledWith(firestore, mockDef);
+    expect(mockCreateOperations).toHaveBeenCalledWith(firestore, mockDef, mockRegistry);
   });
 
   it('calls Contained.wrapOperations with correct params', () => {
-    const keyTypes = ['typeD'];
+    const keyTypes = ['typeD'] as [string];
     const collectionNames = ['colD'];
     const firestore = { app: {} };
-    const libOptions = { foo: 'bar' };
+    const libOptions = { opt: 1 };
     const scopes = ['scope4'];
-    const mockDef = { keyTypes, scopes, collectionNames, coordinate: { kta: [] } };
+    const mockDef = {
+      collectionNames,
+      coordinate: { kta: keyTypes, scopes: ['firestore', ...scopes], toString: () => '' },
+      options: { opt: 1, hooks: { preCreate: () => { }, preUpdate: () => { } } }
+    };
     const mockOps = { op: true };
     mockCreateDefinition.mockReturnValue(mockDef);
     mockCreateOperations.mockReturnValue(mockOps);
-    createInstance(keyTypes, collectionNames, firestore, libOptions, scopes);
+    mockWrapOperations.mockImplementation((ops, def) => ({ wrapped: ops, def }));
+
+    createInstance(keyTypes, collectionNames, firestore, libOptions, scopes, mockRegistry);
+
     expect(mockWrapOperations).toHaveBeenCalledWith(
-      expect.objectContaining({ op: true }),
-      mockDef
+      expect.objectContaining({
+        op: true,
+        all: expect.any(Function),
+        one: expect.any(Function)
+      }),
+      mockDef,
+      mockRegistry
     );
   });
 
@@ -107,7 +127,7 @@ describe('contained/Instance createInstance', () => {
     const firestore = { app: {} };
     mockCreateDefinition.mockReturnValue({ coordinate: { kta: [] } });
     mockCreateOperations.mockReturnValue({});
-    createInstance(keyTypes, collectionNames, firestore);
+    createInstance(keyTypes, collectionNames, firestore, null, null, mockRegistry);
     expect(mockCreateDefinition).toHaveBeenCalledWith(keyTypes, [], collectionNames, {});
   });
 });
