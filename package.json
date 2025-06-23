@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@fjell/core": "^4.4.3",
-    "@fjell/lib": "^4.4.2",
+    "@fjell/lib": "^4.4.3",
     "@fjell/logging": "^4.4.3",
     "@google-cloud/firestore": "^7.11.1",
     "@google-cloud/storage": "^7.16.0",
@@ -59,7 +59,7 @@
     "vite-plugin-node": "^5.0.1",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@10.12.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/getfjell/lib-firestore.git"
