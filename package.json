@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-firestore",
-  "version": "4.4.3",
+  "version": "4.4.4",
   "license": "Apache-2.0",
   "description": "Firestore Library for Fjell",
   "engines": {
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@fjell/core": "^4.4.3",
-    "@fjell/lib": "^4.4.3",
+    "@fjell/lib": "^4.4.4",
     "@fjell/logging": "^4.4.3",
     "@google-cloud/firestore": "^7.11.1",
     "@google-cloud/storage": "^7.16.0",
@@ -41,7 +41,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.29.0",
-    "@swc/core": "^1.12.5",
+    "@swc/core": "^1.12.6",
     "@tsconfig/recommended": "^1.0.10",
     "@types/multer": "^1.4.13",
     "@types/node": "^24.0.3",
