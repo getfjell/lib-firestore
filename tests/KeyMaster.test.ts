@@ -1,6 +1,6 @@
 /* eslint-disable no-undefined */
 import { addKey, removeKey } from '@/KeyMaster';
-import { Item, ItemProperties } from '@fjell/core';
+import { Item } from '@fjell/core';
 import { describe, expect, it } from 'vitest';
 
 // Mock FirebaseFirestore
@@ -39,7 +39,7 @@ const mockDoc = (id: string, parentStructure: string[] = []) => {
 describe('KeyMaster', () => {
   describe('removeKey', () => {
     it('should remove the key property from an item', () => {
-      const item: ItemProperties<'S1'> & { key?: object } = {
+      const item: Partial<Item<'S1'>> & { key?: object } = {
         prop1: 'value1',
         key: { kt: 'S1', pk: 'id1' },
       };
@@ -49,7 +49,7 @@ describe('KeyMaster', () => {
     });
 
     it('should return the item as is if key property does not exist', () => {
-      const item: ItemProperties<'S1'> = {
+      const item: Partial<Item<'S1'>> = {
         prop1: 'value1',
       };
       const result = removeKey(item);

@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { validateKeys } from "@fjell/core";
 
-import { ComKey, isValidItemKey, Item, PriKey, TypesProperties } from "@fjell/core";
+import { ComKey, isValidItemKey, Item, PriKey } from "@fjell/core";
 
 import { Definition } from "@/Definition";
 import { processDoc } from "@/DocProcessor";
@@ -34,7 +34,7 @@ export const getUpdateOperation = <
 
   const update = async (
     key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-    item: TypesProperties<V, S, L1, L2, L3, L4, L5>,
+    item: Partial<Item<S, L1, L2, L3, L4, L5>>,
   ): Promise<V> => {
     logger.default('Update', { key, item });
 
@@ -45,13 +45,13 @@ export const getUpdateOperation = <
 
     const docRef = getReference(
       key as ComKey<S, L1, L2, L3, L4, L5> | PriKey<S>, collectionNames, firestore) as DocumentReference;
-    let itemToUpdate: TypesProperties<V, S, L1, L2, L3, L4, L5> = Object.assign({}, item);
+    let itemToUpdate: Partial<Item<S, L1, L2, L3, L4, L5>> = Object.assign({}, item);
 
     // Right before this record is going to be updated, we need to update the events AND remove the key
     // TODO: Move this up.
-    itemToUpdate = updateEvents(itemToUpdate) as TypesProperties<V, S, L1, L2, L3, L4, L5>;
+    itemToUpdate = updateEvents(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
     // TODO: Move this up.
-    itemToUpdate = removeKey(itemToUpdate) as TypesProperties<V, S, L1, L2, L3, L4, L5>;
+    itemToUpdate = removeKey(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
 
     await docRef.set(itemToUpdate, { merge: true });
     const doc = await docRef.get();

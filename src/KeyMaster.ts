@@ -1,7 +1,6 @@
 import {
   AllItemTypeArrays,
   Item,
-  ItemProperties
 } from '@fjell/core';
 
 import LibLogger from '@/logger';
@@ -17,8 +16,8 @@ const logger = LibLogger.get('KeyMaster');
  * @template L3 - The third location type string (optional)
  * @template L4 - The fourth location type string (optional)
  * @template L5 - The fifth location type string (optional)
- * @param {ItemProperties<S, L1, L2, L3, L4, L5>} item - The item properties from which to remove the key
- * @returns {ItemProperties<S, L1, L2, L3, L4, L5>} The item properties with the key removed
+ * @param {Partial<Item<S, L1, L2, L3, L4, L5>>} item - The item properties from which to remove the key
+ * @returns {Partial<Item<S, L1, L2, L3, L4, L5>>} The item properties with the key removed
  */
 export const removeKey = <
   S extends string,
@@ -27,8 +26,8 @@ export const removeKey = <
   L3 extends string = never,
   L4 extends string = never,
   L5 extends string = never
->(item: ItemProperties<S, L1, L2, L3, L4, L5>):
-  ItemProperties<S, L1, L2, L3, L4, L5> => {
+>(item: Partial<Item<S, L1, L2, L3, L4, L5>>):
+  Partial<Item<S, L1, L2, L3, L4, L5>> => {
   logger.debug('Removing Key', { item });
   delete item.key;
   return item;
