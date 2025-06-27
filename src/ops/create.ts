@@ -9,7 +9,6 @@ import {
   Item,
   LocKeyArray,
   PriKey,
-  TypesProperties,
   validateKeys
 } from "@fjell/core";
 
@@ -42,7 +41,7 @@ export const getCreateOperation = <
   const { kta } = coordinate;
 
   const create = async (
-    item: TypesProperties<V, S, L1, L2, L3, L4, L5>,
+    item: Partial<Item<S, L1, L2, L3, L4, L5>>,
     options?: {
       key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
       locations?: never;
@@ -81,10 +80,10 @@ export const getCreateOperation = <
     logger.default('Getting Document with New Item ID', { newItemId: newItemId })
     const docRef: DocumentReference = reference.doc(String(newItemId));
     logger.default('Doc Ref', { docRef: docRef.path });
-    let itemToInsert: TypesProperties<V, S, L1, L2, L3, L4, L5> = Object.assign({}, item);
+    let itemToInsert: Partial<Item<S, L1, L2, L3, L4, L5>> = Object.assign({}, item);
 
     // Right before we insert this record, we need to update the events AND remove the key
-    itemToInsert = createEvents(itemToInsert) as TypesProperties<V, S, L1, L2, L3, L4, L5>;
+    itemToInsert = createEvents(itemToInsert) as Partial<Item<S, L1, L2, L3, L4, L5>>;
 
     logger.default('Setting Item', { itemToInsert });
     await docRef.set(itemToInsert);

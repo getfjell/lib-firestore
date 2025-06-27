@@ -1,5 +1,5 @@
 import { createEvents, updateEvents } from '@/EventCoordinator';
-import { ItemProperties } from '@fjell/core';
+import { Item } from '@fjell/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('EventCoordinator', () => {
@@ -9,7 +9,7 @@ describe('EventCoordinator', () => {
 
   describe('createEvents', () => {
     it('should add all events if none are present', async () => {
-      const item: ItemProperties<'S1'> = { prop1: 'value1' };
+      const item: Partial<Item<'S1'>> = { prop1: 'value1' };
       const result = createEvents(item);
       expect(result.events).toBeDefined();
       expect(result.events?.created?.at).toBeInstanceOf(Date);
@@ -20,9 +20,9 @@ describe('EventCoordinator', () => {
 
     it('should add missing events if some are present', () => {
       const now = new Date();
-      const item: ItemProperties<'S1'> = {
+      const item: Partial<Item<'S1'>> = {
         prop1: 'value1',
-        events: { created: { at: now } },
+        events: { created: { at: now } } as any,
       };
       const result = createEvents(item);
       expect(result.events?.created?.at).toEqual(now);
@@ -32,13 +32,13 @@ describe('EventCoordinator', () => {
 
     it('should not overwrite existing events', () => {
       const now = new Date();
-      const item: ItemProperties<'S1'> = {
+      const item: Partial<Item<'S1'>> = {
         prop1: 'value1',
         events: {
           created: { at: now },
           updated: { at: now },
           deleted: { at: null },
-        },
+        } as any,
       };
       const result = createEvents(item);
       expect(result.events?.created?.at).toEqual(now);
@@ -49,7 +49,7 @@ describe('EventCoordinator', () => {
 
   describe('updateEvents', () => {
     it('should update the updated event and add created if missing', () => {
-      const item: ItemProperties<'S1'> = { prop1: 'value1' };
+      const item: Partial<Item<'S1'>> = { prop1: 'value1' };
       const result = updateEvents(item);
       expect(result.events?.updated?.at).toBeInstanceOf(Date);
       expect(result.events?.created?.at).toBeInstanceOf(Date);
@@ -57,9 +57,9 @@ describe('EventCoordinator', () => {
 
     it('should update the updated event and preserve created if present', () => {
       const createdDate = new Date('2020-01-01T00:00:00Z');
-      const item: ItemProperties<'S1'> = {
+      const item: Partial<Item<'S1'>> = {
         prop1: 'value1',
-        events: { created: { at: createdDate } },
+        events: { created: { at: createdDate } } as any,
       };
       const result = updateEvents(item);
       expect(result.events?.updated?.at).toBeInstanceOf(Date);
@@ -68,12 +68,12 @@ describe('EventCoordinator', () => {
 
     it('should only update the updated event if created is present and valid', () => {
       const createdDate = new Date('2020-01-01T00:00:00Z');
-      const item: ItemProperties<'S1'> = {
+      const item: Partial<Item<'S1'>> = {
         prop1: 'value1',
         events: {
           created: { at: createdDate },
           updated: { at: new Date('2021-01-01T00:00:00Z') },
-        },
+        } as any,
       };
       const result = updateEvents(item);
       expect(result.events?.updated?.at).toBeInstanceOf(Date);
