@@ -7,6 +7,7 @@ settings:
 overrides:
   '@fjell/lib': link:../fjell-lib
   '@fjell/core': link:../fjell-core
+  '@fjell/logging': link:../fjell-logging
 
 importers:
 
@@ -19,8 +20,8 @@ importers:
         specifier: link:../fjell-lib
         version: link:../fjell-lib
       '@fjell/logging':
-        specifier: ^4.4.3
-        version: 4.4.3
+        specifier: link:../fjell-logging
+        version: link:../fjell-logging
       '@google-cloud/firestore':
         specifier: ^7.11.1
         version: 7.11.1
@@ -853,9 +854,6 @@ packages:
   '@eslint/plugin-kit@0.3.2':
     resolution: {integrity: sha512-4SaFZCNfJqvk/kenHpI8xvN42DMaoycy4PzKc5otHxRswww1kAt82OlBuwRVLofCACCTZEcla2Ydxv8scMXaTg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@fjell/logging@4.4.3':
-    resolution: {integrity: sha512-ZTp3bxU9LNsR7jVsx+gkua72XR3RsY+zbSNE+n219t58IE+wgEySmWpjmnW11WNVSXsN0sdpXcFi9roJwWhNYg==}
 
   '@google-cloud/firestore@7.11.1':
     resolution: {integrity: sha512-ZxOdH8Wr01hBDvKCQfMWqwUcfNcN3JY19k1LtS1fTFhEyorYPLsbWN+VxIRL46pOYGHTPkU3Or5HbT/SLQM5nA==}
@@ -3811,10 +3809,6 @@ snapshots:
     dependencies:
       '@eslint/core': 0.15.0
       levn: 0.4.1
-
-  '@fjell/logging@4.4.3':
-    dependencies:
-      flatted: 3.3.3
 
   '@google-cloud/firestore@7.11.1':
     dependencies:
