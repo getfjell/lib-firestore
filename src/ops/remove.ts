@@ -1,4 +1,4 @@
-import { TypesProperties } from "@fjell/core";
+/* eslint-disable indent */
 
 import { ComKey, isValidItemKey, Item, PriKey, validateKeys } from "@fjell/core";
 
@@ -18,10 +18,10 @@ export const getRemoveOperations = <
   L4 extends string = never,
   L5 extends string = never
 >(
-    firestore: FirebaseFirestore.Firestore,
-    definition: Definition<V, S, L1, L2, L3, L4, L5>,
-    registry: Registry,
-  ) => {
+  firestore: FirebaseFirestore.Firestore,
+  definition: Definition<V, S, L1, L2, L3, L4, L5>,
+  registry: Registry,
+) => {
 
   const { options } = definition;
   const { hooks } = options;
@@ -42,7 +42,7 @@ export const getRemoveOperations = <
     // TODO: Move validate keys up.
     const item = validateKeys(await updateOperation(
       key,
-      { events: { deleted: { at: new Date() } } } as unknown as TypesProperties<V, S, L1, L2, L3, L4, L5>,
+      { events: { deleted: { at: new Date() } } } as unknown as Partial<Item<S, L1, L2, L3, L4, L5>>,
     ), kta);
     if (hooks?.postRemove) {
       logger.default('Running postRemove Hook', { item });
