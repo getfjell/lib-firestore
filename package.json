@@ -1,6 +1,7 @@
 {
   "name": "@fjell/lib-firestore",
   "version": "4.4.5",
+  "type": "module",
   "keywords": [
     "library",
     "persistence",
