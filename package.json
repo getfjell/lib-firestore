@@ -1,6 +1,13 @@
 {
   "name": "@fjell/lib-firestore",
   "version": "4.4.5",
+  "keywords": [
+    "library",
+    "persistence",
+    "database",
+    "firestore",
+    "fjell"
+  ],
   "license": "Apache-2.0",
   "description": "Firestore Library for Fjell",
   "engines": {
@@ -25,9 +32,9 @@
     "prepublishOnly": "pnpm run clean && pnpm run build"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.4",
-    "@fjell/lib": "^4.4.5",
-    "@fjell/logging": "^4.4.4",
+    "@fjell/core": "^4.4.6",
+    "@fjell/lib": "^4.4.8",
+    "@fjell/logging": "^4.4.6",
     "@google-cloud/firestore": "^7.11.2",
     "@google-cloud/storage": "^7.16.0",
     "dayjs": "^1.11.13",
@@ -37,6 +44,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@eldrforge/kodrdriv": "^0.0.6",
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
@@ -60,7 +68,7 @@
     "vite-plugin-node": "^5.0.1",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@10.12.4",
+  "packageManager": "pnpm@10.13.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/getfjell/lib-firestore.git"
