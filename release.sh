@@ -15,9 +15,6 @@ pnpm update --latest
 
 echo "Staging changes for release commit"
 git add package.json pnpm-lock.yaml
-if [ -f "pnpm-workspace.yaml.bak" ]; then
-    git add pnpm-workspace.yaml.bak
-fi
 
 echo "Running clean, lint, build, and test..."
 pnpm run clean && pnpm run lint && pnpm run build && pnpm run test
@@ -44,26 +41,29 @@ echo "Pull request created: $PR_URL"
 
 echo "Waiting for PR #$PR_NUM checks to complete..."
 while true; do
-  STATUS=$(gh pr checks "$PR_NUM" --json state | jq -r 'if length == 0 then "PENDING" else if any(.state == "PENDING") then "PENDING" else if any(.state == "FAILURE" or .state == "ERROR") then "FAILURE" else "SUCCESS" end end end' || echo "FAILURE")
+  STATUS=$(gh pr view "$PR_NUM" --json statusCheckRollup --jq '.statusCheckRollup.state' 2>/dev/null)
+  if [[ -z "$STATUS" ]]; then
+    STATUS="PENDING"
+  fi
   echo "PR status: $STATUS"
   if [[ "$STATUS" == "SUCCESS" ]]; then
     echo "All checks passed!"
     break
   elif [[ "$STATUS" == "FAILURE" || "$STATUS" == "ERROR" ]]; then
     echo "PR checks failed."
-    gh pr checks "$PR_NUM" | cat
+    gh pr checks "$PR_NUM"
     exit 1
-  elif [[ "$STATUS" == "PENDING" ]]; then
-    echo "Checks are pending... waiting 30 seconds."
+  elif [[ "$STATUS" == "PENDING" || "$STATUS" == "EXPECTED" ]]; then
+    echo "Checks are pending... waiting 10 seconds."
     sleep 10
   else
-    echo "Unknown PR status: $STATUS. Waiting 30 seconds."
+    echo "Unknown PR status: $STATUS. Waiting 10 seconds."
     sleep 10
   fi
 done
 
 echo "Merging PR #$PR_NUM..."
-gh pr merge "$PR_NUM" --merge --delete-branch
+gh pr merge "$PR_NUM" --squash --delete-branch
 
 echo "Checking out main branch..."
 git checkout main
