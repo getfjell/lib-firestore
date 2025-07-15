@@ -51,7 +51,7 @@ export const getCreateOperation = <
     }
   ): Promise<V> => {
     let locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = [];
-    let newItemId: string | undefined;
+    let newItemId: string | number | undefined;
 
     // Process Options
     if (options?.locations) {
