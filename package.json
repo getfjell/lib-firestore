@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@fjell/core": "^4.4.7",
-    "@fjell/lib": "^4.4.11",
+    "@fjell/lib": "^4.4.12",
     "@fjell/logging": "^4.4.7",
     "@fjell/registry": "^4.4.7",
     "@google-cloud/firestore": "^7.11.3",
