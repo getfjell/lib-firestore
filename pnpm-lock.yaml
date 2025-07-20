@@ -12,8 +12,8 @@ importers:
         specifier: ^4.4.7
         version: 4.4.7
       '@fjell/lib':
-        specifier: ^4.4.11
-        version: 4.4.11
+        specifier: ^4.4.12
+        version: 4.4.12
       '@fjell/logging':
         specifier: ^4.4.7
         version: 4.4.7
@@ -300,8 +300,8 @@ packages:
   '@fjell/core@4.4.7':
     resolution: {integrity: sha512-urHgEX6uLrbZKiYjhOJx6WZ7dylBvsAxoIfyhA+WE8JasiqFWUzg2YNX5DNOYsqruTe6FSM1dQ/dbHqz/wAFbQ==}
 
-  '@fjell/lib@4.4.11':
-    resolution: {integrity: sha512-9HU+HvOkaAKdHNHvzwJ5OBtsLhYCfhs632YbT7SqCozP0oAsORkxLWN+oOkLMcJxaVwVzLeW6EWYTjsQ/eBtvA==}
+  '@fjell/lib@4.4.12':
+    resolution: {integrity: sha512-lPdL4CfMAYMdVKq1MKqewG95R6+1VJ3HWHeiJWZyxcewnzAPHGGNyevVdCex+Z1/92gUVGxXQDX17E45JfTswA==}
     engines: {node: '>=21'}
 
   '@fjell/logging@4.4.7':
@@ -2151,7 +2151,7 @@ snapshots:
       deepmerge: 4.3.1
       luxon: 3.7.1
 
-  '@fjell/lib@4.4.11':
+  '@fjell/lib@4.4.12':
     dependencies:
       '@fjell/core': 4.4.7
       '@fjell/logging': 4.4.7
