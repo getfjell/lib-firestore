@@ -3,14 +3,8 @@ import { ItemTypeArray } from '@fjell/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies
-const mockLibCreateDefinition = vi.fn();
 const mockCreateCoordinate = vi.fn();
 const mockCreateOptions = vi.fn();
-
-// @ts-ignore
-vi.mock('@fjell/lib', () => ({
-  createDefinition: mockLibCreateDefinition,
-}));
 
 // @ts-ignore
 vi.mock('../src/Coordinate', () => ({
@@ -27,7 +21,6 @@ let Definition: any;
 describe('createDefinition', () => {
   beforeEach(async () => {
     // Clear mock call history before each test
-    mockLibCreateDefinition.mockClear();
     mockCreateCoordinate.mockClear();
     mockCreateOptions.mockClear();
 
@@ -39,6 +32,9 @@ describe('createDefinition', () => {
     const scopes = ['scope1', 'scope2'];
     const collectionNames = ['collection1'];
 
+    mockCreateCoordinate.mockReturnValue({});
+    mockCreateOptions.mockReturnValue({});
+
     Definition.createDefinition(kta, scopes, collectionNames);
 
     expect(mockCreateCoordinate).toHaveBeenCalledWith(kta, scopes);
@@ -48,43 +44,31 @@ describe('createDefinition', () => {
     const kta = ['item'] as ItemTypeArray<'item'>;
     const scopes = ['scope1'];
     const collectionNames = ['collection1'];
-    const libOptions = { someOption: 'value' };
+    const libOptions = { someOption: true };
 
-    Definition.createDefinition(kta, scopes, collectionNames, libOptions as any); // Cast to any for simplicity in test
+    mockCreateCoordinate.mockReturnValue({});
+    mockCreateOptions.mockReturnValue({});
+
+    Definition.createDefinition(kta, scopes, collectionNames, libOptions);
 
     expect(mockCreateOptions).toHaveBeenCalledWith(libOptions);
   });
 
-  it('should call Library.createDefinition with coordinate and options', () => {
+  it('should return a definition object with coordinate, options, and collectionNames', () => {
     const kta = ['item'] as ItemTypeArray<'item'>;
     const scopes = ['scope1'];
-    const collectionNames = ['collection1'];
+    const collectionNames = ['collection1', 'collection2'];
     const mockCoordinate = { type: 'coordinate' };
     const mockOptions = { type: 'options' };
 
     mockCreateCoordinate.mockReturnValue(mockCoordinate);
     mockCreateOptions.mockReturnValue(mockOptions);
 
-    Definition.createDefinition(kta, scopes, collectionNames);
-
-    expect(mockLibCreateDefinition).toHaveBeenCalledWith(mockCoordinate, mockOptions);
-  });
-
-  it('should return a definition object with collectionNames and properties from Library.createDefinition', () => {
-    const kta = ['item'] as ItemTypeArray<'item'>;
-    const scopes = ['scope1'];
-    const collectionNames = ['collection1', 'collection2'];
-    const mockLibDef = { libProp: 'libValue' };
-
-    mockLibCreateDefinition.mockReturnValue(mockLibDef);
-    // Mock other functions as they are called before the final object construction
-    mockCreateCoordinate.mockReturnValue({});
-    mockCreateOptions.mockReturnValue({});
-
     const definition = Definition.createDefinition(kta, scopes, collectionNames);
 
     expect(definition).toEqual({
-      ...mockLibDef,
+      coordinate: mockCoordinate,
+      options: mockOptions,
       collectionNames,
     });
   });
@@ -94,15 +78,18 @@ describe('createDefinition', () => {
     const scopes = ['scope1'];
     const collectionNames = ['collection1'];
     const mockCoordinate = { type: 'coordinate' };
-    const mockOptions = { type: 'options' }; // Options even if libOptions is undefined
+    const mockOptions = { type: 'options' };
 
     mockCreateCoordinate.mockReturnValue(mockCoordinate);
-    mockCreateOptions.mockReturnValue(mockOptions); // createOptions will be called with undefined
-    mockLibCreateDefinition.mockReturnValue({ libProp: 'libValue' });
+    mockCreateOptions.mockReturnValue(mockOptions);
 
-    Definition.createDefinition(kta, scopes, collectionNames, undefined);
+    const definition = Definition.createDefinition(kta, scopes, collectionNames, undefined);
 
     expect(mockCreateOptions).toHaveBeenCalledWith(undefined);
-    expect(mockLibCreateDefinition).toHaveBeenCalledWith(mockCoordinate, mockOptions);
+    expect(definition).toEqual({
+      coordinate: mockCoordinate,
+      options: mockOptions,
+      collectionNames,
+    });
   });
 });
