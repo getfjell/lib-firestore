@@ -4,9 +4,10 @@ import {
 } from '@fjell/core';
 
 import * as Library from '@fjell/lib';
+import { Coordinate } from '@fjell/registry';
 import { createCoordinate } from './Coordinate';
-import { createOptions } from './Options';
-import LibLogger from '@/logger';
+import { createOptions, Options } from './Options';
+import LibLogger from './logger';
 
 const logger = LibLogger.get('Definition');
 
@@ -18,7 +19,9 @@ export interface Definition<
   L3 extends string = never,
   L4 extends string = never,
   L5 extends string = never
-> extends Library.Definition<V, S, L1, L2, L3, L4, L5> {
+> {
+  coordinate: Coordinate<S, L1, L2, L3, L4, L5>;
+  options: Options<V, S, L1, L2, L3, L4, L5>;
   collectionNames: string[];
 }
 
@@ -40,12 +43,11 @@ export function createDefinition<
   const coordinate = createCoordinate(kta, scopes);
   const options = createOptions(libOptions);
 
-  const definition = Library.createDefinition(coordinate, options);
-
   return {
-    ...definition,
+    coordinate,
+    options,
     collectionNames,
-  }
+  };
 }
 
 // const operations = createOperations(firestore, collectionNames, keyTypes, options, lib);
