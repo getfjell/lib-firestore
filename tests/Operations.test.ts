@@ -96,10 +96,12 @@ describe('createOperations', () => {
       }
     } as any; // Using any here since we're just testing the function calls
     const mockRegistry = {
+      type: 'lib' as const,
       get: vi.fn(),
-      libTree: vi.fn() as unknown as Registry['libTree'],
-      register: vi.fn()
-    } as Registry;
+      register: vi.fn(),
+      createInstance: vi.fn(),
+      instanceTree: vi.fn(),
+    } as unknown as Registry;
 
     const { createOperations: createOps } = await import('../src/Operations');
     createOps(mockFirestore, mockDefinition, mockRegistry);

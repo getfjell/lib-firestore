@@ -16,10 +16,12 @@ vi.mock('@/ops/all', () => ({
 
 // Mock registry
 const mockRegistry = {
+  type: 'lib' as const,
   get: vi.fn(),
-  libTree: vi.fn() as unknown as Registry['libTree'],
   register: vi.fn(),
-} as Registry;
+  createInstance: vi.fn(),
+  instanceTree: vi.fn(),
+} as unknown as Registry;
 
 // Mock @fjell/core types for type compatibility
 vi.mock('@fjell/core', () => ({

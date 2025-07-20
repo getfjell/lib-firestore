@@ -14,10 +14,12 @@ const fjellLibMocks = {
 
 // Mock registry
 const mockRegistry = {
+  type: 'lib' as const,
   get: vi.fn(),
-  libTree: vi.fn() as unknown as Registry['libTree'],
   register: vi.fn(),
-} as Registry;
+  createInstance: vi.fn(),
+  instanceTree: vi.fn(),
+} as unknown as Registry;
 
 // Use unstable_mockModule to mock Definition and Operations modules
 vi.mock('@/Definition', () => ({
@@ -85,10 +87,11 @@ describe('Instance', () => {
         mockRegistry
       );
 
-      expect(instance).toHaveProperty('definition');
+      expect(instance).toHaveProperty('coordinate');
+      expect(instance).toHaveProperty('registry');
       expect(instance).toHaveProperty('operations');
       expect(instance).toHaveProperty('firestore');
-      expect(instance.firestore).toBe(mockFirestore);
+      expect(instance).toHaveProperty('options');
     });
 
     it('should call createDefinition with correct parameters', () => {

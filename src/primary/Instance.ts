@@ -14,7 +14,6 @@ export interface Instance<
   operations: Primary.Operations<V, S>;
 }
 
-// eslint-disable-next-line max-params
 export function createInstance<
   V extends Item<S>,
   S extends string
@@ -33,8 +32,9 @@ export function createInstance<
   const operations = createOperations(firestore, definition, registry);
 
   return {
-    definition,
-    operations: Primary.wrapOperations(operations, definition, registry),
+    coordinate: definition.coordinate,
+    operations: Primary.wrapOperations(operations, definition.options as Primary.Options<V, S>, definition.coordinate, registry),
+    options: definition.options,
     firestore,
     registry
   } as Instance<V, S>;

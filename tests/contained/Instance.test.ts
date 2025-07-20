@@ -11,10 +11,12 @@ const mockWrapOperations = vi.fn((ops: any, def: any) => ({ wrapped: ops, def })
 
 // Mock registry
 const mockRegistry = {
+  type: 'lib' as const,
   get: vi.fn(),
-  libTree: vi.fn() as unknown as Registry['libTree'],
   register: vi.fn(),
-} as Registry;
+  createInstance: vi.fn(),
+  instanceTree: vi.fn(),
+} as unknown as Registry;
 
 // ESM module mocks
 vi.mock('@/logger', () => ({
@@ -47,17 +49,26 @@ describe('contained/Instance createInstance', () => {
     const firestore = { app: {} };
     const libOptions = { opt: 1 };
     const scopes = ['scope1'];
-    const mockDef = { keyTypes, scopes, collectionNames, coordinate: { kta: [] } };
+    const mockDef = {
+      coordinate: { kta: [] },
+      options: { opt: 1 },
+      collectionNames
+    };
     const mockOps = { op: true };
     mockCreateDefinition.mockReturnValue(mockDef);
     mockCreateOperations.mockReturnValue(mockOps);
     mockWrapOperations.mockImplementation((ops, def) => ({ wrapped: ops, def }));
 
     const result = createInstance(keyTypes, collectionNames, firestore, libOptions, scopes, mockRegistry);
-    expect(result).toHaveProperty('definition', mockDef);
+    expect(result.coordinate).toMatchObject({ kta: [] });
+    expect(result.options).toMatchObject({ opt: 1 });
     expect(result).toHaveProperty('operations');
-    expect(result.operations).toMatchObject({ wrapped: expect.objectContaining({ op: true }), def: mockDef });
+    expect(result.operations).toMatchObject({
+      wrapped: expect.objectContaining({ op: true }),
+      def: { opt: 1 }  // def is now just the options, not the full definition
+    });
     expect(result).toHaveProperty('firestore', firestore);
+    expect(result).toHaveProperty('registry', mockRegistry);
   });
 
   it('calls logger.debug with correct args', () => {
@@ -116,7 +127,8 @@ describe('contained/Instance createInstance', () => {
         all: expect.any(Function),
         one: expect.any(Function)
       }),
-      mockDef,
+      mockDef.options,
+      mockDef.coordinate,
       mockRegistry
     );
   });
