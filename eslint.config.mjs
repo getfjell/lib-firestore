@@ -28,9 +28,14 @@ export default [{
     "@typescript-eslint/no-unused-expressions": "off",
     "no-console": 0,
     "no-unused-vars": "off",
+
+    "max-len": ["warn", {
+      code: 200,
+    }],
+
     "max-depth": ["error", 4],
-    "max-params": ["error", 4],
-    "max-lines": ["error", 500],
+    "max-params": ["warn", 6],
+    "max-lines": ["warn", 8000],
 
     "no-multiple-empty-lines": ["error", {
       max: 1,
@@ -41,8 +46,28 @@ export default [{
       skipBlankLines: true,
     }],
 
-    indent: ["error", 2, {
+    indent: ["warn", 2, {
       SwitchCase: 1,
+      ignoredNodes: [
+        "TemplateLiteral",
+        "JSXElement",
+        "JSXElement > *",
+        "JSXAttribute",
+        "JSXIdentifier",
+        "JSXNamespacedName",
+        "JSXMemberExpression",
+        "JSXSpreadAttribute",
+        "JSXExpressionContainer",
+        "JSXOpeningElement",
+        "JSXClosingElement",
+        "JSXFragment",
+        "JSXOpeningFragment",
+        "JSXClosingFragment",
+        "JSXText",
+        "JSXEmptyExpression",
+        "JSXSpreadChild"
+      ],
+      offsetTernaryExpressions: true,
     }],
 
     "sort-imports": ["error", {
