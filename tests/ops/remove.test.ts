@@ -11,10 +11,12 @@ vi.mock('@/logger', () => ({
 
 // Mock registry
 const mockRegistry = {
+  type: 'lib' as const,
   get: vi.fn(),
-  libTree: vi.fn() as unknown as Registry['libTree'],
   register: vi.fn(),
-} as Registry;
+  createInstance: vi.fn(),
+  instanceTree: vi.fn(),
+} as unknown as Registry;
 
 // Mock @fjell/core
 const mockValidateKeys = vi.fn((item: any, kta: any) => ({ ...item, validated: true }));

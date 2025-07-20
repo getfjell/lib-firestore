@@ -9,10 +9,12 @@ const mockWrapOperations = vi.fn((ops) => ops);
 
 // Mock registry
 const mockRegistry = {
+  type: 'lib' as const,
   get: vi.fn(),
-  libTree: vi.fn() as unknown as Registry['libTree'],
   register: vi.fn(),
-} as Registry;
+  createInstance: vi.fn(),
+  instanceTree: vi.fn(),
+} as unknown as Registry;
 
 // Use unstable_mockModule for ESM mocking
 vi.mock('@/logger', () => ({
@@ -55,14 +57,17 @@ describe('primary/Instance createInstance', () => {
     mockWrapOperations.mockImplementation((ops) => ({ wrapped: ops }));
 
     const result = createInstance(keyType, collectionName, firestore, libOptions, scopes, mockRegistry);
-    expect(result.definition).toMatchObject({
-      collectionNames: [collectionName],
-      coordinate: { kta: [keyType], scopes: ['firestore', ...scopes] },
-      options: expect.objectContaining({ opt: 1 }),
+    expect(result.coordinate).toMatchObject({
+      kta: [keyType],
+      scopes: ['firestore', ...scopes]
+    });
+    expect(result.options).toMatchObject({
+      opt: 1
     });
     expect(result).toHaveProperty('operations');
     expect(result.operations).toEqual(expect.any(Object));
     expect(result).toHaveProperty('firestore', firestore);
+    expect(result).toHaveProperty('registry', mockRegistry);
   });
 
   it('calls logger.debug with correct args', () => {
