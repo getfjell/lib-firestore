@@ -1,23 +1,23 @@
 import LibLogger from './logger';
 import { Item, ItemTypeArray } from '@fjell/core';
-import { Instance as BaseInstance, Coordinate } from '@fjell/registry';
+import { Coordinate } from '@fjell/registry';
 import * as Library from '@fjell/lib';
 import { Registry } from '@fjell/lib';
 import { Options } from './Options';
 import { createDefinition } from './Definition';
 import { createOperations } from './Operations';
 
-const logger = LibLogger.get('Instance');
+const logger = LibLogger.get('FirestoreLibrary');
 
 /**
- * The Firestore Instance interface extends the base Instance from @fjell/registry
+ * The FirestoreLibrary interface extends the Library from @fjell/lib
  * and adds firestore-specific properties and operations.
  *
  * @template V - The type of the data model item, extending Item
  * @template S - The string literal type representing the model's key type
  * @template L1-L5 - Optional string literal types for location hierarchy levels
  */
-export interface Instance<
+export interface FirestoreLibrary<
   V extends Item<S, L1, L2, L3, L4, L5>,
   S extends string,
   L1 extends string = never,
@@ -25,21 +25,15 @@ export interface Instance<
   L3 extends string = never,
   L4 extends string = never,
   L5 extends string = never
-> extends BaseInstance<S, L1, L2, L3, L4, L5> {
+> extends Library.Library<V, S, L1, L2, L3, L4, L5> {
   /** Firestore instance for database operations */
   firestore: FirebaseFirestore.Firestore;
-
-  /** The operations object that provides methods for interacting with the data model */
-  operations: Library.Operations<V, S, L1, L2, L3, L4, L5>;
-
-  /** The options object that provides hooks, validators, finders, actions, and facets */
-  options: Options<V, S, L1, L2, L3, L4, L5>;
 }
 
 /**
- * Creates a new Firestore Instance with pre-created components
+ * Creates a new FirestoreLibrary with pre-created components
  */
-export const createInstanceFromComponents = <
+export const createFirestoreLibraryFromComponents = <
   V extends Item<S, L1, L2, L3, L4, L5>,
   S extends string,
   L1 extends string = never,
@@ -53,8 +47,8 @@ export const createInstanceFromComponents = <
     firestore: FirebaseFirestore.Firestore,
     operations: Library.Operations<V, S, L1, L2, L3, L4, L5>,
     options: Options<V, S, L1, L2, L3, L4, L5>
-  ): Instance<V, S, L1, L2, L3, L4, L5> => {
-  logger.debug('createInstanceFromComponents', { registry, coordinate, firestore, operations, options });
+  ): FirestoreLibrary<V, S, L1, L2, L3, L4, L5> => {
+  logger.debug('createFirestoreLibraryFromComponents', { registry, coordinate, firestore, operations, options });
 
   return {
     registry,
@@ -66,9 +60,9 @@ export const createInstanceFromComponents = <
 };
 
 /**
- * Creates a new Firestore Instance with the provided raw parameters
+ * Creates a new FirestoreLibrary with the provided raw parameters
  */
-export const createInstance = <
+export const createFirestoreLibrary = <
   V extends Item<S, L1, L2, L3, L4, L5>,
   S extends string,
   L1 extends string = never,
@@ -83,8 +77,8 @@ export const createInstance = <
     libOptions?: Library.Options<V, S, L1, L2, L3, L4, L5> | null,
     scopes: string[] | null = [],
     registry?: Registry
-  ): Instance<V, S, L1, L2, L3, L4, L5> => {
-  logger.debug('createInstance', { kta, collectionNames, firestore, libOptions, scopes, registry });
+  ): FirestoreLibrary<V, S, L1, L2, L3, L4, L5> => {
+  logger.debug('createFirestoreLibrary', { kta, collectionNames, firestore, libOptions, scopes, registry });
 
   // Convert null values to proper defaults
   const actualScopes = scopes || [];
@@ -93,7 +87,7 @@ export const createInstance = <
   const definition = createDefinition(kta, actualScopes, collectionNames, actualLibOptions);
   const operations = createOperations(firestore, definition, registry!);
 
-  return createInstanceFromComponents(
+  return createFirestoreLibraryFromComponents(
     registry!,
     definition.coordinate,
     firestore,
