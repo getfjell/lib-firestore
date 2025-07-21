@@ -12,14 +12,14 @@ importers:
         specifier: ^4.4.7
         version: 4.4.7
       '@fjell/lib':
-        specifier: ^4.4.12
-        version: 4.4.12
+        specifier: ^4.4.13
+        version: 4.4.13
       '@fjell/logging':
         specifier: ^4.4.7
         version: 4.4.7
       '@fjell/registry':
-        specifier: ^4.4.7
-        version: 4.4.7
+        specifier: ^4.4.11
+        version: 4.4.11
       '@google-cloud/firestore':
         specifier: ^7.11.3
         version: 7.11.3
@@ -300,15 +300,15 @@ packages:
   '@fjell/core@4.4.7':
     resolution: {integrity: sha512-urHgEX6uLrbZKiYjhOJx6WZ7dylBvsAxoIfyhA+WE8JasiqFWUzg2YNX5DNOYsqruTe6FSM1dQ/dbHqz/wAFbQ==}
 
-  '@fjell/lib@4.4.12':
-    resolution: {integrity: sha512-lPdL4CfMAYMdVKq1MKqewG95R6+1VJ3HWHeiJWZyxcewnzAPHGGNyevVdCex+Z1/92gUVGxXQDX17E45JfTswA==}
+  '@fjell/lib@4.4.13':
+    resolution: {integrity: sha512-ALBEIdwCLbZYa3dpSRX8L33i1ertjzxjv6dQY66bTB9M2pALAgkhyF3E3q3HvdC+oqfiYFGFANFl0gJoPbmn2Q==}
     engines: {node: '>=21'}
 
   '@fjell/logging@4.4.7':
     resolution: {integrity: sha512-ned1kfEpFZSDraH/KRaRodoozyBB7PwlrQuiAmBiUUadfBKx6mx56fZIFRlzb/XUHZIypw237I+4P/bsx7cEzg==}
 
-  '@fjell/registry@4.4.7':
-    resolution: {integrity: sha512-3lbLO4P6WYHgBqiAU/UQRQ1goenlOqMLhqsovX/HyBJEDLlebZVLpktJoSOQVX56aIgHR9C30PeXBCEOkI3YAg==}
+  '@fjell/registry@4.4.11':
+    resolution: {integrity: sha512-GaVnDJGLWW7w2waVJb+NxatiopY2LyHqY3BfZSMP835i9ibj232NV34QBiBh3VSXIuWGrKdSAQkPz4F1DGjujg==}
     engines: {node: '>=21'}
 
   '@google-cloud/firestore@7.11.3':
@@ -2151,16 +2151,16 @@ snapshots:
       deepmerge: 4.3.1
       luxon: 3.7.1
 
-  '@fjell/lib@4.4.12':
+  '@fjell/lib@4.4.13':
     dependencies:
       '@fjell/core': 4.4.7
       '@fjell/logging': 4.4.7
-      '@fjell/registry': 4.4.7
+      '@fjell/registry': 4.4.11
       deepmerge: 4.3.1
 
   '@fjell/logging@4.4.7': {}
 
-  '@fjell/registry@4.4.7':
+  '@fjell/registry@4.4.11':
     dependencies:
       '@fjell/core': 4.4.7
       '@fjell/logging': 4.4.7
