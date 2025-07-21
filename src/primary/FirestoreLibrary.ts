@@ -1,5 +1,5 @@
 import { createDefinition } from '@/Definition';
-import { Instance as AbstractFirestoreInstance } from '@/Instance';
+import { FirestoreLibrary as AbstractFirestoreLibrary } from '@/FirestoreLibrary';
 import { createOperations } from '@/Operations';
 import LibLogger from '@/logger';
 import { Item } from '@fjell/core';
@@ -7,14 +7,14 @@ import { Primary, Registry } from '@fjell/lib';
 
 const logger = LibLogger.get('Instance');
 
-export interface Instance<
+export interface FirestoreLibrary<
   V extends Item<S>,
   S extends string
-> extends AbstractFirestoreInstance<V, S> {
+> extends AbstractFirestoreLibrary<V, S> {
   operations: Primary.Operations<V, S>;
 }
 
-export function createInstance<
+export function createFirestoreLibrary<
   V extends Item<S>,
   S extends string
 >(
@@ -24,9 +24,9 @@ export function createInstance<
   libOptions: Primary.Options<V, S> = {},
   scopes: string[] = [],
   registry: Registry
-): Instance<V, S> {
+): FirestoreLibrary<V, S> {
 
-  logger.debug('createInstance', { keyType, collectionName, libOptions, scopes });
+  logger.debug('createFirestoreLibrary', { keyType, collectionName, libOptions, scopes });
 
   const definition = createDefinition([keyType], scopes || [], [collectionName], libOptions || {});
   const operations = createOperations(firestore, definition, registry);
@@ -37,6 +37,13 @@ export function createInstance<
     options: definition.options,
     firestore,
     registry
-  } as Instance<V, S>;
+  } as FirestoreLibrary<V, S>;
 
 }
+
+// Legacy exports for backwards compatibility
+export const createInstance = createFirestoreLibrary;
+export type Instance<
+  V extends Item<S>,
+  S extends string
+> = FirestoreLibrary<V, S>;

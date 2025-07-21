@@ -1,2 +1,2 @@
-export * from './Instance';
+export * from './FirestoreLibrary';
 export * from './Operations';
