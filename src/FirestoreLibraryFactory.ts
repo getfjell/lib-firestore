@@ -3,12 +3,12 @@ import * as Library from "@fjell/lib";
 import { Registry } from "@fjell/lib";
 import { Options } from "./Options";
 import { InstanceFactory as BaseInstanceFactory, Coordinate, RegistryHub } from "@fjell/registry";
-import { createInstanceFromComponents, Instance } from "./Instance";
+import { createFirestoreLibraryFromComponents, FirestoreLibrary } from "./FirestoreLibrary";
 import LibLogger from "./logger";
 
 const logger = LibLogger.get("InstanceFactory");
 
-export type InstanceFactory<
+export type FirestoreLibraryFactory<
   V extends Item<S, L1, L2, L3, L4, L5>,
   S extends string,
   L1 extends string = never,
@@ -23,9 +23,9 @@ export type InstanceFactory<
 ) => BaseInstanceFactory<S, L1, L2, L3, L4, L5>;
 
 /**
- * Factory function for creating firestore instances
+ * Factory function for creating firestore libraries
  */
-export const createInstanceFactory = <
+export const createFirestoreLibraryFactory = <
   V extends Item<S, L1, L2, L3, L4, L5>,
   S extends string,
   L1 extends string = never,
@@ -41,6 +41,6 @@ export const createInstanceFactory = <
   return (coordinate: Coordinate<S, L1, L2, L3, L4, L5>, context: { registry: any, registryHub?: RegistryHub }) => {
     logger.debug("Creating firestore instance", { coordinate, registry: context.registry, firestore, operations, options });
 
-    return createInstanceFromComponents(context.registry as Registry, coordinate, firestore, operations, options) as Instance<V, S, L1, L2, L3, L4, L5>;
+    return createFirestoreLibraryFromComponents(context.registry as Registry, coordinate, firestore, operations, options) as FirestoreLibrary<V, S, L1, L2, L3, L4, L5>;
   };
 };
