@@ -45,6 +45,7 @@
     "deepmerge": "^4.3.1"
   },
   "devDependencies": {
+    "@fjell/eslint-config": "^1.0.5",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.31.0",
     "@swc/core": "^1.13.2",
