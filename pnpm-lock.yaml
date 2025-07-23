@@ -6,6 +6,7 @@ settings:
 
 overrides:
   '@fjell/core': link:../fjell-core
+  '@fjell/eslint-config': link:../fjell-eslint-config
   '@fjell/lib': link:../fjell-lib
   '@fjell/logging': link:../fjell-logging
   '@fjell/registry': link:../fjell-registry
@@ -40,8 +41,8 @@ importers:
         specifier: ^9.31.0
         version: 9.31.0
       '@fjell/eslint-config':
-        specifier: ^1.0.5
-        version: 1.0.5(eslint@9.31.0)(typescript@5.8.3)
+        specifier: link:../fjell-eslint-config
+        version: link:../fjell-eslint-config
       '@swc/core':
         specifier: ^1.13.2
         version: 1.13.2
@@ -305,12 +306,6 @@ packages:
   '@eslint/plugin-kit@0.3.4':
     resolution: {integrity: sha512-Ul5l+lHEcw3L5+k8POx6r74mxEYKG5kOb6Xpy2gCRW6zweT6TEhAf8vhxGgjhqrd/VO/Dirhsb+1hNpD1ue9hw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@fjell/eslint-config@1.0.5':
-    resolution: {integrity: sha512-0RzrW3iD4Sv4wlYXHEYo1+2xYRu9QLZ90uypRjTdrRwmwJwl9wY3Qa9nUYnBu963+Sqlb8ZJewstzC8KRPRycA==}
-    peerDependencies:
-      eslint: ^9.0.0
-      typescript: ^5.0.0
 
   '@google-cloud/firestore@7.11.3':
     resolution: {integrity: sha512-qsM3/WHpawF07SRVvEJJVRwhYzM7o9qtuksyuqnrMig6fxIrwWnsezECWsG/D5TyYru51Fv5c/RTqNDQ2yU+4w==}
@@ -2141,17 +2136,6 @@ snapshots:
     dependencies:
       '@eslint/core': 0.15.1
       levn: 0.4.1
-
-  '@fjell/eslint-config@1.0.5(eslint@9.31.0)(typescript@5.8.3)':
-    dependencies:
-      '@eslint/eslintrc': 3.3.1
-      '@eslint/js': 9.31.0
-      '@typescript-eslint/eslint-plugin': 8.38.0(@typescript-eslint/parser@8.38.0(eslint@9.31.0)(typescript@5.8.3))(eslint@9.31.0)(typescript@5.8.3)
-      '@typescript-eslint/parser': 8.38.0(eslint@9.31.0)(typescript@5.8.3)
-      eslint: 9.31.0
-      typescript: 5.8.3
-    transitivePeerDependencies:
-      - supports-color
 
   '@google-cloud/firestore@7.11.3':
     dependencies:
