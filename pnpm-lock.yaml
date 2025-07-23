@@ -10,16 +10,16 @@ importers:
     dependencies:
       '@fjell/core':
         specifier: ^4.4.7
-        version: 4.4.7
+        version: 4.4.13
       '@fjell/lib':
         specifier: ^4.4.13
-        version: 4.4.13
+        version: 4.4.21
       '@fjell/logging':
         specifier: ^4.4.7
-        version: 4.4.7
+        version: 4.4.17
       '@fjell/registry':
         specifier: ^4.4.11
-        version: 4.4.11
+        version: 4.4.16
       '@google-cloud/firestore':
         specifier: ^7.11.3
         version: 7.11.3
@@ -297,18 +297,18 @@ packages:
     resolution: {integrity: sha512-1+WqvgNMhmlAambTvT3KPtCl/Ibr68VldY2XY40SL1CE0ZXiakFR/cbTspaF5HsnpDMvcYYoJHfl4980NBjGag==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fjell/core@4.4.7':
-    resolution: {integrity: sha512-urHgEX6uLrbZKiYjhOJx6WZ7dylBvsAxoIfyhA+WE8JasiqFWUzg2YNX5DNOYsqruTe6FSM1dQ/dbHqz/wAFbQ==}
+  '@fjell/core@4.4.13':
+    resolution: {integrity: sha512-+oZprCSL7HDvcOwXDBIkPq9i4bxkvwfZ2IfRh3uopRTo2hJlcQ1hWkGZdIvwXfkl9H4PLiuWgCuI9xeHyR+2FA==}
 
-  '@fjell/lib@4.4.13':
-    resolution: {integrity: sha512-ALBEIdwCLbZYa3dpSRX8L33i1ertjzxjv6dQY66bTB9M2pALAgkhyF3E3q3HvdC+oqfiYFGFANFl0gJoPbmn2Q==}
+  '@fjell/lib@4.4.21':
+    resolution: {integrity: sha512-XvjS+YvrUm523VwAZ2jljqWTHJGk4uvo9nmWyYCFbY3lBzOSBkQpL8nsCuJoKMH+/d35X27k7P3kwYOzzBprHA==}
     engines: {node: '>=21'}
 
-  '@fjell/logging@4.4.7':
-    resolution: {integrity: sha512-ned1kfEpFZSDraH/KRaRodoozyBB7PwlrQuiAmBiUUadfBKx6mx56fZIFRlzb/XUHZIypw237I+4P/bsx7cEzg==}
+  '@fjell/logging@4.4.17':
+    resolution: {integrity: sha512-e6YnAB7/sVuVmUgtuAh0XIk70HewsoPxlQwmXHhXQYosxleW6zytIPvPUWpA8xL26HcUFyTy71aKkhIJ0ZM9VA==}
 
-  '@fjell/registry@4.4.11':
-    resolution: {integrity: sha512-GaVnDJGLWW7w2waVJb+NxatiopY2LyHqY3BfZSMP835i9ibj232NV34QBiBh3VSXIuWGrKdSAQkPz4F1DGjujg==}
+  '@fjell/registry@4.4.16':
+    resolution: {integrity: sha512-k24HEuCZKP36z7/wjfTBx4pGlrxOSGDKik2V0Nj5TeKwnL/wAizZwtenfDSBKe+H+Vc0wo+lgfyYga7pBQ8eFA==}
     engines: {node: '>=21'}
 
   '@google-cloud/firestore@7.11.3':
@@ -2145,25 +2145,25 @@ snapshots:
       '@eslint/core': 0.15.1
       levn: 0.4.1
 
-  '@fjell/core@4.4.7':
+  '@fjell/core@4.4.13':
     dependencies:
-      '@fjell/logging': 4.4.7
+      '@fjell/logging': 4.4.17
       deepmerge: 4.3.1
       luxon: 3.7.1
 
-  '@fjell/lib@4.4.13':
+  '@fjell/lib@4.4.21':
     dependencies:
-      '@fjell/core': 4.4.7
-      '@fjell/logging': 4.4.7
-      '@fjell/registry': 4.4.11
+      '@fjell/core': 4.4.13
+      '@fjell/logging': 4.4.17
+      '@fjell/registry': 4.4.16
       deepmerge: 4.3.1
 
-  '@fjell/logging@4.4.7': {}
+  '@fjell/logging@4.4.17': {}
 
-  '@fjell/registry@4.4.11':
+  '@fjell/registry@4.4.16':
     dependencies:
-      '@fjell/core': 4.4.7
-      '@fjell/logging': 4.4.7
+      '@fjell/core': 4.4.13
+      '@fjell/logging': 4.4.17
       deepmerge: 4.3.1
 
   '@google-cloud/firestore@7.11.3':
