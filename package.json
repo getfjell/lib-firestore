@@ -30,7 +30,11 @@
     "clean": "rimraf dist",
     "test": "pnpm run lint && vitest run --coverage",
     "coverage": "vitest run --coverage",
-    "prepublishOnly": "pnpm run clean && pnpm run build"
+    "prepublishOnly": "pnpm run clean && pnpm run build",
+    "docs:dev": "cd docs && pnpm run dev",
+    "docs:build": "cd docs && pnpm run build",
+    "docs:preview": "cd docs && pnpm run preview",
+    "docs:test": "cd docs && pnpm run test"
   },
   "dependencies": {
     "@fjell/core": "^4.4.7",
