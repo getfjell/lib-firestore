@@ -45,32 +45,8 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Build documentation site
-        run: |
-          # Change to docs directory and install dependencies
-          cd docs
-          pnpm install --no-frozen-lockfile
-
-          # Copy README.md to public directory so it can be fetched
-          mkdir -p public
-          cp ../README.md public/
-
-          # Copy examples README as examples-README.md
-          cp ../examples/README.md public/examples-README.md
-
-          # Copy example files to public directory if they exist
-          mkdir -p public/examples
-          cp ../examples/*.ts public/examples/ 2>/dev/null || true
-
-          # Copy package.json for version info
-          cp ../package.json public/
-
-          # Copy any icon files if they exist
-          cp ../icon.png public/ 2>/dev/null || true
-          cp ../fjell-icon.svg public/ 2>/dev/null || true
-
-          # Build the Vite documentation site
-          pnpm run build
+      - name: Build documentation
+        uses: ./.github/actions/build-docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
