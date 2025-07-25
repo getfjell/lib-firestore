@@ -23,8 +23,8 @@
     }
   },
   "scripts": {
-    "build": "node esbuild.config.js && node scripts/build-with-types.js",
-    "dev": "concurrently \"node esbuild.config.js --watch\" \"node scripts/build-with-types.js\"",
+    "build": "node build.js && node scripts/build-with-types.js",
+    "dev": "concurrently \"node build.js --watch\" \"node scripts/build-with-types.js\"",
     "lint": "eslint . --ext .ts --fix",
     "clean": "rimraf dist",
     "test": "pnpm run lint && vitest run --coverage",
