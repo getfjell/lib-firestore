@@ -4,22 +4,29 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@fjell/core': link:../fjell-core
+  '@fjell/eslint-config': link:../fjell-eslint-config
+  '@fjell/lib': link:../fjell-lib
+  '@fjell/logging': link:../fjell-logging
+  '@fjell/registry': link:../fjell-registry
+
 importers:
 
   .:
     dependencies:
       '@fjell/core':
-        specifier: ^4.4.21
-        version: 4.4.21
+        specifier: link:../fjell-core
+        version: link:../fjell-core
       '@fjell/lib':
-        specifier: ^4.4.23
-        version: 4.4.23
+        specifier: link:../fjell-lib
+        version: link:../fjell-lib
       '@fjell/logging':
-        specifier: ^4.4.25
-        version: 4.4.25
+        specifier: link:../fjell-logging
+        version: link:../fjell-logging
       '@fjell/registry':
-        specifier: ^4.4.17
-        version: 4.4.17
+        specifier: link:../fjell-registry
+        version: link:../fjell-registry
       '@google-cloud/firestore':
         specifier: ^7.11.3
         version: 7.11.3
@@ -34,8 +41,8 @@ importers:
         specifier: ^9.31.0
         version: 9.31.0
       '@fjell/eslint-config':
-        specifier: ^1.0.5
-        version: 1.0.5(eslint@9.31.0)(typescript@5.8.3)
+        specifier: link:../fjell-eslint-config
+        version: link:../fjell-eslint-config
       '@swc/core':
         specifier: ^1.13.2
         version: 1.13.2
@@ -293,26 +300,6 @@ packages:
   '@eslint/plugin-kit@0.3.4':
     resolution: {integrity: sha512-Ul5l+lHEcw3L5+k8POx6r74mxEYKG5kOb6Xpy2gCRW6zweT6TEhAf8vhxGgjhqrd/VO/Dirhsb+1hNpD1ue9hw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@fjell/core@4.4.21':
-    resolution: {integrity: sha512-QDP64NuO8VlCUlqpIo4FZUxU4Rx1iGVvsubxa3Jv6Yel8jJojF9pVkGY2uwHbjcZkb0gkMQBTr41ylRG9zPSkw==}
-
-  '@fjell/eslint-config@1.0.5':
-    resolution: {integrity: sha512-0RzrW3iD4Sv4wlYXHEYo1+2xYRu9QLZ90uypRjTdrRwmwJwl9wY3Qa9nUYnBu963+Sqlb8ZJewstzC8KRPRycA==}
-    peerDependencies:
-      eslint: ^9.0.0
-      typescript: ^5.0.0
-
-  '@fjell/lib@4.4.23':
-    resolution: {integrity: sha512-A0phLycF363rPEzl626Lx34WJiSjTqUqjX077ib2Tp4mxNBP+MT6njKtkhMSlYMHZ0fcgnpk2pcGGN+aABvLYw==}
-    engines: {node: '>=21'}
-
-  '@fjell/logging@4.4.25':
-    resolution: {integrity: sha512-eSJbAJ2ZQ081nWxEWUwmakCrEy+Wrk1AcuSn+RNN2eyp+qMe2QKs4Ae85HxV54956K4HsVFk286baS16MBH4dg==}
-
-  '@fjell/registry@4.4.17':
-    resolution: {integrity: sha512-aBlfYYA8L/H7Xgxd6TF9bXLGUyiTlPNXkPB+jXaHk9uF2NPFwrfAax2KIzCxjrPNL2/4k1lYekiP4nlxAc/5VA==}
-    engines: {node: '>=21'}
 
   '@google-cloud/firestore@7.11.3':
     resolution: {integrity: sha512-qsM3/WHpawF07SRVvEJJVRwhYzM7o9qtuksyuqnrMig6fxIrwWnsezECWsG/D5TyYru51Fv5c/RTqNDQ2yU+4w==}
@@ -1282,10 +1269,6 @@ packages:
     resolution: {integrity: sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==}
     engines: {node: 20 || >=22}
 
-  luxon@3.7.1:
-    resolution: {integrity: sha512-RkRWjA926cTvz5rAb1BqyWkKbbjzCGchDUIKMCUvNi17j6f6j8uHGDV82Aqcqtzd+icoYpELmG3ksgGiFNNcNg==}
-    engines: {node: '>=12'}
-
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
 
@@ -1885,39 +1868,6 @@ snapshots:
     dependencies:
       '@eslint/core': 0.15.1
       levn: 0.4.1
-
-  '@fjell/core@4.4.21':
-    dependencies:
-      '@fjell/docs-template': link:../fjell-docs-template
-      '@fjell/logging': 4.4.25
-      deepmerge: 4.3.1
-      luxon: 3.7.1
-
-  '@fjell/eslint-config@1.0.5(eslint@9.31.0)(typescript@5.8.3)':
-    dependencies:
-      '@eslint/eslintrc': 3.3.1
-      '@eslint/js': 9.31.0
-      '@typescript-eslint/eslint-plugin': 8.38.0(@typescript-eslint/parser@8.38.0(eslint@9.31.0)(typescript@5.8.3))(eslint@9.31.0)(typescript@5.8.3)
-      '@typescript-eslint/parser': 8.38.0(eslint@9.31.0)(typescript@5.8.3)
-      eslint: 9.31.0
-      typescript: 5.8.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@fjell/lib@4.4.23':
-    dependencies:
-      '@fjell/core': 4.4.21
-      '@fjell/logging': 4.4.25
-      '@fjell/registry': 4.4.17
-      deepmerge: 4.3.1
-
-  '@fjell/logging@4.4.25': {}
-
-  '@fjell/registry@4.4.17':
-    dependencies:
-      '@fjell/core': 4.4.21
-      '@fjell/logging': 4.4.25
-      deepmerge: 4.3.1
 
   '@google-cloud/firestore@7.11.3':
     dependencies:
@@ -2947,8 +2897,6 @@ snapshots:
   lru-cache@10.4.3: {}
 
   lru-cache@11.1.0: {}
-
-  luxon@3.7.1: {}
 
   magic-string@0.30.17:
     dependencies:

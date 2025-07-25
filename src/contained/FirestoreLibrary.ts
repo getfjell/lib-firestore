@@ -1,7 +1,7 @@
 import { createDefinition } from '@/Definition';
 import { FirestoreLibrary as AbstractFirestoreLibrary } from '@/FirestoreLibrary';
 import { Item, ItemTypeArray } from '@fjell/core';
-import { Contained, Registry } from '@fjell/lib';
+import { Contained, Operations, Registry } from '@fjell/lib';
 import { createOperations } from './Operations';
 
 import LibLogger from '@/logger';
@@ -17,7 +17,7 @@ export interface FirestoreLibrary<
   L4 extends string = never,
   L5 extends string = never
 > extends AbstractFirestoreLibrary<V, S, L1, L2, L3, L4, L5> {
-  operations: Contained.Operations<V, S, L1, L2, L3, L4, L5>;
+  operations: Operations<V, S, L1, L2, L3, L4, L5>;
 }
 
 export function createFirestoreLibrary<

@@ -3,7 +3,7 @@ import { FirestoreLibrary as AbstractFirestoreLibrary } from '@/FirestoreLibrary
 import { createOperations } from '@/Operations';
 import LibLogger from '@/logger';
 import { Item } from '@fjell/core';
-import { Primary, Registry } from '@fjell/lib';
+import { Operations, Primary, Registry } from '@fjell/lib';
 
 const logger = LibLogger.get('Instance');
 
@@ -11,7 +11,7 @@ export interface FirestoreLibrary<
   V extends Item<S>,
   S extends string
 > extends AbstractFirestoreLibrary<V, S> {
-  operations: Primary.Operations<V, S>;
+  operations: Operations<V, S>;
 }
 
 export function createFirestoreLibrary<
