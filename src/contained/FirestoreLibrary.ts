@@ -6,7 +6,7 @@ import { createOperations } from './Operations';
 
 import LibLogger from '@/logger';
 
-const logger = LibLogger.get('contained', 'Instance');
+const logger = LibLogger.get('contained', 'FirestoreLibrary');
 
 export interface FirestoreLibrary<
   V extends Item<S>,
@@ -51,15 +51,3 @@ export function createFirestoreLibrary<
   } as FirestoreLibrary<V, S, L1, L2, L3, L4, L5>;
 
 }
-
-// Legacy exports for backwards compatibility
-export const createInstance = createFirestoreLibrary;
-export type Instance<
-  V extends Item<S>,
-  S extends string,
-  L1 extends string = never,
-  L2 extends string = never,
-  L3 extends string = never,
-  L4 extends string = never,
-  L5 extends string = never
-> = FirestoreLibrary<V, S, L1, L2, L3, L4, L5>;

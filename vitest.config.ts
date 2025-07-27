@@ -18,12 +18,14 @@ export default defineConfig({
         'esbuild.config.js',
         'scripts/',
         'dist',
+        'build.js',
+        'docs/',
       ],
       thresholds: {
-        lines: 77,
-        functions: 80,
-        branches: 85,
-        statements: 77,
+        lines: 90,
+        functions: 90,
+        branches: 90,
+        statements: 90,
       },
     },
     server: {

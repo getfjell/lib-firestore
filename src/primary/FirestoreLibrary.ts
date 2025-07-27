@@ -5,7 +5,7 @@ import LibLogger from '@/logger';
 import { Item } from '@fjell/core';
 import { Operations, Primary, Registry } from '@fjell/lib';
 
-const logger = LibLogger.get('Instance');
+const logger = LibLogger.get('primary', 'FirestoreLibrary');
 
 export interface FirestoreLibrary<
   V extends Item<S>,
@@ -40,10 +40,3 @@ export function createFirestoreLibrary<
   } as FirestoreLibrary<V, S>;
 
 }
-
-// Legacy exports for backwards compatibility
-export const createInstance = createFirestoreLibrary;
-export type Instance<
-  V extends Item<S>,
-  S extends string
-> = FirestoreLibrary<V, S>;
