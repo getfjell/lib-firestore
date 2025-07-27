@@ -36,17 +36,17 @@
     "docs:test": "cd docs && npm run test"
   },
   "dependencies": {
-    "@fjell/core": "file:../fjell-core",
-    "@fjell/lib": "file:../fjell-lib",
-    "@fjell/logging": "file:../fjell-logging",
-    "@fjell/registry": "file:../fjell-registry",
+    "@fjell/core": "^4.4.25",
+    "@fjell/lib": "^4.4.26",
+    "@fjell/logging": "^4.4.30",
+    "@fjell/registry": "^4.4.20",
     "@google-cloud/firestore": "^7.11.3",
     "deepmerge": "^4.3.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.32.0",
-    "@fjell/eslint-config": "file:../fjell-eslint-config",
+    "@fjell/eslint-config": "^1.1.3",
     "@swc/core": "^1.13.2",
     "@tsconfig/recommended": "^1.0.10",
     "@types/node": "^24.1.0",
