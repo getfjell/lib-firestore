@@ -6,7 +6,7 @@ import { InstanceFactory as BaseInstanceFactory, Coordinate, RegistryHub } from 
 import { createFirestoreLibraryFromComponents, FirestoreLibrary } from "./FirestoreLibrary";
 import LibLogger from "./logger";
 
-const logger = LibLogger.get("InstanceFactory");
+const logger = LibLogger.get("FirestoreLibraryFactory");
 
 export type FirestoreLibraryFactory<
   V extends Item<S, L1, L2, L3, L4, L5>,
@@ -39,7 +39,7 @@ export const createFirestoreLibraryFactory = <
     options: Options<V, S, L1, L2, L3, L4, L5>
   ): BaseInstanceFactory<S, L1, L2, L3, L4, L5> => {
   return (coordinate: Coordinate<S, L1, L2, L3, L4, L5>, context: { registry: any, registryHub?: RegistryHub }) => {
-    logger.debug("Creating firestore instance", { coordinate, registry: context.registry, firestore, operations, options });
+    logger.debug("Creating firestore library", { coordinate, registry: context.registry, firestore, operations, options });
 
     return createFirestoreLibraryFromComponents(context.registry as Registry, coordinate, firestore, operations, options) as FirestoreLibrary<V, S, L1, L2, L3, L4, L5>;
   };
