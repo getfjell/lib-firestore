@@ -1,9 +1,15 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger
-const mockLogger = { default: vi.fn(), error: vi.fn() };
+const mockLogger = {
+  default: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn()
+};
 const mockLoggerGet = vi.fn(() => mockLogger);
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
@@ -15,10 +21,10 @@ const mockRemoveKey = vi.fn((item: any) => {
   const { key: _removed, ...rest } = item;
   return rest;
 });
-vi.mock('@/EventCoordinator', () => ({
+vi.mock('../../src/EventCoordinator', () => ({
   updateEvents: mockUpdateEvents,
 }));
-vi.mock('@/KeyMaster', () => ({
+vi.mock('../../src/KeyMaster', () => ({
   removeKey: mockRemoveKey,
 }));
 
@@ -28,7 +34,7 @@ const mockDocRef = {
   get: vi.fn(),
 };
 const mockGetReference = vi.fn(() => mockDocRef);
-vi.mock('@/ReferenceFinder', () => ({
+vi.mock('../../src/ReferenceFinder', () => ({
   getReference: mockGetReference,
 }));
 
@@ -37,19 +43,31 @@ const mockProcessDoc = vi.fn((doc: any) => {
   const data = doc && typeof doc.data === 'function' ? doc.data() : {};
   return { ...data, processed: true };
 });
-vi.mock('@/DocProcessor', () => ({
+vi.mock('../../src/DocProcessor', () => ({
   processDoc: mockProcessDoc,
 }));
 
 // Mock validateKeys to just return the item as an object
 const mockValidateKeys = vi.fn((item: any) => ({ ...item, validated: true }));
 const mockIsValidItemKey = vi.fn(() => true);
+const mockGenerateKeyArray = vi.fn((key: any) => {
+  // Return an array containing the original key object
+  if (key && typeof key === 'object') {
+    return [key];
+  }
+  return [{ pk: 'mockKey' }];
+});
+const mockIsPriKey = vi.fn(() => true);
 vi.mock('@fjell/core', () => ({
   validateKeys: mockValidateKeys,
   isValidItemKey: mockIsValidItemKey,
+  generateKeyArray: mockGenerateKeyArray,
+  isPriKey: mockIsPriKey,
   Item: class { },
   PriKey: Object,
   ComKey: Object,
+  LocKey: Object,
+  LocKeyArray: Object,
   TypesProperties: Object,
 }));
 
@@ -65,11 +83,16 @@ vi.mock('@fjell/lib', () => ({
 
 let getUpdateOperation: any;
 beforeAll(async () => {
-  ({ getUpdateOperation } = await import('@/ops/update'));
+  ({ getUpdateOperation } = await import('../../src/ops/update'));
 });
 
 describe('getUpdateOperation', () => {
-  const firestore = {};
+  const mockCollection = {
+    doc: vi.fn(() => mockDocRef),
+  };
+  const firestore = {
+    collection: vi.fn(() => mockCollection),
+  };
   const definition = {
     collectionNames: ['testCollection'],
     coordinate: { kta: ['TYPEA'] },
@@ -83,6 +106,9 @@ describe('getUpdateOperation', () => {
     mockIsValidItemKey.mockReturnValue(true);
     mockDocRef.set.mockReset();
     mockDocRef.get.mockReset();
+    mockDocRef.get.mockResolvedValue({ exists: true, data: () => docData });
+    firestore.collection.mockClear();
+    mockCollection.doc.mockClear();
   });
 
   it('updates and returns processed and validated item for a valid key', async () => {

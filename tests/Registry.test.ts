@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('Registry', () => {
   it('should re-export Registry from @fjell/lib', async () => {
-    const registryModule = await import('@/Registry');
+    const registryModule = await import('../src/Registry');
 
     // Test that the module exports the Registry
     expect(registryModule).toBeDefined();

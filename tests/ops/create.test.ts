@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 // Mock logger
 const mockLogger = { default: vi.fn(), debug: vi.fn() };
 const mockLoggerGet = vi.fn(() => mockLogger);
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
@@ -20,13 +20,13 @@ const mockCollectionRef = {
   _lastDocRef: null, // for test assertions if needed
 };
 const mockGetReference = vi.fn(() => mockCollectionRef);
-vi.mock('@/ReferenceFinder', () => ({
+vi.mock('../../src/ReferenceFinder', () => ({
   getReference: mockGetReference,
 }));
 
 // Mock createEvents to just return the item as an object
 const mockCreateEvents = vi.fn((item: any) => ({ ...(typeof item === 'object' ? item : {}), events: { created: true } }));
-vi.mock('@/EventCoordinator', () => ({
+vi.mock('../../src/EventCoordinator', () => ({
   createEvents: mockCreateEvents,
 }));
 
@@ -35,7 +35,7 @@ const mockProcessDoc = vi.fn((doc: any) => {
   const data = doc && typeof doc.data === 'function' ? doc.data() : {};
   return { ...data, events: data.events, processed: true };
 });
-vi.mock('@/DocProcessor', () => ({
+vi.mock('../../src/DocProcessor', () => ({
   processDoc: mockProcessDoc,
 }));
 
@@ -71,7 +71,7 @@ afterAll(() => {
 
 let getCreateOperation: any;
 beforeAll(async () => {
-  ({ getCreateOperation } = await import('@/ops/create'));
+  ({ getCreateOperation } = await import('../../src/ops/create'));
 });
 
 describe('getCreateOperation', () => {

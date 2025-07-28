@@ -1,7 +1,7 @@
 import { Item, LocKeyArray } from "@fjell/core";
 
-import { Definition } from "@/Definition";
-import LibLogger from "@/logger";
+import { Definition } from "../Definition";
+import LibLogger from "../logger";
 import { Operations, Registry } from "@fjell/lib";
 
 const logger = LibLogger.get('ops', 'find');
