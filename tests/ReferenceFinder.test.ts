@@ -11,7 +11,7 @@ const mockLoggerGet = vi.fn(() => ({
 }));
 
 // @ts-ignore
-vi.mock('@/logger', () => ({
+vi.mock('../src/logger', () => ({
   __esModule: true,
   default: {
     get: mockLoggerGet,

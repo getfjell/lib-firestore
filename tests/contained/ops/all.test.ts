@@ -1,23 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getAllOperation } from '@/contained/ops/all';
-import { Definition } from '@/Definition';
+import { getAllOperation } from '../../../src/contained/ops/all';
+import { Definition } from '../../../src/Definition';
 import { Item, ItemQuery, validateKeys } from '@fjell/core';
 import { CollectionGroup, CollectionReference, Query } from '@google-cloud/firestore';
-import { buildQuery } from '@/QueryBuilder';
-import { processDoc } from '@/DocProcessor';
-import { getReference } from '@/ReferenceFinder';
+import { buildQuery } from '../../../src/QueryBuilder';
+import { processDoc } from '../../../src/DocProcessor';
+import { getReference } from '../../../src/ReferenceFinder';
 import { Registry } from '@fjell/lib';
 
 // Mock dependencies
-vi.mock('@/QueryBuilder', () => ({
+vi.mock('../../../src/QueryBuilder', () => ({
   buildQuery: vi.fn(),
 }));
 
-vi.mock('@/DocProcessor', () => ({
+vi.mock('../../../src/DocProcessor', () => ({
   processDoc: vi.fn(),
 }));
 
-vi.mock('@/ReferenceFinder', () => ({
+vi.mock('../../../src/ReferenceFinder', () => ({
   getReference: vi.fn(),
 }));
 
@@ -29,7 +29,7 @@ vi.mock('@fjell/core', async () => {
   };
 });
 
-vi.mock('@/logger', () => ({
+vi.mock('../../../src/logger', () => ({
   get: vi.fn(() => ({
     debug: vi.fn(),
     default: vi.fn(),
