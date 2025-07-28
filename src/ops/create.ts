@@ -12,11 +12,11 @@ import {
   validateKeys
 } from "@fjell/core";
 
-import { Definition } from "@/Definition";
-import { processDoc } from "@/DocProcessor";
-import { createEvents } from "@/EventCoordinator";
-import LibLogger from "@/logger";
-import { getReference } from "@/ReferenceFinder";
+import { Definition } from "../Definition";
+import { processDoc } from "../DocProcessor";
+import { createEvents } from "../EventCoordinator";
+import LibLogger from "../logger";
+import { getReference } from "../ReferenceFinder";
 import { Registry } from "@fjell/lib";
 import { CollectionReference } from "@google-cloud/firestore";
 

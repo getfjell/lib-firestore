@@ -3,12 +3,12 @@ import { validateKeys } from "@fjell/core";
 
 import { ComKey, isValidItemKey, Item, PriKey } from "@fjell/core";
 
-import { Definition } from "@/Definition";
-import { processDoc } from "@/DocProcessor";
-import { updateEvents } from "@/EventCoordinator";
-import { removeKey } from "@/KeyMaster";
-import { getReference } from "@/ReferenceFinder";
-import LibLogger from "@/logger";
+import { Definition } from "../Definition";
+import { processDoc } from "../DocProcessor";
+import { updateEvents } from "../EventCoordinator";
+import { removeKey } from "../KeyMaster";
+import { getReference } from "../ReferenceFinder";
+import LibLogger from "../logger";
 import * as Library from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";
 

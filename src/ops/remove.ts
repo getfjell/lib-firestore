@@ -2,8 +2,8 @@
 
 import { ComKey, isValidItemKey, Item, PriKey, validateKeys } from "@fjell/core";
 
-import { Definition } from "@/Definition";
-import LibLogger from "@/logger";
+import { Definition } from "../Definition";
+import LibLogger from "../logger";
 import { Registry } from "@fjell/lib";
 import { getUpdateOperation } from "./update";
 

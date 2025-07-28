@@ -4,13 +4,13 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 // Mock logger to suppress output and allow assertions
 const mockLogger = { default: vi.fn() };
 const mockLoggerGet = vi.fn(() => mockLogger);
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
 // Mock getAllOperation to control its return value
 const mockGetAllOperation = vi.fn();
-vi.mock('@/ops/all', () => ({
+vi.mock('../../src/ops/all', () => ({
   getAllOperation: mockGetAllOperation,
 }));
 
@@ -33,7 +33,7 @@ vi.mock('@fjell/core', () => ({
 // Import after mocks
 let getOneOperation: any;
 beforeAll(async () => {
-  ({ getOneOperation } = await import('@/ops/one'));
+  ({ getOneOperation } = await import('../../src/ops/one'));
 });
 
 describe('getOneOperation', () => {

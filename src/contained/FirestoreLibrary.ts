@@ -1,10 +1,10 @@
-import { createDefinition } from '@/Definition';
-import { FirestoreLibrary as AbstractFirestoreLibrary } from '@/FirestoreLibrary';
+import { createDefinition } from '../Definition';
+import { FirestoreLibrary as AbstractFirestoreLibrary } from '../FirestoreLibrary';
 import { Item, ItemTypeArray } from '@fjell/core';
 import { Contained, Operations, Registry } from '@fjell/lib';
 import { createOperations } from './Operations';
 
-import LibLogger from '@/logger';
+import LibLogger from '../logger';
 
 const logger = LibLogger.get('contained', 'FirestoreLibrary');
 

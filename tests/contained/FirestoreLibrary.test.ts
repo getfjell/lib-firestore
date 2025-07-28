@@ -26,17 +26,17 @@ const mockFirestore = {
 } as any;
 
 // ESM module mocks
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   get: vi.fn(() => mockLoggerInstance),
   __esModule: true,
   default: { get: vi.fn(() => mockLoggerInstance) },
 }));
 
-vi.mock('@/Definition', () => ({
+vi.mock('../../src/Definition', () => ({
   createDefinition: mockCreateDefinition,
 }));
 
-vi.mock('@/contained/Operations', () => ({
+vi.mock('../../src/contained/Operations', () => ({
   createOperations: mockCreateOperations,
 }));
 

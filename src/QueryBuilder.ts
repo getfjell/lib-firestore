@@ -20,7 +20,7 @@ import {
   Query
 } from '@google-cloud/firestore';
   
-import LibLogger from '@/logger';
+import LibLogger from './logger';
 
 const logger = LibLogger.get('QueryBuilder');
 

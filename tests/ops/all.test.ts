@@ -8,13 +8,13 @@ const mockLogger = {
 };
 const mockLoggerGet = vi.fn(() => mockLogger);
 
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
 // Mock buildQuery to just return the collection reference (chainable)
 const mockBuildQuery = vi.fn((itemQuery: any, colRef: any) => colRef);
-vi.mock('@/QueryBuilder', () => ({
+vi.mock('../../src/QueryBuilder', () => ({
   buildQuery: mockBuildQuery,
 }));
 
@@ -24,7 +24,7 @@ const mockProcessDoc = vi.fn((doc: any, kta: any) => {
   void kta; // suppress unused
   return { ...doc.data(), key: { kt: kta[0], pk: doc.id } };
 });
-vi.mock('@/DocProcessor', () => ({
+vi.mock('../../src/DocProcessor', () => ({
   processDoc: mockProcessDoc,
 }));
 
@@ -33,7 +33,7 @@ const mockColRef = {
   get: vi.fn() as Mock,
 };
 const mockGetReference = vi.fn(() => mockColRef);
-vi.mock('@/ReferenceFinder', () => ({
+vi.mock('../../src/ReferenceFinder', () => ({
   getReference: mockGetReference,
 }));
 
@@ -54,7 +54,7 @@ vi.mock('@fjell/core', () => ({
 // Import after mocks
 let getAllOperation: any;
 beforeAll(async () => {
-  ({ getAllOperation } = await import('@/ops/all'));
+  ({ getAllOperation } = await import('../../src/ops/all'));
 });
 
 describe('getAllOperation', () => {

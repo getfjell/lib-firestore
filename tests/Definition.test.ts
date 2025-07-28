@@ -24,7 +24,7 @@ describe('createDefinition', () => {
     mockCreateCoordinate.mockClear();
     mockCreateOptions.mockClear();
 
-    Definition = await import('@/Definition');
+    Definition = await import('../src/Definition');
   });
 
   it('should call createCoordinate with kta and scopes', () => {

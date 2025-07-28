@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildQuery } from '@/QueryBuilder';
+import { buildQuery } from '../src/QueryBuilder';
 import { CompoundCondition, Condition, ItemQuery } from '@fjell/core';
 import { CollectionGroup, CollectionReference, Filter, Query } from '@google-cloud/firestore';
 
 // Mock the logger
-vi.mock('@/logger', () => ({
+vi.mock('../src/logger', () => ({
   get: vi.fn(() => ({
     debug: vi.fn(),
     default: vi.fn(),

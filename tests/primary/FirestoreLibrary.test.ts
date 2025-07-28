@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createFirestoreLibrary } from '@/primary/FirestoreLibrary';
+import { createFirestoreLibrary } from '../../src/primary/FirestoreLibrary';
 import type { Registry } from '@fjell/lib';
 
 // Mock the dependencies
-vi.mock('@/Definition');
-vi.mock('@/Operations');
-vi.mock('@/logger', () => ({
+vi.mock('../../src/Definition');
+vi.mock('../../src/Operations');
+vi.mock('../../src/logger', () => ({
   default: {
     get: vi.fn().mockReturnValue({
       debug: vi.fn(),
@@ -19,8 +19,8 @@ vi.mock('@fjell/lib', () => ({
 }));
 
 // Import mocked functions
-import { createDefinition } from '@/Definition';
-import { createOperations } from '@/Operations';
+import { createDefinition } from '../../src/Definition';
+import { createOperations } from '../../src/Operations';
 import { Primary } from '@fjell/lib';
 
 const mockCreateDefinition = vi.mocked(createDefinition);

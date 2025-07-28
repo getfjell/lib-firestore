@@ -16,14 +16,14 @@ const mockRegistry = {
 };
 
 // ESM module mocks
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   get: vi.fn(() => mockLoggerInstance),
   __esModule: true,
   default: { get: vi.fn(() => mockLoggerInstance) },
 }));
-vi.mock('@/Operations', () => ({ createOperations: mockAbstractCreateOperations }));
-vi.mock('@/contained/ops/all', () => ({ getAllOperation: mockGetAllOperation }));
-vi.mock('@/contained/ops/one', () => ({ getOneOperation: mockGetOneOperation }));
+vi.mock('../../src/Operations', () => ({ createOperations: mockAbstractCreateOperations }));
+vi.mock('../../src/contained/ops/all', () => ({ getAllOperation: mockGetAllOperation }));
+vi.mock('../../src/contained/ops/one', () => ({ getOneOperation: mockGetOneOperation }));
 
 let createOperations: any;
 
@@ -40,7 +40,11 @@ describe('contained/Operations createOperations', () => {
 
   it('calls logger.debug with correct args', () => {
     const firestore = { app: {} };
-    const definition = { foo: 'bar' };
+    const definition = {
+      coordinate: { kta: ['test'], scopes: ['firestore'], toString: () => 'test' },
+      options: {},
+      collectionNames: ['testCollection']
+    };
     mockAbstractCreateOperations.mockReturnValue({});
     mockGetAllOperation.mockReturnValue(vi.fn());
     mockGetOneOperation.mockReturnValue(vi.fn());
@@ -50,7 +54,11 @@ describe('contained/Operations createOperations', () => {
 
   it('calls Abstract.createOperations, getAllOperation, and getOneOperation with correct params', () => {
     const firestore = { app: {} };
-    const definition = { foo: 'baz' };
+    const definition = {
+      coordinate: { kta: ['test'], scopes: ['firestore'], toString: () => 'test' },
+      options: {},
+      collectionNames: ['testCollection']
+    };
     const mockOps = { op: true };
     const mockAll = vi.fn();
     const mockOne = vi.fn();
@@ -66,7 +74,11 @@ describe('contained/Operations createOperations', () => {
 
   it('returns an operations object with all, one, and spread abstract ops', () => {
     const firestore = { app: {} };
-    const definition = { foo: 'qux' };
+    const definition = {
+      coordinate: { kta: ['test'], scopes: ['firestore'], toString: () => 'test' },
+      options: {},
+      collectionNames: ['testCollection']
+    };
     const mockOps = { opA: vi.fn(), opB: vi.fn() };
     const mockAll = vi.fn();
     const mockOne = vi.fn();

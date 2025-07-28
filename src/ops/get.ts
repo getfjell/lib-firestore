@@ -1,8 +1,8 @@
 /* eslint-disable indent */
-import { Definition } from "@/Definition";
-import { processDoc } from "@/DocProcessor";
-import { getReference } from "@/ReferenceFinder";
-import LibLogger from "@/logger";
+import { Definition } from "../Definition";
+import { processDoc } from "../DocProcessor";
+import { getReference } from "../ReferenceFinder";
+import LibLogger from "../logger";
 import { ComKey, isValidItemKey, Item, PriKey, validateKeys } from "@fjell/core";
 import * as Library from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";

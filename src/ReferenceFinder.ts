@@ -2,7 +2,7 @@ import { ComKey, generateKeyArray, isPriKey, LocKeyArray, PriKey } from "@fjell/
 
 import { LocKey } from "@fjell/core";
 
-import LibLogger from "@/logger";
+import LibLogger from "./logger";
 import { DocumentReference } from "@google-cloud/firestore";
 
 const logger = LibLogger.get('ReferenceFinder');

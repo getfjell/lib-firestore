@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 // Mock logger
 const mockLogger = { default: vi.fn(), error: vi.fn() };
 const mockLoggerGet = vi.fn(() => mockLogger);
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
@@ -12,7 +12,7 @@ const mockDocRef = {
   get: vi.fn(),
 };
 const mockGetReference = vi.fn(() => mockDocRef);
-vi.mock('@/ReferenceFinder', () => ({
+vi.mock('../../src/ReferenceFinder', () => ({
   getReference: mockGetReference,
 }));
 
@@ -21,7 +21,7 @@ const mockProcessDoc = vi.fn((doc: any) => {
   const data = doc && typeof doc.data === 'function' ? doc.data() : {};
   return { ...data, processed: true };
 });
-vi.mock('@/DocProcessor', () => ({
+vi.mock('../../src/DocProcessor', () => ({
   processDoc: mockProcessDoc,
 }));
 
@@ -49,7 +49,7 @@ vi.mock('@fjell/lib', () => ({
 
 let getGetOperation: any;
 beforeAll(async () => {
-  ({ getGetOperation } = await import('@/ops/get'));
+  ({ getGetOperation } = await import('../../src/ops/get'));
 });
 
 describe('getGetOperation', () => {

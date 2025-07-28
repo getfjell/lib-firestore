@@ -1,7 +1,7 @@
 import { AllItemTypeArrays, Item, ItemEvent, RecursivePartial } from "@fjell/core";
 import { addKey } from "./KeyMaster";
 
-import LibLogger from "@/logger";
+import LibLogger from "./logger";
 import { DocumentSnapshot, Timestamp } from "@google-cloud/firestore";
 
 const logger = LibLogger.get('DocProcessor');

@@ -5,7 +5,7 @@ vi.mock('../src/KeyMaster', () => ({
   addKey: vi.fn((...args: any[]) => mockAddKeyFn(...args)),
 }));
 
-import { processDoc } from '@/DocProcessor';
+import { processDoc } from '../src/DocProcessor';
 import { AllItemTypeArrays } from '@fjell/core';
 import { DocumentData, DocumentSnapshot, Timestamp } from '@google-cloud/firestore';
 import type { Mock } from 'vitest';

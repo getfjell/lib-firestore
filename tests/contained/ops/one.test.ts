@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, type MockedFunction, vi } from 'vitest';
-import { getOneOperation } from '@/contained/ops/one';
-import { getAllOperation } from '@/contained/ops/all';
-import { Definition } from '@/Definition';
+import { getOneOperation } from '../../../src/contained/ops/one';
+import { getAllOperation } from '../../../src/contained/ops/all';
+import { Definition } from '../../../src/Definition';
 import { Item, ItemQuery } from '@fjell/core';
 import { Registry } from '@fjell/lib';
 
 // Mock dependencies
-vi.mock('@/contained/ops/all', () => ({
+vi.mock('../../../src/contained/ops/all', () => ({
   getAllOperation: vi.fn(),
 }));
 
-vi.mock('@/logger', () => ({
+vi.mock('../../../src/logger', () => ({
   get: vi.fn(() => ({
     debug: vi.fn(),
   })),
