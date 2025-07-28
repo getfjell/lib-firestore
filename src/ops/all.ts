@@ -1,14 +1,14 @@
 /* eslint-disable indent */
-import { buildQuery } from "@/QueryBuilder";
+import { buildQuery } from "../QueryBuilder";
 import { Query } from "@google-cloud/firestore";
 
 import { Item, ItemQuery, LocKeyArray, validateKeys } from "@fjell/core";
 import { CollectionReference } from "@google-cloud/firestore";
 
-import { Definition } from "@/Definition";
-import { processDoc } from "@/DocProcessor";
-import { getReference } from "@/ReferenceFinder";
-import LibLogger from "@/logger";
+import { Definition } from "../Definition";
+import { processDoc } from "../DocProcessor";
+import { getReference } from "../ReferenceFinder";
+import LibLogger from "../logger";
 import { Registry } from "@fjell/lib";
 
 const logger = LibLogger.get('ops', 'all');

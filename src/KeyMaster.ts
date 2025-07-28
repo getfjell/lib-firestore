@@ -3,7 +3,7 @@ import {
   Item,
 } from '@fjell/core';
 
-import LibLogger from '@/logger';
+import LibLogger from './logger';
 
 const logger = LibLogger.get('KeyMaster');
 
