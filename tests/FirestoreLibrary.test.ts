@@ -1,26 +1,26 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock the dependencies
-vi.mock('@/logger', () => ({
+vi.mock('../src/logger', () => ({
   default: {
     get: vi.fn().mockReturnValue({ debug: vi.fn() }),
   },
 }));
 
-vi.mock('@/Definition', () => ({
+vi.mock('../src/Definition', () => ({
   createDefinition: vi.fn(),
 }));
 
-vi.mock('@/Operations', () => ({
+vi.mock('../src/Operations', () => ({
   createOperations: vi.fn(),
 }));
 
 import {
   createFirestoreLibrary,
   createFirestoreLibraryFromComponents
-} from '@/FirestoreLibrary';
-import { createDefinition } from '@/Definition';
-import { createOperations } from '@/Operations';
+} from '../src/FirestoreLibrary';
+import { createDefinition } from '../src/Definition';
+import { createOperations } from '../src/Operations';
 
 // Get references to the mocked functions
 const mockCreateDefinition = vi.mocked(createDefinition);

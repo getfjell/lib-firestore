@@ -1,4 +1,4 @@
-import { createEvents, updateEvents } from '@/EventCoordinator';
+import { createEvents, updateEvents } from '../src/EventCoordinator';
 import { Item } from '@fjell/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

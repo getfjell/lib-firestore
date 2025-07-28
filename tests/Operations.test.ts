@@ -1,4 +1,4 @@
-import { Definition } from '@/Definition';
+import { Definition } from '../src/Definition';
 import { Item } from '@fjell/core';
 import { Registry } from '@fjell/lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

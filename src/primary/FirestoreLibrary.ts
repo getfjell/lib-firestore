@@ -1,7 +1,7 @@
-import { createDefinition } from '@/Definition';
-import { FirestoreLibrary as AbstractFirestoreLibrary } from '@/FirestoreLibrary';
-import { createOperations } from '@/Operations';
-import LibLogger from '@/logger';
+import { createDefinition } from '../Definition';
+import { FirestoreLibrary as AbstractFirestoreLibrary } from '../FirestoreLibrary';
+import { createOperations } from '../Operations';
+import LibLogger from '../logger';
 import { Item } from '@fjell/core';
 import { Operations, Primary, Registry } from '@fjell/lib';
 

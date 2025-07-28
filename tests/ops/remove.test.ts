@@ -3,9 +3,15 @@ import type { Registry } from '@fjell/lib';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger
-const mockLogger = { default: vi.fn(), error: vi.fn() };
+const mockLogger = {
+  default: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn()
+};
 const mockLoggerGet = vi.fn(() => mockLogger);
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
@@ -21,29 +27,50 @@ const mockRegistry = {
 // Mock @fjell/core
 const mockValidateKeys = vi.fn((item: any, kta: any) => ({ ...item, validated: true }));
 const mockIsValidItemKey = vi.fn(() => true);
+const mockGenerateKeyArray = vi.fn((key: any) => {
+  // Return an array containing the original key object
+  if (key && typeof key === 'object') {
+    return [key];
+  }
+  return [{ pk: 'mockKey' }];
+});
+const mockIsPriKey = vi.fn(() => true);
 vi.mock('@fjell/core', () => ({
   validateKeys: mockValidateKeys,
   isValidItemKey: mockIsValidItemKey,
+  generateKeyArray: mockGenerateKeyArray,
+  isPriKey: mockIsPriKey,
   Item: class { },
   PriKey: Object,
   ComKey: Object,
+  LocKey: Object,
+  LocKeyArray: Object,
   TypesProperties: Object,
 }));
 
 // Mock getUpdateOperation
 const mockUpdateOperation = vi.fn();
 const mockGetUpdateOperation = vi.fn(() => mockUpdateOperation);
-vi.mock('@/ops/update', () => ({
+vi.mock('../../src/ops/update', () => ({
   getUpdateOperation: mockGetUpdateOperation,
 }));
 
 let getRemoveOperations: any;
 beforeAll(async () => {
-  ({ getRemoveOperations } = await import('@/ops/remove'));
+  ({ getRemoveOperations } = await import('../../src/ops/remove'));
 });
 
 describe('getRemoveOperations', () => {
-  const firestore = {};
+  const mockDocRef = {
+    set: vi.fn(),
+    get: vi.fn(),
+  };
+  const mockCollection = {
+    doc: vi.fn(() => mockDocRef),
+  };
+  const firestore = {
+    collection: vi.fn(() => mockCollection),
+  };
   const definition: any = {
     options: {},
     coordinate: { kta: ['TYPEA'] },
@@ -59,6 +86,11 @@ describe('getRemoveOperations', () => {
     // @ts-ignore
     mockUpdateOperation.mockResolvedValue(removedItem);
     mockValidateKeys.mockImplementation((item: any) => ({ ...item, validated: true }));
+    firestore.collection.mockClear();
+    mockCollection.doc.mockClear();
+    mockDocRef.set.mockClear();
+    mockDocRef.get.mockClear();
+    mockDocRef.get.mockResolvedValue({ exists: true, data: () => ({}) });
   });
 
   it('removes item and returns validated item (no postRemove)', async () => {

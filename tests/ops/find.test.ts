@@ -8,14 +8,14 @@ const mockLogger = {
 };
 const mockLoggerGet = vi.fn(() => mockLogger);
 
-vi.mock('@/logger', () => ({
+vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
 }));
 
 // Import after mocks
 let getFindOperation: any;
 beforeAll(async () => {
-  ({ getFindOperation } = await import('@/ops/find'));
+  ({ getFindOperation } = await import('../../src/ops/find'));
 });
 
 describe('getFindOperation', () => {
