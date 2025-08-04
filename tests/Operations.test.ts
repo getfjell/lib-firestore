@@ -144,9 +144,11 @@ describe('createOperations', () => {
     expect(operations.find).toBe(mockFind);
   });
 
-  it('should include an upsert operation that throws "Not implemented"', async () => {
+  it('should include a functional upsert operation', async () => {
     const { createOperations: createOps } = await import('../src/Operations');
     const operations = createOps(mockFirestore, mockDefinition, mockRegistry);
-    expect(() => operations.upsert({} as any, {} as any)).toThrow('Not implemented');
+    expect(operations.upsert).toBeDefined();
+    expect(typeof operations.upsert).toBe('function');
+    // Note: The actual upsert functionality is tested in integration tests
   });
 });

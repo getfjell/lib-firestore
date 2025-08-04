@@ -31,7 +31,7 @@ export const getGetOperation = <
     const { collectionNames, coordinate } = definition;
     const { kta } = coordinate;
 
-    logger.default('Get', { key, kta, collectionNames, coordinate });
+    logger.debug('Get', { key, kta, collectionNames, coordinate });
     if (!isValidItemKey(key)) {
       logger.error('Key for Get is not a valid ItemKey: %j', key);
       throw new Error('Key for Get is not a valid ItemKey');

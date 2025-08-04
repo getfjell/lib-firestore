@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-firestore",
-  "version": "4.4.24",
+  "version": "4.4.25",
   "type": "module",
   "keywords": [
     "library",
@@ -36,17 +36,17 @@
     "docs:test": "cd docs && npm run test"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.25",
-    "@fjell/lib": "^4.4.26",
-    "@fjell/logging": "^4.4.30",
-    "@fjell/registry": "^4.4.20",
+    "@fjell/core": "^4.4.29",
+    "@fjell/lib": "^4.4.31",
+    "@fjell/logging": "^4.4.36",
+    "@fjell/registry": "^4.4.24",
     "@google-cloud/firestore": "^7.11.3",
     "deepmerge": "^4.3.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.32.0",
-    "@fjell/eslint-config": "^1.1.3",
+    "@fjell/eslint-config": "^1.1.11",
     "@swc/core": "^1.13.2",
     "@tsconfig/recommended": "^1.0.10",
     "@types/node": "^24.1.0",
