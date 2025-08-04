@@ -10,6 +10,7 @@ import { getGetOperation } from "./ops/get";
 import { getOneOperation } from "./ops/one";
 import { getRemoveOperations } from "./ops/remove";
 import { getUpdateOperation } from "./ops/update";
+import { getUpsertOperation } from "./ops/upsert";
 
 const logger = LibLogger.get('Operations');
 
@@ -38,9 +39,7 @@ export const createOperations = <
   operations.get = getGetOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry);
   operations.remove = getRemoveOperations<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry);
   operations.find = getFindOperation<V, S, L1, L2, L3, L4, L5>(definition, operations, registry);
-  operations.upsert = () => {
-    throw new Error('Not implemented');
-  };
+  operations.upsert = getUpsertOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry, operations);
 
   return operations;
 }

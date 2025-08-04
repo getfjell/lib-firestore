@@ -17,8 +17,9 @@ vi.mock('../../src/logger', () => ({
 const mockUpdateEvents = vi.fn((item: any) => ({ ...item, updated: true }));
 const mockRemoveKey = vi.fn((item: any) => {
   // Remove 'key' property from item
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const { key: _removed, ...rest } = item;
+  console.log('removed key', _removed);
   return rest;
 });
 vi.mock('../../src/EventCoordinator', () => ({
