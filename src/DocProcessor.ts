@@ -40,7 +40,7 @@ export const processDoc = <S extends string,
     doc: DocumentSnapshot,
     keyTypes: AllItemTypeArrays<S, L1, L2, L3, L4, L5>,
   ): Item<S, L1, L2, L3, L4, L5> => {
-  logger.default('Processing Doc', { doc });
+  logger.debug('Processing Doc', { doc });
   const itemData = doc.data();
   if (!itemData) {
     logger.error('Document data is undefined', { docId: doc.id });
