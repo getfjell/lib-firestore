@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger
-const mockLogger = { default: vi.fn(), error: vi.fn() };
+const mockLogger = { debug: vi.fn(), error: vi.fn() };
 const mockLoggerGet = vi.fn(() => mockLogger);
 vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
