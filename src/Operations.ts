@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { Item } from "@fjell/core";
 
 import * as Library from "@fjell/lib";
@@ -23,12 +24,12 @@ export const createOperations = <
   L4 extends string = never,
   L5 extends string = never,
 >(
-    firestore: FirebaseFirestore.Firestore,
-    definition: Definition<V, S, L1, L2, L3, L4, L5>,
-    registry: Library.Registry,
-  ): Library.Operations<V, S, L1, L2, L3, L4, L5> => {
+  firestore: FirebaseFirestore.Firestore,
+  definition: Definition<V, S, L1, L2, L3, L4, L5>,
+  registry: Library.Registry,
+): Library.Operations<V, S, L1, L2, L3, L4, L5> => {
 
-  logger.debug('createOperations', { firestore, definition });
+  logger.default('createOperations', { firestore, definition });
 
   const operations = {} as Library.Operations<V, S, L1, L2, L3, L4, L5>;
 

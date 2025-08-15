@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger instance
-const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), default: vi.fn() };
 
 // Mocked dependency functions
 const mockAbstractCreateOperations = vi.fn();
@@ -34,6 +34,7 @@ describe('contained/Operations createOperations', () => {
     mockGetAllOperation.mockReset();
     mockGetOneOperation.mockReset();
     mockLoggerInstance.debug.mockReset();
+    mockLoggerInstance.default.mockReset();
     const mod = await import('../../src/contained/Operations');
     createOperations = mod.createOperations;
   });
@@ -49,7 +50,7 @@ describe('contained/Operations createOperations', () => {
     mockGetAllOperation.mockReturnValue(vi.fn());
     mockGetOneOperation.mockReturnValue(vi.fn());
     createOperations(firestore, definition, mockRegistry);
-    expect(mockLoggerInstance.debug).toHaveBeenCalledWith('createOperations', { firestore, definition });
+    expect(mockLoggerInstance.default).toHaveBeenCalledWith('createOperations', { firestore, definition });
   });
 
   it('calls Abstract.createOperations, getAllOperation, and getOneOperation with correct params', () => {

@@ -39,7 +39,7 @@ export function createDefinition<
   collectionNames: string[],
   libOptions?: Library.Options<V, S, L1, L2, L3, L4, L5>,
 ): Definition<V, S, L1, L2, L3, L4, L5> {
-  logger.debug('createDefinition', { kta, scopes, collectionNames, libOptions });
+  logger.default('createDefinition', { kta, scopes, collectionNames, libOptions });
   const coordinate = createCoordinate(kta, scopes);
   const options = createOptions(libOptions);
 
