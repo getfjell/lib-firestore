@@ -10,12 +10,15 @@ vi.mock('../../../src/contained/ops/all', () => ({
   getAllOperation: vi.fn(),
 }));
 
+const mockLogger = vi.hoisted(() => ({
+  debug: vi.fn(),
+  default: vi.fn(),
+}));
+
 vi.mock('../../../src/logger', () => ({
-  get: vi.fn(() => ({
-    debug: vi.fn(),
-  })),
+  get: vi.fn(() => mockLogger),
   __esModule: true,
-  default: { get: vi.fn(() => ({ debug: vi.fn() })) }
+  default: { get: vi.fn(() => mockLogger) }
 }));
 
 const mockGetAllOperation = vi.mocked(getAllOperation);
@@ -69,8 +72,8 @@ describe('contained/ops/one', () => {
       const oneOperation = getOneOperation(mockFirestore, mockDefinition, mockRegistry);
 
       expect(typeof oneOperation).toBe('function');
-      // getAllOperation is called when the one function is invoked, not during creation
-      // So we only verify that getOneOperation returns a function
+      // Verify that the logger.default was called during creation
+      expect(mockLogger.default).toHaveBeenCalledWith('One', expect.objectContaining({ one: expect.any(Function) }));
     });
 
     it('should return first item when getAllOperation returns items', async () => {
@@ -90,6 +93,8 @@ describe('contained/ops/one', () => {
       expect(mockAllFunction).toHaveBeenCalledWith(itemQuery, []);
       expect(result).toBe(testItems[0]);
       expect(result).toEqual({ name: 'test1', value: 1 });
+      // Verify that the logger.default was called with the operation details
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery, locations: [] });
     });
 
     it('should return null when getAllOperation returns empty array', async () => {
@@ -102,6 +107,8 @@ describe('contained/ops/one', () => {
 
       expect(mockAllFunction).toHaveBeenCalledWith(itemQuery, []);
       expect(result).toBeNull();
+      // Verify that the logger.default was called with the operation details
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery, locations: [] });
     });
 
     it('should pass through complex item queries to getAllOperation', async () => {
@@ -129,6 +136,8 @@ describe('contained/ops/one', () => {
 
       expect(mockAllFunction).toHaveBeenCalledWith(complexItemQuery, []);
       expect(result).toBe(testItems[0]);
+      // Verify that the logger.default was called with the operation details
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: complexItemQuery, locations: [] });
     });
 
     it('should handle default empty location array', async () => {
@@ -142,6 +151,8 @@ describe('contained/ops/one', () => {
 
       expect(mockAllFunction).toHaveBeenCalledWith({}, []);
       expect(result).toBe(testItems[0]);
+      // Verify that the logger.default was called with the operation details
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [] });
     });
 
     it('should propagate errors from getAllOperation', async () => {
@@ -152,6 +163,8 @@ describe('contained/ops/one', () => {
 
       await expect(oneOperation({}, [])).rejects.toThrow('All operation failed');
       expect(mockAllFunction).toHaveBeenCalledWith({}, []);
+      // Verify that the logger.default was called with the operation details
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [] });
     });
 
     it('should return first item even when many items are returned', async () => {
@@ -168,6 +181,8 @@ describe('contained/ops/one', () => {
 
       expect(result).toBe(manyItems[0]);
       expect(result).toEqual({ name: 'test0', value: 0 });
+      // Verify that the logger.default was called with the operation details
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [] });
     });
 
     it('should handle different item types correctly', async () => {
@@ -184,6 +199,8 @@ describe('contained/ops/one', () => {
 
       expect(result).toBe(customItems[0]);
       expect(result).toEqual({ customField: 'value1', data: { nested: true } });
+      // Verify that the logger.default was called with the operation details
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [] });
     });
   });
 });

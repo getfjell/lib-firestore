@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import LibLogger from './logger';
 import { Item, ItemTypeArray } from '@fjell/core';
 import { Coordinate } from '@fjell/registry';
@@ -42,13 +43,13 @@ export const createFirestoreLibraryFromComponents = <
   L4 extends string = never,
   L5 extends string = never
 >(
-    registry: Registry,
-    coordinate: Coordinate<S, L1, L2, L3, L4, L5>,
-    firestore: FirebaseFirestore.Firestore,
-    operations: Library.Operations<V, S, L1, L2, L3, L4, L5>,
-    options: Options<V, S, L1, L2, L3, L4, L5>
-  ): FirestoreLibrary<V, S, L1, L2, L3, L4, L5> => {
-  logger.debug('createFirestoreLibraryFromComponents', { registry, coordinate, firestore, operations, options });
+  registry: Registry,
+  coordinate: Coordinate<S, L1, L2, L3, L4, L5>,
+  firestore: FirebaseFirestore.Firestore,
+  operations: Library.Operations<V, S, L1, L2, L3, L4, L5>,
+  options: Options<V, S, L1, L2, L3, L4, L5>
+): FirestoreLibrary<V, S, L1, L2, L3, L4, L5> => {
+  logger.default('createFirestoreLibraryFromComponents', { registry, coordinate, firestore, operations, options });
 
   return {
     registry,
@@ -71,14 +72,14 @@ export const createFirestoreLibrary = <
   L4 extends string = never,
   L5 extends string = never
 >(
-    kta: ItemTypeArray<S, L1, L2, L3, L4, L5>,
-    collectionNames: string[],
-    firestore: FirebaseFirestore.Firestore,
-    libOptions?: Library.Options<V, S, L1, L2, L3, L4, L5> | null,
-    scopes: string[] | null = [],
-    registry?: Registry
-  ): FirestoreLibrary<V, S, L1, L2, L3, L4, L5> => {
-  logger.debug('createFirestoreLibrary', { kta, collectionNames, firestore, libOptions, scopes, registry });
+  kta: ItemTypeArray<S, L1, L2, L3, L4, L5>,
+  collectionNames: string[],
+  firestore: FirebaseFirestore.Firestore,
+  libOptions?: Library.Options<V, S, L1, L2, L3, L4, L5> | null,
+  scopes: string[] | null = [],
+  registry?: Registry
+): FirestoreLibrary<V, S, L1, L2, L3, L4, L5> => {
+  logger.default('createFirestoreLibrary', { kta, collectionNames, firestore, libOptions, scopes, registry });
 
   // Convert null values to proper defaults
   const actualScopes = scopes || [];

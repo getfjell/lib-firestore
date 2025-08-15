@@ -79,6 +79,7 @@ describe('FirestoreLibraryFactory', () => {
     // Setup logger mock to return an object with debug method
     mockLoggerGet.mockReturnValue({
       debug: mockLoggerDebug,
+      default: mockLoggerDebug,
     });
 
     // Setup default return value for createFirestoreLibraryFromComponents

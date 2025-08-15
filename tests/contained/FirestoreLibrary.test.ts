@@ -4,7 +4,7 @@ import { Coordinate } from '@fjell/registry';
 import { Registry } from '@fjell/lib';
 
 // Mock logger instance
-const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+const mockLoggerInstance = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), default: vi.fn() };
 
 // Mock dependencies
 const mockCreateDefinition = vi.fn();
@@ -114,7 +114,7 @@ describe('contained/FirestoreLibrary', () => {
         mockRegistry
       );
 
-      expect(mockLoggerInstance.debug).toHaveBeenCalledWith('createFirestoreLibrary', {
+      expect(mockLoggerInstance.default).toHaveBeenCalledWith('createFirestoreLibrary', {
         keyTypes: defaultKeyTypes,
         collectionNames: defaultCollectionNames,
         firestore: mockFirestore,

@@ -23,7 +23,7 @@ export const createOperations = <
     registry: Registry,
   ):
   Operations<V, S, L1, L2, L3, L4, L5> => {
-  logger.debug('createOperations', { firestore, definition });
+  logger.default('createOperations', { firestore, definition });
 
   const operations = Abstract.createOperations(firestore, definition, registry);
   return {

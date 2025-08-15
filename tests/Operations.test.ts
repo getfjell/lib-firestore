@@ -46,7 +46,7 @@ vi.mock('../src/ops/find', () => ({
 }));
 vi.mock('../src/logger', () => ({
   default: {
-    get: mockLoggerGet.mockReturnValue({ debug: mockLoggerDebug }),
+    get: mockLoggerGet.mockReturnValue({ debug: mockLoggerDebug, default: mockLoggerDebug }),
   },
 }));
 
