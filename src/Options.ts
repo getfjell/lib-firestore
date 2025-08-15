@@ -28,7 +28,7 @@ export const createOptions = <
   L5 extends string = never
 >(libOptions?: Library.Options<V, S, L1, L2, L3, L4, L5>):
   Options<V, S, L1, L2, L3, L4, L5> => {
-  logger.debug('createOptions', { libOptions });
+  logger.default('createOptions', { libOptions });
   const options = Library.createOptions(libOptions);
   return {
     ...options

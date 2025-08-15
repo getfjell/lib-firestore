@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-firestore",
-  "version": "4.4.29",
+  "version": "4.4.30",
   "type": "module",
   "keywords": [
     "library",
@@ -40,8 +40,10 @@
     "@fjell/lib": "^4.4.35",
     "@fjell/logging": "^4.4.41",
     "@fjell/registry": "^4.4.29",
-    "@google-cloud/firestore": "^7.11.3",
     "deepmerge": "^4.3.1"
+  },
+  "peerDependencies": {
+    "@google-cloud/firestore": "^7.11.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

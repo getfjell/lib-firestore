@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // Mock the dependencies
 vi.mock('../src/logger', () => ({
   default: {
-    get: vi.fn().mockReturnValue({ debug: vi.fn() }),
+    get: vi.fn().mockReturnValue({ debug: vi.fn(), default: vi.fn() }),
   },
 }));
 

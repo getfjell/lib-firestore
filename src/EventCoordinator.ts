@@ -18,7 +18,7 @@ export const createEvents = <
   L5 extends string = never
 >(item: Partial<Item<S, L1, L2, L3, L4, L5>>):
   Partial<Item<S, L1, L2, L3, L4, L5>> => {
-  logger.debug('Creating Events', { item });
+  logger.default('Creating Events', { item });
   const currentDate = new Date();
 
   let events = item.events;
@@ -54,7 +54,7 @@ export const updateEvents = <
   L5 extends string = never
 >(item: Partial<Item<S, L1, L2, L3, L4, L5>>):
   Partial<Item<S, L1, L2, L3, L4, L5>> => {
-  logger.debug('Updating Events', { item });
+  logger.default('Updating Events', { item });
   const currentDate = new Date();
   const events: Evented = {
     updated: { at: currentDate },
