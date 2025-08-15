@@ -26,7 +26,7 @@ export const getOneOperation = <
     itemQuery: ItemQuery,
     locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
   ): Promise<V | null> => {
-    logger.debug('One', { itemQuery, locations });
+    logger.default('One', { itemQuery, locations });
 
     const items = await getAllOperation(firestore, definition, registry)(itemQuery, locations);
     if (items.length > 0) {
@@ -36,7 +36,7 @@ export const getOneOperation = <
     }
   }
 
-  logger.debug('One', { one });
+  logger.default('One', { one });
 
   return one;
 }
