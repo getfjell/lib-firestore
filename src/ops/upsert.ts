@@ -29,14 +29,14 @@ export const getUpsertOperation = <
 
     locations?: LocKeyArray<L1, L2, L3, L4, L5>,
   ): Promise<V> => {
-    logger.debug('upsert', { key, itemProperties, locations });
+    logger.default('upsert', { key, itemProperties, locations });
 
     // Simple upsert implementation: try to get, if not found then create
     try {
       return await operations.get(key);
     } catch {
       // If get fails, create a new item
-      logger.debug('Item not found, creating new item', { key });
+      logger.default('Item not found, creating new item', { key });
       return await operations.create(itemProperties, { key });
     }
   };

@@ -5,9 +5,11 @@ import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 // Mock declarations for logger
 const mockLoggerDebug = vi.fn();
 const mockLoggerError = vi.fn();
+const mockLoggerDefault = vi.fn();
 const mockLoggerGet = vi.fn(() => ({
   debug: mockLoggerDebug,
   error: mockLoggerError,
+  default: mockLoggerDefault,
 }));
 
 // @ts-ignore
@@ -217,7 +219,7 @@ describe('ReferenceFinder', () => {
 
       expect(keys).toEqual([]);
       expect(collections).toEqual([]);
-      expect(mockLoggerDebug).toHaveBeenCalledWith('Adding Reference', expect.anything());
+      expect(mockLoggerDefault).toHaveBeenCalledWith('Adding Reference', expect.anything());
     });
   });
 
