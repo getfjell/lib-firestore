@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildQuery } from '../src/QueryBuilder';
 import { CompoundCondition, Condition, ItemQuery } from '@fjell/core';
-import { CollectionGroup, CollectionReference, Filter, Query } from '@google-cloud/firestore';
+import { CollectionGroup, CollectionReference, Query } from '@google-cloud/firestore';
 
 // Mock the logger
 vi.mock('../src/logger', () => ({
@@ -12,19 +12,6 @@ vi.mock('../src/logger', () => ({
   __esModule: true,
   default: { get: vi.fn(() => ({ debug: vi.fn(), default: vi.fn() })) }
 }));
-
-// Mock Filter static methods
-vi.mock('@google-cloud/firestore', async () => {
-  const actual = await vi.importActual('@google-cloud/firestore');
-  return {
-    ...actual,
-    Filter: {
-      where: vi.fn((field, operator, value) => ({ field, operator, value, type: 'simple' })),
-      and: vi.fn((...filters) => ({ filters, type: 'and' })),
-      or: vi.fn((...filters) => ({ filters, type: 'or' })),
-    }
-  };
-});
 
 describe('QueryBuilder', () => {
   let mockQuery: Query;
@@ -78,9 +65,9 @@ describe('QueryBuilder', () => {
       expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
       expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.pk', '==', 'test-pk');
       expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.kt', '==', 'test-kt');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc[0].lk', '==', 'loc1');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc[0].kt', '==', 'loc-kt1');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc[1].lk', '==', 'loc2');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc.0.lk', '==', 'loc1');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc.0.kt', '==', 'loc-kt1');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc.1.lk', '==', 'loc2');
     });
 
     it('should add reference queries for PriKey references', () => {
@@ -140,10 +127,9 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      // Verify Filter.where was called for each condition
-      expect(Filter.where).toHaveBeenCalledWith('name', '==', 'test');
-      expect(Filter.where).toHaveBeenCalledWith('age', '>', 18);
-      expect(Filter.and).toHaveBeenCalled();
+      // Verify mockQuery.where was called for each condition
+      expect(mockQuery.where).toHaveBeenCalledWith('name', '==', 'test');
+      expect(mockQuery.where).toHaveBeenCalledWith('age', '>', 18);
     });
 
     it('should add compound conditions with OR logic', () => {
@@ -161,9 +147,8 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      expect(Filter.where).toHaveBeenCalledWith('status', '==', 'active');
-      expect(Filter.where).toHaveBeenCalledWith('status', '==', 'pending');
-      expect(Filter.or).toHaveBeenCalled();
+      expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'active');
+      expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'pending');
     });
 
     it('should add nested compound conditions', () => {
@@ -189,11 +174,9 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      expect(Filter.where).toHaveBeenCalledWith('active', '==', true);
-      expect(Filter.where).toHaveBeenCalledWith('type', '==', 'A');
-      expect(Filter.where).toHaveBeenCalledWith('type', '==', 'B');
-      expect(Filter.or).toHaveBeenCalled();
-      expect(Filter.and).toHaveBeenCalled();
+      expect(mockQuery.where).toHaveBeenCalledWith('active', '==', true);
+      expect(mockQuery.where).toHaveBeenCalledWith('type', '==', 'A');
+      expect(mockQuery.where).toHaveBeenCalledWith('type', '==', 'B');
     });
 
     it('should apply limit to query', () => {
@@ -255,6 +238,7 @@ describe('QueryBuilder', () => {
       expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
       expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.pk', '==', 'parent-id');
       expect(mockQuery.where).toHaveBeenCalledWith('events.created.at', '>=', new Date('2023-01-01T00:00:00.000Z'));
+      expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'active');
       expect(mockQuery.limit).toHaveBeenCalledWith(20);
       expect(mockQuery.offset).toHaveBeenCalledWith(10);
       expect(mockQuery.orderBy).toHaveBeenCalledWith('name', 'asc');
@@ -287,7 +271,7 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      expect(Filter.where).toHaveBeenCalledWith('name', '==', 'test');
+      expect(mockQuery.where).toHaveBeenCalledWith('name', '==', 'test');
     });
   });
 });

@@ -21,7 +21,7 @@ export const getFindOperation = <
   ) => {
   const { options } = definition;
 
-  logger.debug('getFindOperation', { definition, operations });
+  logger.default('getFindOperation', { definition, operations });
 
   const find = async (
     finder: string,

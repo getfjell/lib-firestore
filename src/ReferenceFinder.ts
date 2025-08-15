@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { ComKey, generateKeyArray, isPriKey, LocKeyArray, PriKey } from "@fjell/core";
 
 import { LocKey } from "@fjell/core";
@@ -68,11 +69,11 @@ export const addReference = <S extends string,
   L4 extends string = never,
   L5 extends string = never
 >(
-    base: FirebaseFirestore.Firestore | FirebaseFirestore.DocumentReference,
-    keys: Array<PriKey<S> | LocKey<L1 | L2 | L3 | L4 | L5>>,
-    collections: string[],
-  ): FirebaseFirestore.DocumentReference => {
-  logger.debug('Adding Reference', { base, keys, collections });
+  base: FirebaseFirestore.Firestore | FirebaseFirestore.DocumentReference,
+  keys: Array<PriKey<S> | LocKey<L1 | L2 | L3 | L4 | L5>>,
+  collections: string[],
+): FirebaseFirestore.DocumentReference => {
+  logger.default('Adding Reference', { base, keys, collections });
 
   if (keys.length === 0) {
     // If you've recursively consumed all of the keys, return the base.
@@ -178,12 +179,12 @@ export const getReference =
     L3 extends string = never,
     L4 extends string = never,
     L5 extends string = never>(
-    key: ComKey<S, L1, L2, L3, L4, L5> | PriKey<S> | LocKeyArray<L1, L2, L3, L4, L5> | [],
-    collectionNames: string[],
-    firestore: FirebaseFirestore.Firestore,
-  ):
+      key: ComKey<S, L1, L2, L3, L4, L5> | PriKey<S> | LocKeyArray<L1, L2, L3, L4, L5> | [],
+      collectionNames: string[],
+      firestore: FirebaseFirestore.Firestore,
+    ):
     FirebaseFirestore.Firestore | FirebaseFirestore.CollectionReference | FirebaseFirestore.DocumentReference => {
-    logger.debug('Getting Reference', { key, collectionNames });
+    logger.default('Getting Reference', { key, collectionNames });
 
     const collections: string[] = [...collectionNames];
     let reference: FirebaseFirestore.Firestore |
@@ -199,4 +200,3 @@ export const getReference =
 
     return reference;
   };
-

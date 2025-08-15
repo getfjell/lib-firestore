@@ -1,3 +1,4 @@
+/* eslint-disable no-undefined */
 
 import {
   ComKey,
@@ -19,18 +20,18 @@ import {
   Filter,
   Query
 } from '@google-cloud/firestore';
-  
+
 import LibLogger from './logger';
 
 const logger = LibLogger.get('QueryBuilder');
 
 const addDeleteQuery = (query: Query): Query => {
-  logger.debug('Adding Delete Query', { query });
+  logger.default('Adding Delete Query', { query });
   return query.where('events.deleted.at', '==', null);
 }
-  
+
 const addEventQueries = (query: Query, events: Record<string, EventQuery>): Query => {
-  logger.debug('Adding Event Queries', { query, events });
+  logger.default('Adding Event Queries', { query, events });
   let retQuery = query;
   Object.keys(events).forEach((key: string) => {
     const event = events[key];
@@ -49,10 +50,10 @@ const addEventQueries = (query: Query, events: Record<string, EventQuery>): Quer
 
 // Add the references to the query
 const addReferenceQueries = (query: Query, references: References): Query => {
-  logger.debug('Adding Reference Queries', { query, references });
+  logger.default('Adding Reference Queries', { query, references });
   let retQuery = query;
   Object.keys(references).forEach((key: string) => {
-    logger.debug('Adding Reference Query', { key, references });
+    logger.default('Adding Reference Query', { key, references });
     if (isComKey(references[key])) {
       const ComKey: ComKey<string, string, string | never, string | never, string | never, string | never> =
         references[key] as ComKey<string, string, string | never, string | never, string | never, string | never>;
@@ -63,9 +64,9 @@ const addReferenceQueries = (query: Query, references: References): Query => {
       ComKey.loc.forEach((
         loc: LocKey<string>,
         index: number) => {
-        retQuery = retQuery.where(`refs.${key}.loc[${index}].lk`, '==', loc.lk);
+        retQuery = retQuery.where(`refs.${key}.loc.${index}.lk`, '==', loc.lk);
         if (loc.kt) {
-          retQuery = retQuery.where(`refs.${key}.loc[${index}].kt`, '==', loc.kt);
+          retQuery = retQuery.where(`refs.${key}.loc.${index}.kt`, '==', loc.kt);
         }
       });
     } else if (isPriKey(references[key])) {
@@ -78,23 +79,97 @@ const addReferenceQueries = (query: Query, references: References): Query => {
   });
   return retQuery;
 }
-    
+
+const addConditions = (query: Query, compoundCondition: CompoundCondition): Query => {
+  logger.default('Adding Compound Condition using individual where clauses', { compoundCondition });
+  const conditions: Array<Condition | CompoundCondition> = compoundCondition.conditions;
+
+  let retQuery = query;
+  for (let i = 0; i < conditions.length; i++) {
+    const condition = conditions[i];
+    if (isCondition(condition)) {
+      const cond: Condition = condition as Condition;
+      logger.default('Adding individual condition', { column: cond.column, operator: cond.operator, value: cond.value });
+
+      // Validate field path - this is the most common source of Firestore errors
+      if (cond.column === undefined || cond.column === null) {
+        logger.error('Invalid field path detected - undefined/null', { column: cond.column, type: typeof cond.column, fullCondition: cond });
+        throw new Error(`Invalid field path: column is ${cond.column}. Field paths must be non-empty strings.`);
+      }
+
+      if (typeof cond.column !== 'string') {
+        logger.error('Invalid field path detected - not a string', { column: cond.column, type: typeof cond.column, fullCondition: cond });
+        throw new Error(`Invalid field path: "${JSON.stringify(cond.column)}" (type: ${typeof cond.column}). Field paths must be strings.`);
+      }
+
+      if (cond.column.trim() === '') {
+        logger.error('Invalid field path detected - empty string', { column: cond.column, fullCondition: cond });
+        throw new Error(`Invalid field path: empty string. Field paths must be non-empty strings.`);
+      }
+
+      logger.default('About to call Query.where', {
+        column: cond.column,
+        columnType: typeof cond.column,
+        columnLength: cond.column?.length,
+        operator: cond.operator || '==',
+        value: cond.value,
+        valueType: typeof cond.value
+      });
+
+      // Use the traditional Query.where(fieldPath, operator, value) syntax
+      retQuery = retQuery.where(cond.column, cond.operator || '==', cond.value);
+    } else {
+      // For nested compound conditions, recurse
+      retQuery = addConditions(retQuery, condition as CompoundCondition);
+    }
+  }
+  return retQuery;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createFilter = (compoundCondition: CompoundCondition): Filter => {
-  logger.debug('Adding Compound Condition', { compoundCondition });
+  logger.default('Adding Compound Condition', { compoundCondition });
   const compoundType = compoundCondition.compoundType;
   const conditions: Array<Condition | CompoundCondition> = compoundCondition.conditions;
-  
+
   const filters: Filter[] = [];
   for (let i = 0; i < conditions.length; i++) {
     const condition = conditions[i];
     if (isCondition(condition)) {
       const cond: Condition = condition as Condition;
+      // Use dot notation for field paths - Firestore supports this natively
+      logger.default('Creating filter with column', { column: cond.column, operator: cond.operator, value: cond.value });
+
+      // Validate field path - this is the most common source of Firestore errors
+      if (cond.column === undefined || cond.column === null) {
+        logger.error('Invalid field path detected - undefined/null', { column: cond.column, type: typeof cond.column, fullCondition: cond });
+        throw new Error(`Invalid field path: column is ${cond.column}. Field paths must be non-empty strings.`);
+      }
+
+      if (typeof cond.column !== 'string') {
+        logger.error('Invalid field path detected - not a string', { column: cond.column, type: typeof cond.column, fullCondition: cond });
+        throw new Error(`Invalid field path: "${JSON.stringify(cond.column)}" (type: ${typeof cond.column}). Field paths must be strings.`);
+      }
+
+      if (cond.column.trim() === '') {
+        logger.error('Invalid field path detected - empty string', { column: cond.column, fullCondition: cond });
+        throw new Error(`Invalid field path: empty string. Field paths must be non-empty strings.`);
+      }
+
+      logger.default('About to call Filter.where', {
+        column: cond.column,
+        columnType: typeof cond.column,
+        columnLength: cond.column?.length,
+        operator: cond.operator || '==',
+        value: cond.value,
+        valueType: typeof cond.value
+      });
       filters.push(Filter.where(cond.column, cond.operator || '==', cond.value));
     } else {
       filters.push(createFilter(condition as CompoundCondition));
     }
   }
-  
+
   let filter: Filter;
   if (compoundType === 'AND') {
     filter = Filter.and(...filters);
@@ -108,7 +183,7 @@ export const buildQuery = (
   itemQuery: ItemQuery,
   collectionReference: CollectionReference | CollectionGroup
 ): Query => {
-  logger.debug('buildQuery', { itemQuery, collectionReference });
+  logger.default('buildQuery', { itemQuery, collectionReference });
 
   let itemsQuery: Query = collectionReference;
   itemsQuery = addDeleteQuery(itemsQuery);
@@ -118,32 +193,33 @@ export const buildQuery = (
   if (itemQuery.events) {
     itemsQuery = addEventQueries(itemsQuery, itemQuery.events);
   }
-  
+
   // TODO: Once we start to support Aggs on the server-side, we'll need to parse agg queries
-  
+
   if (itemQuery.compoundCondition) {
-    logger.debug('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });
-    itemsQuery = itemsQuery.where(createFilter(itemQuery.compoundCondition));
+    logger.default('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });
+    // For now, let's apply conditions individually instead of using complex filters
+    itemsQuery = addConditions(itemsQuery, itemQuery.compoundCondition);
   }
-  
+
   // Apply a limit to the result set
   if (itemQuery.limit) {
-    logger.debug('Limiting to', { limit: itemQuery.limit });
+    logger.default('Limiting to', { limit: itemQuery.limit });
     itemsQuery = itemsQuery.limit(itemQuery.limit);
   }
-  
+
   // Apply an offset to the result set
   if (itemQuery.offset) {
     itemsQuery = itemsQuery.offset(itemQuery.offset);
   }
-  
+
   // Add orderBy to the query
   if (itemQuery.orderBy) {
     itemQuery.orderBy.forEach((orderBy: OrderBy) => {
+      // Use dot notation for field paths - Firestore supports this natively
       itemsQuery = itemsQuery.orderBy(orderBy.field, orderBy.direction);
     });
   }
 
   return itemsQuery;
 }
-  

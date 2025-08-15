@@ -56,7 +56,7 @@ export const addKey = <
   L4 extends string = never,
   L5 extends string = never
 >(item: Partial<Item<S, L1, L2, L3, L4, L5>>, doc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>, keyTypes: AllItemTypeArrays<S, L1, L2, L3, L4, L5>): void => {
-  logger.debug('Adding Key', { item });
+  logger.default('Adding Key', { item });
   const key = {};
   if (Array.isArray(keyTypes) && keyTypes.length > 1) {
     const type = [...keyTypes];
