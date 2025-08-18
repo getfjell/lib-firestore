@@ -14,7 +14,7 @@ export const createCoordinate = <
   L4 extends string = never,
   L5 extends string = never
 >(kta: ItemTypeArray<S, L1, L2, L3, L4, L5>, scopes?: string[]): Coordinate<S, L1, L2, L3, L4, L5> => {
-  logger.debug('createCoordinate', { kta, scopes });
+  logger.default('createCoordinate', { kta, scopes });
   const coordinate = createBaseCoordinate(kta, [SCOPE_FIRESTORE, ...(scopes || [])]);
   return coordinate;
 };
