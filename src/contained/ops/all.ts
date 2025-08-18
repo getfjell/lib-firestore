@@ -49,7 +49,7 @@ export const getAllOperation = <
     locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
   ): Promise<V[]> => {
 
-    logger.debug('All', { itemQuery, locations });
+    logger.default('All', { itemQuery, locations });
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
     let colRef: CollectionReference | CollectionGroup;
