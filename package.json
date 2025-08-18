@@ -36,10 +36,10 @@
     "docs:test": "cd docs && npm run test"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.37",
-    "@fjell/lib": "^4.4.36",
-    "@fjell/logging": "^4.4.43",
-    "@fjell/registry": "^4.4.31",
+    "@fjell/core": "^4.4.38",
+    "@fjell/lib": "^4.4.37",
+    "@fjell/logging": "^4.4.44",
+    "@fjell/registry": "^4.4.32",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.32.0",
-    "@fjell/eslint-config": "^1.1.20",
+    "@fjell/eslint-config": "^1.1.21",
     "@swc/core": "^1.13.2",
     "@tsconfig/recommended": "^1.0.10",
     "@types/node": "^24.1.0",
