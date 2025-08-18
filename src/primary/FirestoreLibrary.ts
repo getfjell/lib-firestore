@@ -26,7 +26,7 @@ export function createFirestoreLibrary<
   registry: Registry
 ): FirestoreLibrary<V, S> {
 
-  logger.debug('createFirestoreLibrary', { keyType, collectionName, libOptions, scopes });
+  logger.default('createFirestoreLibrary', { keyType, collectionName, libOptions, scopes });
 
   const definition = createDefinition([keyType], scopes || [], [collectionName], libOptions || {});
   const operations = createOperations(firestore, definition, registry);
