@@ -9,6 +9,15 @@ vi.mock('../../src/logger', () => ({
   default: {
     get: vi.fn().mockReturnValue({
       debug: vi.fn(),
+      default: vi.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
+      warning: vi.fn(),
+      critical: vi.fn(),
+      emergency: vi.fn(),
+      alert: vi.fn(),
+      notice: vi.fn(),
+      trace: vi.fn(),
     }),
   },
 }));
