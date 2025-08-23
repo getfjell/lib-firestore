@@ -37,9 +37,9 @@
   },
   "dependencies": {
     "@fjell/core": "^4.4.38",
-    "@fjell/lib": "^4.4.38",
+    "@fjell/lib": "^4.4.39",
     "@fjell/logging": "^4.4.44",
-    "@fjell/registry": "^4.4.32",
+    "@fjell/registry": "^4.4.33",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
