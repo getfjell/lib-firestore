@@ -67,6 +67,13 @@ describe('createOperations', () => {
       name: 'testDefinition',
       collectionName: 'testCollection',
       fields: {},
+      options: {
+        finders: {},
+        actions: {},
+        facets: {},
+        allActions: {},
+        allFacets: {}
+      },
       // Add other Definition properties if needed
     } as unknown as Definition<Item<string>, string>; // Cast for simplicity
   });
