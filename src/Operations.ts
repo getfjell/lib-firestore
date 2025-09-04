@@ -42,5 +42,15 @@ export const createOperations = <
   operations.find = getFindOperation<V, S, L1, L2, L3, L4, L5>(definition, operations, registry);
   operations.upsert = getUpsertOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry, operations);
 
+  operations.allFacet = async (): Promise<any> => { };
+  operations.allAction = async (): Promise<any> => { };
+  operations.action = async (): Promise<any> => { };
+  operations.facet = async (): Promise<any> => { };
+  operations.finders = { ...(definition.options.finders || {}) };
+  operations.actions = { ...(definition.options.actions || {}) };
+  operations.facets = { ...(definition.options.facets || {}) };
+  operations.allActions = { ...(definition.options.allActions || {}) };
+  operations.allFacets = { ...(definition.options.allFacets || {}) };
+
   return operations;
 }
