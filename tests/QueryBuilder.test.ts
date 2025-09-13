@@ -127,9 +127,23 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      // Verify mockQuery.where was called for each condition
-      expect(mockQuery.where).toHaveBeenCalledWith('name', '==', 'test');
-      expect(mockQuery.where).toHaveBeenCalledWith('age', '>', 18);
+      // Verify mockQuery.where was called with a CompositeFilter for AND logic
+      expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
+      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
+        filters: expect.arrayContaining([
+          expect.objectContaining({
+            field: 'name',
+            operator: '==',
+            value: 'test'
+          }),
+          expect.objectContaining({
+            field: 'age',
+            operator: '>',
+            value: 18
+          })
+        ]),
+        operator: 'AND'
+      }));
     });
 
     it('should add compound conditions with OR logic', () => {
@@ -147,8 +161,23 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'active');
-      expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'pending');
+      // Verify mockQuery.where was called with a CompositeFilter for OR logic
+      expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
+      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
+        filters: expect.arrayContaining([
+          expect.objectContaining({
+            field: 'status',
+            operator: '==',
+            value: 'active'
+          }),
+          expect.objectContaining({
+            field: 'status',
+            operator: '==',
+            value: 'pending'
+          })
+        ]),
+        operator: 'OR'
+      }));
     });
 
     it('should add nested compound conditions', () => {
@@ -174,9 +203,33 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      expect(mockQuery.where).toHaveBeenCalledWith('active', '==', true);
-      expect(mockQuery.where).toHaveBeenCalledWith('type', '==', 'A');
-      expect(mockQuery.where).toHaveBeenCalledWith('type', '==', 'B');
+      // Verify mockQuery.where was called with a CompositeFilter for nested conditions
+      expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
+      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
+        filters: expect.arrayContaining([
+          expect.objectContaining({
+            field: 'active',
+            operator: '==',
+            value: true
+          }),
+          expect.objectContaining({
+            filters: expect.arrayContaining([
+              expect.objectContaining({
+                field: 'type',
+                operator: '==',
+                value: 'A'
+              }),
+              expect.objectContaining({
+                field: 'type',
+                operator: '==',
+                value: 'B'
+              })
+            ]),
+            operator: 'OR'
+          })
+        ]),
+        operator: 'AND'
+      }));
     });
 
     it('should apply limit to query', () => {
@@ -237,8 +290,18 @@ describe('QueryBuilder', () => {
       // Verify all types of filters were applied
       expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
       expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.pk', '==', 'parent-id');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.kt', '==', 'parent');
       expect(mockQuery.where).toHaveBeenCalledWith('events.created.at', '>=', new Date('2023-01-01T00:00:00.000Z'));
-      expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'active');
+      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
+        filters: expect.arrayContaining([
+          expect.objectContaining({
+            field: 'status',
+            operator: '==',
+            value: 'active'
+          })
+        ]),
+        operator: 'AND'
+      }));
       expect(mockQuery.limit).toHaveBeenCalledWith(20);
       expect(mockQuery.offset).toHaveBeenCalledWith(10);
       expect(mockQuery.orderBy).toHaveBeenCalledWith('name', 'asc');
@@ -271,7 +334,55 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      expect(mockQuery.where).toHaveBeenCalledWith('name', '==', 'test');
+      // Verify mockQuery.where was called with a CompositeFilter for the condition
+      expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
+      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
+        filters: expect.arrayContaining([
+          expect.objectContaining({
+            field: 'name',
+            operator: '==',
+            value: 'test'
+          })
+        ]),
+        operator: 'AND'
+      }));
+    });
+
+    it('should handle product type OR query (Wagner Skis scenario)', () => {
+      // This test verifies the specific bug fix for OR compound queries
+      // that was causing 0 results instead of returning products matching any product type
+      const compoundCondition: CompoundCondition = {
+        compoundType: 'OR',
+        conditions: [
+          { column: 'product_type', operator: '==', value: 'Wood Veneer' } as Condition,
+          { column: 'product_type', operator: '==', value: 'Stock Graphics' } as Condition
+        ]
+      };
+
+      const itemQuery: ItemQuery = {
+        compoundCondition
+      };
+
+      buildQuery(itemQuery, mockCollectionRef);
+
+      // Verify that the OR query uses proper Filter.or() implementation
+      // instead of multiple individual .where() calls that would create AND conditions
+      expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
+      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
+        filters: expect.arrayContaining([
+          expect.objectContaining({
+            field: 'product_type',
+            operator: '==',
+            value: 'Wood Veneer'
+          }),
+          expect.objectContaining({
+            field: 'product_type',
+            operator: '==',
+            value: 'Stock Graphics'
+          })
+        ]),
+        operator: 'OR'
+      }));
     });
   });
 });
