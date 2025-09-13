@@ -79,54 +79,7 @@ const addReferenceQueries = (query: Query, references: References): Query => {
   });
   return retQuery;
 }
-
-const addConditions = (query: Query, compoundCondition: CompoundCondition): Query => {
-  logger.default('Adding Compound Condition using individual where clauses', { compoundCondition });
-  const conditions: Array<Condition | CompoundCondition> = compoundCondition.conditions;
-
-  let retQuery = query;
-  for (let i = 0; i < conditions.length; i++) {
-    const condition = conditions[i];
-    if (isCondition(condition)) {
-      const cond: Condition = condition as Condition;
-      logger.default('Adding individual condition', { column: cond.column, operator: cond.operator, value: cond.value });
-
-      // Validate field path - this is the most common source of Firestore errors
-      if (cond.column === undefined || cond.column === null) {
-        logger.error('Invalid field path detected - undefined/null', { column: cond.column, type: typeof cond.column, fullCondition: cond });
-        throw new Error(`Invalid field path: column is ${cond.column}. Field paths must be non-empty strings.`);
-      }
-
-      if (typeof cond.column !== 'string') {
-        logger.error('Invalid field path detected - not a string', { column: cond.column, type: typeof cond.column, fullCondition: cond });
-        throw new Error(`Invalid field path: "${JSON.stringify(cond.column)}" (type: ${typeof cond.column}). Field paths must be strings.`);
-      }
-
-      if (cond.column.trim() === '') {
-        logger.error('Invalid field path detected - empty string', { column: cond.column, fullCondition: cond });
-        throw new Error(`Invalid field path: empty string. Field paths must be non-empty strings.`);
-      }
-
-      logger.default('About to call Query.where', {
-        column: cond.column,
-        columnType: typeof cond.column,
-        columnLength: cond.column?.length,
-        operator: cond.operator || '==',
-        value: cond.value,
-        valueType: typeof cond.value
-      });
-
-      // Use the traditional Query.where(fieldPath, operator, value) syntax
-      retQuery = retQuery.where(cond.column, cond.operator || '==', cond.value);
-    } else {
-      // For nested compound conditions, recurse
-      retQuery = addConditions(retQuery, condition as CompoundCondition);
-    }
-  }
-  return retQuery;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const createFilter = (compoundCondition: CompoundCondition): Filter => {
   logger.default('Adding Compound Condition', { compoundCondition });
   const compoundType = compoundCondition.compoundType;
@@ -198,8 +151,9 @@ export const buildQuery = (
 
   if (itemQuery.compoundCondition) {
     logger.default('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });
-    // For now, let's apply conditions individually instead of using complex filters
-    itemsQuery = addConditions(itemsQuery, itemQuery.compoundCondition);
+    // Use proper Filter.or() and Filter.and() implementation for compound conditions
+    const filter = createFilter(itemQuery.compoundCondition);
+    itemsQuery = itemsQuery.where(filter);
   }
 
   // Apply a limit to the result set
