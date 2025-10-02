@@ -1,4 +1,3 @@
-/* eslint-disable no-undefined */
 
 let mockAddKeyFn: any;
 vi.mock('../src/KeyMaster', () => ({

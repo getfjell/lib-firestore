@@ -1,4 +1,4 @@
-/* eslint-disable no-undefined */
+ 
 import { addKey, removeKey } from '../src/KeyMaster';
 import { Item } from '@fjell/core';
 import { describe, expect, it } from 'vitest';

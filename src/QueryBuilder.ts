@@ -153,7 +153,8 @@ export const buildQuery = (
     logger.default('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });
     // Use proper Filter.or() and Filter.and() implementation for compound conditions
     const filter = createFilter(itemQuery.compoundCondition);
-    itemsQuery = itemsQuery.where(filter);
+    // Pass the filter directly as a single argument to where()
+    itemsQuery = (itemsQuery as any).where(filter);
   }
 
   // Apply a limit to the result set
