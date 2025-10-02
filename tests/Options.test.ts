@@ -53,7 +53,7 @@ describe('createOptions', () => {
 
     expect(mockLibCreateOptions).toHaveBeenCalledTimes(1);
     // @ts-ignore
-    // eslint-disable-next-line no-undefined
+     
     expect(mockLibCreateOptions).toHaveBeenCalledWith(undefined);
     expect(result).toEqual(expectedOptionsOutput);
   });
