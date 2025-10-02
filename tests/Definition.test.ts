@@ -1,4 +1,4 @@
-/* eslint-disable no-undefined */
+ 
 import { ItemTypeArray } from '@fjell/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
