@@ -80,36 +80,41 @@ const addReferenceQueries = (query: Query, references: References): Query => {
   return retQuery;
 }
  
-const createFilter = (compoundCondition: CompoundCondition): Filter => {
-  logger.default('Adding Compound Condition', { compoundCondition });
-  const compoundType = compoundCondition.compoundType;
+const applyAndConditions = (query: Query, compoundCondition: CompoundCondition): Query => {
+  logger.default('Applying AND conditions', { compoundCondition });
   const conditions: Array<Condition | CompoundCondition> = compoundCondition.conditions;
-
-  const filters: Filter[] = [];
+  
+  let resultQuery = query;
   for (let i = 0; i < conditions.length; i++) {
     const condition = conditions[i];
     if (isCondition(condition)) {
       const cond: Condition = condition as Condition;
-      // Use dot notation for field paths - Firestore supports this natively
-      logger.default('Creating filter with column', { column: cond.column, operator: cond.operator, value: cond.value });
+      
+      logger.default('Applying condition', { 
+        column: cond.column, 
+        operator: cond.operator, 
+        value: cond.value,
+        conditionKeys: Object.keys(cond),
+        fullCondition: JSON.stringify(cond)
+      });
 
       // Validate field path - this is the most common source of Firestore errors
       if (cond.column === undefined || cond.column === null) {
-        logger.error('Invalid field path detected - undefined/null', { column: cond.column, type: typeof cond.column, fullCondition: cond });
+        logger.default('Invalid field path detected - undefined/null', { column: cond.column, type: typeof cond.column, fullCondition: cond });
         throw new Error(`Invalid field path: column is ${cond.column}. Field paths must be non-empty strings.`);
       }
 
       if (typeof cond.column !== 'string') {
-        logger.error('Invalid field path detected - not a string', { column: cond.column, type: typeof cond.column, fullCondition: cond });
+        logger.default('Invalid field path detected - not a string', { column: cond.column, type: typeof cond.column, fullCondition: cond });
         throw new Error(`Invalid field path: "${JSON.stringify(cond.column)}" (type: ${typeof cond.column}). Field paths must be strings.`);
       }
 
       if (cond.column.trim() === '') {
-        logger.error('Invalid field path detected - empty string', { column: cond.column, fullCondition: cond });
+        logger.default('Invalid field path detected - empty string', { column: cond.column, fullCondition: cond });
         throw new Error(`Invalid field path: empty string. Field paths must be non-empty strings.`);
       }
 
-      logger.default('About to call Filter.where', {
+      logger.default('Applying where clause', {
         column: cond.column,
         columnType: typeof cond.column,
         columnLength: cond.column?.length,
@@ -117,19 +122,20 @@ const createFilter = (compoundCondition: CompoundCondition): Filter => {
         value: cond.value,
         valueType: typeof cond.value
       });
-      filters.push(Filter.where(cond.column, cond.operator || '==', cond.value));
+      
+      // Apply the condition using the traditional three-argument form
+      resultQuery = resultQuery.where(cond.column, cond.operator || '==', cond.value);
     } else {
-      filters.push(createFilter(condition as CompoundCondition));
+      // Nested compound conditions
+      if ((condition as CompoundCondition).compoundType === 'AND') {
+        resultQuery = applyAndConditions(resultQuery, condition as CompoundCondition);
+      } else {
+        throw new Error('OR conditions within AND are not supported in Firestore v7');
+      }
     }
   }
-
-  let filter: Filter;
-  if (compoundType === 'AND') {
-    filter = Filter.and(...filters);
-  } else {
-    filter = Filter.or(...filters);
-  }
-  return filter;
+  
+  return resultQuery;
 }
 
 export const buildQuery = (
@@ -151,10 +157,15 @@ export const buildQuery = (
 
   if (itemQuery.compoundCondition) {
     logger.default('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });
-    // Use proper Filter.or() and Filter.and() implementation for compound conditions
-    const filter = createFilter(itemQuery.compoundCondition);
-    // Pass the filter directly as a single argument to where()
-    itemsQuery = (itemsQuery as any).where(filter);
+    // For v7 compatibility, we need to apply conditions differently
+    if (itemQuery.compoundCondition.compoundType === 'AND') {
+      // AND conditions can be applied sequentially
+      itemsQuery = applyAndConditions(itemsQuery, itemQuery.compoundCondition);
+    } else {
+      // OR conditions are not supported in Firestore v7 without composite indexes
+      logger.default('OR conditions are not directly supported in Firestore v7');
+      throw new Error('OR conditions require Firestore SDK v10+ or composite indexes. Consider upgrading @google-cloud/firestore to v10.1.0 or higher.');
+    }
   }
 
   // Apply a limit to the result set
