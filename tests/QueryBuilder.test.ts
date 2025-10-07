@@ -127,23 +127,10 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      // Verify mockQuery.where was called with a CompositeFilter for AND logic
+      // Verify mockQuery.where was called with individual conditions for AND logic
       expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
-      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
-        filters: expect.arrayContaining([
-          expect.objectContaining({
-            field: 'name',
-            operator: '==',
-            value: 'test'
-          }),
-          expect.objectContaining({
-            field: 'age',
-            operator: '>',
-            value: 18
-          })
-        ]),
-        operator: 'AND'
-      }));
+      expect(mockQuery.where).toHaveBeenCalledWith('name', '==', 'test');
+      expect(mockQuery.where).toHaveBeenCalledWith('age', '>', 18);
     });
 
     it('should add compound conditions with OR logic', () => {
@@ -159,25 +146,10 @@ describe('QueryBuilder', () => {
         compoundCondition
       };
 
-      buildQuery(itemQuery, mockCollectionRef);
-
-      // Verify mockQuery.where was called with a CompositeFilter for OR logic
-      expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
-      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
-        filters: expect.arrayContaining([
-          expect.objectContaining({
-            field: 'status',
-            operator: '==',
-            value: 'active'
-          }),
-          expect.objectContaining({
-            field: 'status',
-            operator: '==',
-            value: 'pending'
-          })
-        ]),
-        operator: 'OR'
-      }));
+      // OR conditions should throw an error in Firestore v7
+      expect(() => {
+        buildQuery(itemQuery, mockCollectionRef);
+      }).toThrow('OR conditions require Firestore SDK v10+ or composite indexes. Consider upgrading @google-cloud/firestore to v10.1.0 or higher.');
     });
 
     it('should add nested compound conditions', () => {
@@ -201,35 +173,10 @@ describe('QueryBuilder', () => {
         compoundCondition
       };
 
-      buildQuery(itemQuery, mockCollectionRef);
-
-      // Verify mockQuery.where was called with a CompositeFilter for nested conditions
-      expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
-      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
-        filters: expect.arrayContaining([
-          expect.objectContaining({
-            field: 'active',
-            operator: '==',
-            value: true
-          }),
-          expect.objectContaining({
-            filters: expect.arrayContaining([
-              expect.objectContaining({
-                field: 'type',
-                operator: '==',
-                value: 'A'
-              }),
-              expect.objectContaining({
-                field: 'type',
-                operator: '==',
-                value: 'B'
-              })
-            ]),
-            operator: 'OR'
-          })
-        ]),
-        operator: 'AND'
-      }));
+      // Nested OR conditions should throw an error in Firestore v7
+      expect(() => {
+        buildQuery(itemQuery, mockCollectionRef);
+      }).toThrow('OR conditions within AND are not supported in Firestore v7');
     });
 
     it('should apply limit to query', () => {
@@ -292,16 +239,7 @@ describe('QueryBuilder', () => {
       expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.pk', '==', 'parent-id');
       expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.kt', '==', 'parent');
       expect(mockQuery.where).toHaveBeenCalledWith('events.created.at', '>=', new Date('2023-01-01T00:00:00.000Z'));
-      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
-        filters: expect.arrayContaining([
-          expect.objectContaining({
-            field: 'status',
-            operator: '==',
-            value: 'active'
-          })
-        ]),
-        operator: 'AND'
-      }));
+      expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'active');
       expect(mockQuery.limit).toHaveBeenCalledWith(20);
       expect(mockQuery.offset).toHaveBeenCalledWith(10);
       expect(mockQuery.orderBy).toHaveBeenCalledWith('name', 'asc');
@@ -334,23 +272,13 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      // Verify mockQuery.where was called with a CompositeFilter for the condition
+      // Verify mockQuery.where was called with individual condition
       expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
-      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
-        filters: expect.arrayContaining([
-          expect.objectContaining({
-            field: 'name',
-            operator: '==',
-            value: 'test'
-          })
-        ]),
-        operator: 'AND'
-      }));
+      expect(mockQuery.where).toHaveBeenCalledWith('name', '==', 'test');
     });
 
     it('should handle product type OR query (Wagner Skis scenario)', () => {
-      // This test verifies the specific bug fix for OR compound queries
-      // that was causing 0 results instead of returning products matching any product type
+      // This test verifies that OR compound queries throw an error in Firestore v7
       const compoundCondition: CompoundCondition = {
         compoundType: 'OR',
         conditions: [
@@ -363,26 +291,10 @@ describe('QueryBuilder', () => {
         compoundCondition
       };
 
-      buildQuery(itemQuery, mockCollectionRef);
-
-      // Verify that the OR query uses proper Filter.or() implementation
-      // instead of multiple individual .where() calls that would create AND conditions
-      expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
-      expect(mockQuery.where).toHaveBeenCalledWith(expect.objectContaining({
-        filters: expect.arrayContaining([
-          expect.objectContaining({
-            field: 'product_type',
-            operator: '==',
-            value: 'Wood Veneer'
-          }),
-          expect.objectContaining({
-            field: 'product_type',
-            operator: '==',
-            value: 'Stock Graphics'
-          })
-        ]),
-        operator: 'OR'
-      }));
+      // OR conditions should throw an error in Firestore v7
+      expect(() => {
+        buildQuery(itemQuery, mockCollectionRef);
+      }).toThrow('OR conditions require Firestore SDK v10+ or composite indexes. Consider upgrading @google-cloud/firestore to v10.1.0 or higher.');
     });
   });
 });
