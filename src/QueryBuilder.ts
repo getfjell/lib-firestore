@@ -17,7 +17,6 @@ import {
 import {
   CollectionGroup,
   CollectionReference,
-  Filter,
   Query
 } from '@google-cloud/firestore';
 
@@ -90,9 +89,9 @@ const applyAndConditions = (query: Query, compoundCondition: CompoundCondition):
     if (isCondition(condition)) {
       const cond: Condition = condition as Condition;
       
-      logger.default('Applying condition', { 
-        column: cond.column, 
-        operator: cond.operator, 
+      logger.default('Applying condition', {
+        column: cond.column,
+        operator: cond.operator,
         value: cond.value,
         conditionKeys: Object.keys(cond),
         fullCondition: JSON.stringify(cond)
