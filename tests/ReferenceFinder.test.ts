@@ -219,7 +219,7 @@ describe('ReferenceFinder', () => {
 
       expect(keys).toEqual([]);
       expect(collections).toEqual([]);
-      expect(mockLoggerDefault).toHaveBeenCalledWith('Adding Reference', expect.anything());
+      expect(mockLoggerDebug).toHaveBeenCalledWith('Adding Reference', expect.anything());
     });
   });
 

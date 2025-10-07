@@ -73,13 +73,13 @@ export const addReference = <S extends string,
   keys: Array<PriKey<S> | LocKey<L1 | L2 | L3 | L4 | L5>>,
   collections: string[],
 ): FirebaseFirestore.DocumentReference => {
-  logger.debug('Adding Reference', { 
+  logger.debug('Adding Reference', {
     baseType: base.constructor.name,
     basePath: (base as any).path || 'no path',
-    keys, 
+    keys,
     keysLength: keys.length,
     collections,
-    collectionsLength: collections.length 
+    collectionsLength: collections.length
   });
 
   if (keys.length === 0) {
@@ -95,25 +95,25 @@ export const addReference = <S extends string,
     if (key && collection) {
       if (isPriKey(key)) {
         const PriKey = key as PriKey<S>;
-        logger.debug('Adding PriKey reference', { 
+        logger.debug('Adding PriKey reference', {
           collection,
           pk: PriKey.pk,
           kt: PriKey.kt
         });
         nextBase = base.collection(collection).doc(PriKey.pk.toString());
-        logger.debug('Created reference', { 
-          path: (nextBase as any).path || 'no path' 
+        logger.debug('Created reference', {
+          path: (nextBase as any).path || 'no path'
         });
       } else {
         const LocKey = key as LocKey<L1 | L2 | L3 | L4 | L5>;
-        logger.debug('Adding LocKey reference', { 
+        logger.debug('Adding LocKey reference', {
           collection,
           lk: LocKey.lk,
           kt: LocKey.kt
         });
         nextBase = base.collection(collection).doc(LocKey.lk.toString());
-        logger.debug('Created reference', { 
-          path: (nextBase as any).path || 'no path' 
+        logger.debug('Created reference', {
+          path: (nextBase as any).path || 'no path'
         });
       }
     } else {
@@ -215,9 +215,9 @@ export const getReference =
     const keys = generateKeyArray(key);
     logger.debug('Generated keys array', { keys, keysLength: keys.length });
     reference = addReference(reference, keys, collections);
-    logger.debug('After addReference', { 
-      collectionsRemaining: collections.length, 
-      referenceType: reference.constructor.name 
+    logger.debug('After addReference', {
+      collectionsRemaining: collections.length,
+      referenceType: reference.constructor.name
     });
 
     // If there is only one collection left in the collections array, this means that
@@ -225,12 +225,12 @@ export const getReference =
     if (collections.length === 1) {
       logger.debug('Adding final collection to reference', { collection: collections[0] });
       reference = (reference as DocumentReference).collection(collections[0]);
-      logger.debug('Final collection reference path', { 
-        path: (reference as any).path || 'path not available' 
+      logger.debug('Final collection reference path', {
+        path: (reference as any).path || 'path not available'
       });
     }
 
-    logger.debug('Returning reference', { 
+    logger.debug('Returning reference', {
       finalReferenceType: reference.constructor.name,
       path: (reference as any).path || 'path not available'
     });

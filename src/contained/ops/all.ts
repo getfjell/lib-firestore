@@ -40,13 +40,13 @@ export const getAllOperation = <
 
   // Of a local key array is supplied, query the collection for that location.
   const getCollection = (itemQuery: ItemQuery, loc: LocKeyArray<L1, L2, L3, L4, L5>) => {
-    logger.debug('Getting collection reference', { 
+    logger.debug('Getting collection reference', {
       collectionNames,
       locations: loc,
       locationsLength: loc.length
     });
     const colRef = (getReference(loc, collectionNames, firestore) as CollectionReference);
-    logger.debug('Collection reference obtained', { 
+    logger.debug('Collection reference obtained', {
       path: (colRef as any).path || 'path not available',
       collectionId: (colRef as any).id || 'id not available'
     });
@@ -77,7 +77,7 @@ export const getAllOperation = <
 
     const matchingItems = await firestoreQuery.get();
 
-    logger.debug('Query executed', { 
+    logger.debug('Query executed', {
       empty: matchingItems.empty,
       size: matchingItems.size,
       docsLength: matchingItems.docs.length
@@ -87,9 +87,9 @@ export const getAllOperation = <
     // TODO: Move this up.
     const docs = matchingItems.docs.map(doc => validateKeys(processDoc(doc, kta), kta));
 
-    logger.debug('Matching Items', { 
+    logger.debug('Matching Items', {
       docs,
-      docsCount: docs.length 
+      docsCount: docs.length
     });
     return docs as V[];
 
