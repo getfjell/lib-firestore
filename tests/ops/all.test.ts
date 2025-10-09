@@ -5,6 +5,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 const mockLogger = {
   debug: vi.fn(),
   default: vi.fn(),
+  error: vi.fn(),
 };
 const mockLoggerGet = vi.fn(() => mockLogger);
 
@@ -59,6 +60,7 @@ beforeAll(async () => {
 
 describe('getAllOperation', () => {
   const firestore: any = {};
+  const registry: any = {};
   const definition: any = {
     collectionNames: ['testCollection'],
     coordinate: { kta: ['TYPEA'] },
@@ -76,7 +78,7 @@ describe('getAllOperation', () => {
       { id: 'id2', data: () => ({ foo: 'baz' }) },
     ];
     mockColRef.get.mockResolvedValue({ docs } as unknown as never);
-    const all = getAllOperation(firestore, definition);
+    const all = getAllOperation(firestore, definition, registry);
     const result = await all(itemQuery, locations);
     expect(mockGetReference).toHaveBeenCalledWith(locations, definition.collectionNames, firestore);
     expect(mockBuildQuery).toHaveBeenCalledWith(itemQuery, mockColRef);
@@ -91,7 +93,7 @@ describe('getAllOperation', () => {
 
   it('returns an empty array if no docs are found', async () => {
     mockColRef.get.mockResolvedValue({ docs: [] } as unknown as never);
-    const all = getAllOperation(firestore, definition);
+    const all = getAllOperation(firestore, definition, registry);
     const result = await all(itemQuery, locations);
     expect(result).toEqual([]);
     expect(mockProcessDoc).not.toHaveBeenCalled();
@@ -106,7 +108,7 @@ describe('getAllOperation', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mockProcessDoc.mockImplementationOnce((doc: any, kta: any) => ({ ...doc.data(), key: { kt: 'THROW', pk: doc.id } }));
     mockColRef.get.mockResolvedValue({ docs } as unknown as never);
-    const all = getAllOperation(firestore, definition);
+    const all = getAllOperation(firestore, definition, registry);
     await expect(all(itemQuery, locations)).rejects.toThrow('Key validation error');
     expect(mockValidateKeys).toHaveBeenCalled();
   });

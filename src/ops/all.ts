@@ -36,24 +36,43 @@ export const getAllOperation = <
     const { collectionNames, coordinate } = definition;
     const { kta } = coordinate;
 
-    logger.default('All', { itemQuery, locations });
+    logger.default('🔥 [LIB-FIRESTORE] All operation called', { itemQuery, locations, coordinate: coordinate.kta });
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
+    logger.default('🔥 [LIB-FIRESTORE] Getting collection reference', { loc, collectionNames });
     const colRef = (getReference(loc, collectionNames, firestore) as CollectionReference);
+    logger.default('🔥 [LIB-FIRESTORE] Collection reference obtained', { colRef: colRef.path });
 
     let itemsQuery: Query = colRef;
+    logger.default('🔥 [LIB-FIRESTORE] Building query with filters', { itemQuery });
     itemsQuery = buildQuery(itemQuery, colRef);
 
-    logger.default('Configured this Item Query', { itemQuery, itemsQuery });
+    logger.default('🔥 [LIB-FIRESTORE] Query built successfully', {
+      itemQuery
+    });
 
-    const matchingItems = await itemsQuery.get();
+    logger.default('🔥 [LIB-FIRESTORE] Executing Firestore query');
+    try {
+      const matchingItems = await itemsQuery.get();
+      logger.default('🔥 [LIB-FIRESTORE] Query executed successfully', {
+        docCount: matchingItems.docs.length,
+        empty: matchingItems.empty
+      });
 
-    // this.logger.default('Matching Items', { matchingItems });
-    // TODO: Move this up.
-    const docs = matchingItems.docs.map(doc => validateKeys(processDoc(doc, kta), kta));
+      // this.logger.default('Matching Items', { matchingItems });
+      // TODO: Move this up.
+      const docs = matchingItems.docs.map(doc => validateKeys(processDoc(doc, kta), kta));
 
-    logger.default('All', { docs });
-    return docs as V[];
+      logger.default('🔥 [LIB-FIRESTORE] All operation completed', { docCount: docs.length });
+      return docs as V[];
+    } catch (error) {
+      logger.error('🔥 [LIB-FIRESTORE] Query execution failed', {
+        error: error.message,
+        errorCode: error.code,
+        errorDetails: error.details
+      });
+      throw error;
+    }
   }
 
   return all;
