@@ -50,6 +50,13 @@ export const getCreateOperation = <
       locations: LocKeyArray<L1, L2, L3, L4, L5>,
     }
   ): Promise<V> => {
+    logger.default('🔥 [LIB-FIRESTORE] Raw create operation called', {
+      item,
+      options,
+      coordinate: coordinate.kta,
+      collectionNames
+    });
+    
     let locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = [];
     let newItemId: string | number | undefined;
 
@@ -66,35 +73,40 @@ export const getCreateOperation = <
     } else {
       newItemId = crypto.randomUUID();
     }
-    logger.default('Create', { item, options });
+    logger.default('🔥 [LIB-FIRESTORE] Processed options', { locations, newItemId });
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
-    logger.default('Getting Reference', { loc });
+    logger.default('🔥 [LIB-FIRESTORE] Getting Reference', { loc });
     const reference:
       CollectionReference<DocumentData, DocumentData> |
       Firestore =
       getReference(loc, [...collectionNames], firestore) as CollectionReference<DocumentData, DocumentData> |
       Firestore;
-    logger.default('Got Reference', { reference })
+    logger.default('🔥 [LIB-FIRESTORE] Got Reference', { reference })
 
-    logger.default('Getting Document with New Item ID', { newItemId: newItemId })
+    logger.default('🔥 [LIB-FIRESTORE] Getting Document with New Item ID', { newItemId: newItemId })
     const docRef: DocumentReference = reference.doc(String(newItemId));
-    logger.default('Doc Ref', { docRef: docRef.path });
+    logger.default('🔥 [LIB-FIRESTORE] Doc Ref', { docRef: docRef.path });
     let itemToInsert: Partial<Item<S, L1, L2, L3, L4, L5>> = Object.assign({}, item);
 
     // Right before we insert this record, we need to update the events AND remove the key
+    logger.default('🔥 [LIB-FIRESTORE] Creating events for item', { itemToInsert });
     itemToInsert = createEvents(itemToInsert) as Partial<Item<S, L1, L2, L3, L4, L5>>;
+    logger.default('🔥 [LIB-FIRESTORE] Events created', { itemToInsert });
 
-    logger.default('Setting Item', { itemToInsert });
+    logger.default('🔥 [LIB-FIRESTORE] Setting Item in Firestore', { itemToInsert });
     await docRef.set(itemToInsert);
-    logger.default('Getting Item', { docRef: docRef.path });
+    logger.default('🔥 [LIB-FIRESTORE] Getting Item from Firestore', { docRef: docRef.path });
     const doc = await docRef.get();
     if (!doc.exists) {
       // TODO: Make this a Firestore exception type?
+      logger.error('🔥 [LIB-FIRESTORE] Item not saved to Firestore');
       throw new Error('Item not saved');
     } else {
       // Move this up.
+      logger.default('🔥 [LIB-FIRESTORE] Processing document and validating keys');
       const item = validateKeys(processDoc(doc, kta), kta);
+      logger.default('🔥 [LIB-FIRESTORE] Raw create operation completed', { item });
       return item as V;
     }
   }

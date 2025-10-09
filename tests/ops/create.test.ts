@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock logger
-const mockLogger = { default: vi.fn(), debug: vi.fn() };
+const mockLogger = { default: vi.fn(), debug: vi.fn(), error: vi.fn() };
 const mockLoggerGet = vi.fn(() => mockLogger);
 vi.mock('../../src/logger', () => ({
   default: { get: mockLoggerGet },
@@ -76,6 +76,7 @@ beforeAll(async () => {
 
 describe('getCreateOperation', () => {
   const firestore = {};
+  const registry = {};
   const definition = {
     collectionNames: ['testCollection'],
     coordinate: { kta: ['TYPEA'] },
@@ -97,7 +98,7 @@ describe('getCreateOperation', () => {
       };
       return lastDocRef;
     });
-    const create = getCreateOperation(firestore, definition);
+    const create = getCreateOperation(firestore, definition, registry);
     const result = await create(item);
     expect(mockGetReference).toHaveBeenCalledWith([], ['testCollection'], firestore);
     expect(mockCollectionRef.doc).toHaveBeenCalledWith('00000000-0000-0000-0000-000000000000');
@@ -119,7 +120,7 @@ describe('getCreateOperation', () => {
       };
       return lastDocRef;
     });
-    const create = getCreateOperation(firestore, definition);
+    const create = getCreateOperation(firestore, definition, registry);
     const options = { key: { pk: 'custom-id', kt: 'pri' } };
     mockIsComKey.mockReturnValue(false);
     const result = await create(item, options);
@@ -140,7 +141,7 @@ describe('getCreateOperation', () => {
       };
       return lastDocRef;
     });
-    const create = getCreateOperation(firestore, definition);
+    const create = getCreateOperation(firestore, definition, registry);
     const options = { key: { pk: 'com-id', loc: ['loc1'], kt: 'com' } };
     mockIsComKey.mockReturnValue(true);
     const result = await create(item, options);
@@ -161,7 +162,7 @@ describe('getCreateOperation', () => {
       };
       return lastDocRef;
     });
-    const create = getCreateOperation(firestore, definition);
+    const create = getCreateOperation(firestore, definition, registry);
     const options = { locations: ['loc2'] };
     const result = await create(item, options);
     expect(mockGetReference).toHaveBeenCalledWith(['loc2'], ['testCollection'], firestore);
@@ -181,7 +182,7 @@ describe('getCreateOperation', () => {
       };
       return lastDocRef;
     });
-    const create = getCreateOperation(firestore, definition);
+    const create = getCreateOperation(firestore, definition, registry);
     await expect(create(item)).rejects.toThrow('Item not saved');
     expect(lastDocRef!.set).toHaveBeenCalled();
     expect(lastDocRef!.get).toHaveBeenCalled();
