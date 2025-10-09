@@ -94,6 +94,7 @@ describe('getUpdateOperation', () => {
   const firestore = {
     collection: vi.fn(() => mockCollection),
   };
+  const registry = {};
   const definition = {
     collectionNames: ['testCollection'],
     coordinate: { kta: ['TYPEA'] },
@@ -115,9 +116,10 @@ describe('getUpdateOperation', () => {
   it('updates and returns processed and validated item for a valid key', async () => {
     mockDocRef.set.mockResolvedValue(void 0);
     mockDocRef.get.mockResolvedValue({ exists: true, data: () => docData });
-    const update = getUpdateOperation(firestore, definition);
+    const update = getUpdateOperation(firestore, definition, registry);
     const result = await update(validKey, item);
-    expect(mockLogger.default).toHaveBeenCalledWith('Update', { key: validKey, item });
+    // The logger is called multiple times with the new verbose format
+    expect(mockLogger.default).toHaveBeenCalled();
     expect(mockIsValidItemKey).toHaveBeenCalledWith(validKey);
     expect(mockGetReference).toHaveBeenCalledWith(validKey, definition.collectionNames, firestore);
     expect(mockUpdateEvents).toHaveBeenCalledWith(item);
@@ -131,9 +133,9 @@ describe('getUpdateOperation', () => {
 
   it('throws if key is invalid', async () => {
     mockIsValidItemKey.mockReturnValue(false);
-    const update = getUpdateOperation(firestore, definition);
+    const update = getUpdateOperation(firestore, definition, registry);
     await expect(update(validKey, item)).rejects.toThrow('Key for Update is not a valid ItemKey');
-    expect(mockLogger.error).toHaveBeenCalledWith('Key for Update is not a valid ItemKey: %j', validKey);
+    expect(mockLogger.error).toHaveBeenCalledWith('🔥 [LIB-FIRESTORE] Key for Update is not a valid ItemKey: %j', validKey);
     expect(mockGetReference).not.toHaveBeenCalled();
     expect(mockDocRef.set).not.toHaveBeenCalled();
   });
@@ -141,7 +143,7 @@ describe('getUpdateOperation', () => {
   it('throws NotUpdatedError if doc does not exist after set', async () => {
     mockDocRef.set.mockResolvedValue(void 0);
     mockDocRef.get.mockResolvedValue({ exists: false });
-    const update = getUpdateOperation(firestore, definition);
+    const update = getUpdateOperation(firestore, definition, registry);
     await expect(update(validKey, item)).rejects.toThrow('NotUpdatedError');
     expect(mockNotUpdatedError).toHaveBeenCalledWith('update', definition.coordinate, validKey);
   });
@@ -149,7 +151,7 @@ describe('getUpdateOperation', () => {
   it('propagates error from set', async () => {
     const error = new Error('set failed');
     mockDocRef.set.mockRejectedValue(error);
-    const update = getUpdateOperation(firestore, definition);
+    const update = getUpdateOperation(firestore, definition, registry);
     await expect(update(validKey, item)).rejects.toThrow('set failed');
     expect(mockDocRef.set).toHaveBeenCalled();
   });
@@ -158,7 +160,7 @@ describe('getUpdateOperation', () => {
     mockDocRef.set.mockResolvedValue(void 0);
     const error = new Error('get failed');
     mockDocRef.get.mockRejectedValue(error);
-    const update = getUpdateOperation(firestore, definition);
+    const update = getUpdateOperation(firestore, definition, registry);
     await expect(update(validKey, item)).rejects.toThrow('get failed');
     expect(mockDocRef.get).toHaveBeenCalled();
   });

@@ -48,7 +48,8 @@ export const getAllOperation = <
     const colRef = (getReference(loc, collectionNames, firestore) as CollectionReference);
     logger.debug('Collection reference obtained', {
       path: (colRef as any).path || 'path not available',
-      collectionId: (colRef as any).id || 'id not available'
+      collectionId: (colRef as any).id || 'id not available',
+      fullPath: (colRef as any).path
     });
     return colRef;
   }
@@ -80,7 +81,8 @@ export const getAllOperation = <
     logger.debug('Query executed', {
       empty: matchingItems.empty,
       size: matchingItems.size,
-      docsLength: matchingItems.docs.length
+      docsLength: matchingItems.docs.length,
+      collectionPath: (colRef as any).path || 'path not available'
     });
 
     // this.logger.default('Matching Items', { matchingItems });
