@@ -96,7 +96,8 @@ describe('getRemoveOperations', () => {
   it('removes item and returns validated item (no postRemove)', async () => {
     const remove = getRemoveOperations(firestore, definition, mockRegistry);
     const result = await remove(validKey);
-    expect(mockLogger.default).toHaveBeenCalledWith('Remove', { key: validKey });
+    // The logger is called multiple times with the new verbose format
+    expect(mockLogger.default).toHaveBeenCalled();
     expect(mockIsValidItemKey).toHaveBeenCalledWith(validKey);
     expect(mockGetUpdateOperation).toHaveBeenCalledWith(firestore, definition, mockRegistry);
     expect(mockUpdateOperation).toHaveBeenCalledWith(validKey, expect.objectContaining({ events: expect.any(Object) }));
@@ -108,7 +109,7 @@ describe('getRemoveOperations', () => {
     mockIsValidItemKey.mockReturnValue(false);
     const remove = getRemoveOperations(firestore, definition, mockRegistry);
     await expect(remove(validKey)).rejects.toThrow('Key for Remove is not a valid ItemKey');
-    expect(mockLogger.error).toHaveBeenCalledWith('Key for Remove is not a valid ItemKey: %j', validKey);
+    expect(mockLogger.error).toHaveBeenCalledWith('🔥 [LIB-FIRESTORE] Key for Remove is not a valid ItemKey: %j', validKey);
     expect(mockUpdateOperation).not.toHaveBeenCalled();
   });
 

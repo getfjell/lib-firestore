@@ -40,7 +40,17 @@ export const getAllOperation = <
 
   // Of a local key array is supplied, query the collection for that location.
   const getCollection = (itemQuery: ItemQuery, loc: LocKeyArray<L1, L2, L3, L4, L5>) => {
+    logger.debug('Getting collection reference', {
+      collectionNames,
+      locations: loc,
+      locationsLength: loc.length
+    });
     const colRef = (getReference(loc, collectionNames, firestore) as CollectionReference);
+    logger.debug('Collection reference obtained', {
+      path: (colRef as any).path || 'path not available',
+      collectionId: (colRef as any).id || 'id not available',
+      fullPath: (colRef as any).path
+    });
     return colRef;
   }
 
@@ -49,7 +59,7 @@ export const getAllOperation = <
     locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
   ): Promise<V[]> => {
 
-    logger.default('All', { itemQuery, locations });
+    logger.debug('All', { itemQuery, locations });
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
     let colRef: CollectionReference | CollectionGroup;
@@ -64,15 +74,25 @@ export const getAllOperation = <
     let firestoreQuery: Query = colRef;
     firestoreQuery = buildQuery(itemQuery, colRef);
 
-    logger.default('Configured this Item Query', { itemQuery, firestoreQuery });
+    logger.debug('Configured this Item Query', { itemQuery, firestoreQuery });
 
     const matchingItems = await firestoreQuery.get();
+
+    logger.debug('Query executed', {
+      empty: matchingItems.empty,
+      size: matchingItems.size,
+      docsLength: matchingItems.docs.length,
+      collectionPath: (colRef as any).path || 'path not available'
+    });
 
     // this.logger.default('Matching Items', { matchingItems });
     // TODO: Move this up.
     const docs = matchingItems.docs.map(doc => validateKeys(processDoc(doc, kta), kta));
 
-    logger.default('Matching Items', { docs });
+    logger.debug('Matching Items', {
+      docs,
+      docsCount: docs.length
+    });
     return docs as V[];
 
   }
