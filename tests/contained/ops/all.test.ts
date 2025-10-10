@@ -75,6 +75,8 @@ describe('contained/ops/all', () => {
         finders: {},
         actions: {},
         facets: {},
+        references: [],
+        aggregations: []
       },
       collectionNames: ['testCollection'],
     } as Definition<TestItem, 'test'>;
@@ -154,11 +156,17 @@ describe('contained/ops/all', () => {
       expect(mockProcessDoc).toHaveBeenCalledTimes(2);
       expect(mockProcessDoc).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'doc1' }),
-        ['test']
+        ['test'],
+        [],
+        [],
+        expect.anything()
       );
       expect(mockProcessDoc).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'doc2' }),
-        ['test']
+        ['test'],
+        [],
+        [],
+        expect.anything()
       );
       expect(mockValidateKeys).toHaveBeenCalledTimes(2);
     });
@@ -242,7 +250,28 @@ describe('contained/ops/all', () => {
 
       expect(mockProcessDoc).toHaveBeenCalledWith(
         expect.any(Object),
-        ['customType', 'level1']
+        ['customType', 'level1'],
+        [],
+        [],
+        expect.anything()
+      );
+    });
+
+    it('should handle missing references and aggregations options', async () => {
+      const definitionWithoutRefsAggs = {
+        ...mockDefinition,
+        options: {} // No references or aggregations
+      } as any;
+
+      const allOperation = getAllOperation(mockFirestore, definitionWithoutRefsAggs, mockRegistry);
+      await allOperation({}, []);
+
+      expect(mockProcessDoc).toHaveBeenCalledWith(
+        expect.any(Object),
+        ['test'],
+        [],
+        [],
+        expect.anything()
       );
     });
   });

@@ -64,6 +64,10 @@ describe('getAllOperation', () => {
   const definition: any = {
     collectionNames: ['testCollection'],
     coordinate: { kta: ['TYPEA'] },
+    options: {
+      references: [],
+      aggregations: []
+    }
   };
   const itemQuery: any = { limit: 2 };
   const locations: any[] = [];
@@ -111,5 +115,30 @@ describe('getAllOperation', () => {
     const all = getAllOperation(firestore, definition, registry);
     await expect(all(itemQuery, locations)).rejects.toThrow('Key validation error');
     expect(mockValidateKeys).toHaveBeenCalled();
+  });
+
+  it('handles missing references and aggregations options', async () => {
+    const definitionWithoutRefsAggs: any = {
+      collectionNames: ['testCollection'],
+      coordinate: { kta: ['TYPEA'] },
+      options: {} // No references or aggregations
+    };
+    const docs = [
+      { id: 'id1', data: () => ({ foo: 'bar' }) },
+    ];
+    mockColRef.get.mockResolvedValue({ docs } as unknown as never);
+    const all = getAllOperation(firestore, definitionWithoutRefsAggs, registry);
+    const result = await all(itemQuery, locations);
+    
+    expect(mockProcessDoc).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'id1' }),
+      ['TYPEA'],
+      [],
+      [],
+      registry
+    );
+    expect(result).toEqual([
+      { foo: 'bar', key: { kt: 'TYPEA', pk: 'id1' } },
+    ]);
   });
 });

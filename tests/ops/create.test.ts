@@ -80,6 +80,10 @@ describe('getCreateOperation', () => {
   const definition = {
     collectionNames: ['testCollection'],
     coordinate: { kta: ['TYPEA'] },
+    options: {
+      references: [],
+      aggregations: []
+    }
   };
   const item = { foo: 'bar' };
 
@@ -105,7 +109,7 @@ describe('getCreateOperation', () => {
     expect(mockCreateEvents).toHaveBeenCalledWith(item);
     expect(lastDocRef!.set).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', events: { created: true } }));
     expect(lastDocRef!.get).toHaveBeenCalled();
-    expect(mockProcessDoc).toHaveBeenCalledWith(expect.anything(), ['TYPEA']);
+    expect(mockProcessDoc).toHaveBeenCalledWith(expect.anything(), ['TYPEA'], [], [], expect.anything());
     expect(mockValidateKeys).toHaveBeenCalledWith(expect.objectContaining({ processed: true }), ['TYPEA']);
     expect(result).toEqual(expect.objectContaining({ foo: 'bar', events: { created: true }, processed: true, validated: true }));
   });
@@ -186,5 +190,33 @@ describe('getCreateOperation', () => {
     await expect(create(item)).rejects.toThrow('Item not saved');
     expect(lastDocRef!.set).toHaveBeenCalled();
     expect(lastDocRef!.get).toHaveBeenCalled();
+  });
+
+  it('handles missing references and aggregations options', async () => {
+    const definitionWithoutRefsAggs: any = {
+      collectionNames: ['testCollection'],
+      coordinate: { kta: ['TYPEA'] },
+      options: {} // No references or aggregations
+    };
+    let lastDocRef;
+    mockCollectionRef.doc.mockImplementationOnce((id) => {
+      lastDocRef = {
+        set: vi.fn(() => void 0),
+        get: vi.fn(() => ({ exists: true, data: () => ({ foo: 'bar' }) })),
+        path: `mock/doc/path/${id}`,
+      };
+      return lastDocRef;
+    });
+    const create = getCreateOperation(firestore, definitionWithoutRefsAggs, registry);
+    const result = await create(item);
+    
+    expect(mockProcessDoc).toHaveBeenCalledWith(
+      expect.objectContaining({ exists: true }),
+      ['TYPEA'],
+      [],
+      [],
+      registry
+    );
+    expect(result).toEqual(expect.objectContaining({ foo: 'bar', processed: true, validated: true }));
   });
 });
