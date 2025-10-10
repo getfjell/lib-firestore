@@ -12,3 +12,6 @@ export * as Primary from './primary';
 // are subscribing to updates from firestore, and because of this they need to be able to process the dates.
 // Once we have a proper client SDK, we should remove this.
 export * from './DocProcessor';
+
+// Export Firestore-specific reference handling
+export * from './processing/ReferenceBuilder';
