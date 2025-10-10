@@ -20,7 +20,7 @@ export const getGetOperation = <
 >(
   firestore: FirebaseFirestore.Firestore,
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   registry: Library.Registry,
 ) => {
 
@@ -47,7 +47,14 @@ export const getGetOperation = <
     if (!doc.exists) {
       throw new Library.NotFoundError<S, L1, L2, L3, L4, L5>('get', coordinate, key);
     } else {
-      return validateKeys(processDoc(doc, kta), kta) as V;
+      const item = await processDoc(
+        doc,
+        kta,
+        definition.options.references || [],
+        definition.options.aggregations || [],
+        registry
+      );
+      return validateKeys(item, kta) as V;
     }
   }
 

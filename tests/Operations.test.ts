@@ -158,4 +158,51 @@ describe('createOperations', () => {
     expect(typeof operations.upsert).toBe('function');
     // Note: The actual upsert functionality is tested in integration tests
   });
+
+  it('should include stub functions for facets and actions', async () => {
+    const { createOperations: createOps } = await import('../src/Operations');
+    const operations = createOps(mockFirestore, mockDefinition, mockRegistry);
+    
+    // Test stub functions exist and can be called
+    expect(operations.allFacet).toBeDefined();
+    expect(operations.allAction).toBeDefined();
+    expect(operations.action).toBeDefined();
+    expect(operations.facet).toBeDefined();
+    
+    // Call the stub functions to improve coverage
+    await operations.allFacet();
+    await operations.allAction();
+    await operations.action();
+    await operations.facet();
+  });
+
+  it('should include finder, action, and facet collections', async () => {
+    const mockDefinitionWithExtras = {
+      ...mockDefinition,
+      options: {
+        ...mockDefinition.options,
+        finders: { customFinder: vi.fn() },
+        actions: { customAction: vi.fn() },
+        facets: { customFacet: vi.fn() },
+        allActions: { customAllAction: vi.fn() },
+        allFacets: { customAllFacet: vi.fn() }
+      }
+    };
+
+    const { createOperations: createOps } = await import('../src/Operations');
+    const operations = createOps(mockFirestore, mockDefinitionWithExtras, mockRegistry);
+    
+    expect(operations.finders).toBeDefined();
+    expect(operations.actions).toBeDefined();
+    expect(operations.facets).toBeDefined();
+    expect(operations.allActions).toBeDefined();
+    expect(operations.allFacets).toBeDefined();
+    
+    // Verify the collections were copied from the definition
+    expect(operations.finders.customFinder).toBeDefined();
+    expect(operations.actions.customAction).toBeDefined();
+    expect(operations.facets.customFacet).toBeDefined();
+    expect(operations.allActions.customAllAction).toBeDefined();
+    expect(operations.allFacets.customAllFacet).toBeDefined();
+  });
 });
