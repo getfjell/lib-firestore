@@ -19,6 +19,7 @@ import LibLogger from "../logger";
 import { getReference } from "../ReferenceFinder";
 import { Registry } from "@fjell/lib";
 import { CollectionReference } from "@google-cloud/firestore";
+import { stripReferenceItems } from "../processing/ReferenceBuilder";
 
 const logger = LibLogger.get('ops', 'create');
 
@@ -89,10 +90,15 @@ export const getCreateOperation = <
     logger.default('🔥 [LIB-FIRESTORE] Doc Ref', { docRef: docRef.path });
     let itemToInsert: Partial<Item<S, L1, L2, L3, L4, L5>> = Object.assign({}, item);
 
-    // Right before we insert this record, we need to update the events AND remove the key
+    // Right before we insert this record, we need to update the events, strip reference items, and remove the key
     logger.default('🔥 [LIB-FIRESTORE] Creating events for item', { itemToInsert });
     itemToInsert = createEvents(itemToInsert) as Partial<Item<S, L1, L2, L3, L4, L5>>;
     logger.default('🔥 [LIB-FIRESTORE] Events created', { itemToInsert });
+    
+    // Strip populated reference items before writing to Firestore
+    logger.default('🔥 [LIB-FIRESTORE] Stripping reference items from item', { itemToInsert });
+    itemToInsert = stripReferenceItems(itemToInsert);
+    logger.default('🔥 [LIB-FIRESTORE] Reference items stripped', { itemToInsert });
 
     logger.default('🔥 [LIB-FIRESTORE] Setting Item in Firestore', { itemToInsert });
     await docRef.set(itemToInsert);
