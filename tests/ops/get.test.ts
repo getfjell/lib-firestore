@@ -54,9 +54,14 @@ beforeAll(async () => {
 
 describe('getGetOperation', () => {
   const firestore = {};
+  const registry = {} as any;
   const definition = {
     collectionNames: ['testCollection'],
     coordinate: { kta: ['TYPEA'] },
+    options: {
+      references: [],
+      aggregations: []
+    }
   };
   const validKey = { pk: 'id1', kt: 'pri' };
   const docData = { foo: 'bar' };
@@ -69,19 +74,19 @@ describe('getGetOperation', () => {
 
   it('returns processed and validated item for a valid key', async () => {
     mockDocRef.get.mockResolvedValue({ exists: true, data: () => docData });
-    const get = getGetOperation(firestore, definition);
+    const get = getGetOperation(firestore, definition, registry);
     const result = await get(validKey);
     expect(mockIsValidItemKey).toHaveBeenCalledWith(validKey);
     expect(mockGetReference).toHaveBeenCalledWith(validKey, definition.collectionNames, firestore);
     expect(mockDocRef.get).toHaveBeenCalled();
-    expect(mockProcessDoc).toHaveBeenCalledWith({ exists: true, data: expect.any(Function) }, ['TYPEA']);
+    expect(mockProcessDoc).toHaveBeenCalledWith(expect.objectContaining({ exists: true }), ['TYPEA'], [], [], registry);
     expect(mockValidateKeys).toHaveBeenCalledWith(expect.objectContaining({ processed: true }), ['TYPEA']);
     expect(result).toEqual(expect.objectContaining({ foo: 'bar', processed: true, validated: true }));
   });
 
   it('throws if key is invalid', async () => {
     mockIsValidItemKey.mockReturnValue(false);
-    const get = getGetOperation(firestore, definition);
+    const get = getGetOperation(firestore, definition, registry);
     await expect(get(validKey)).rejects.toThrow('Key for Get is not a valid ItemKey');
     expect(mockLogger.error).toHaveBeenCalledWith('Key for Get is not a valid ItemKey: %j', validKey);
     expect(mockGetReference).not.toHaveBeenCalled();
@@ -89,8 +94,28 @@ describe('getGetOperation', () => {
 
   it('throws NotFoundError if doc does not exist', async () => {
     mockDocRef.get.mockResolvedValue({ exists: false });
-    const get = getGetOperation(firestore, definition);
+    const get = getGetOperation(firestore, definition, registry);
     await expect(get(validKey)).rejects.toThrow('NotFoundError');
     expect(mockNotFoundError).toHaveBeenCalledWith('get', definition.coordinate, validKey);
+  });
+
+  it('handles missing references and aggregations options', async () => {
+    const definitionWithoutRefsAggs: any = {
+      collectionNames: ['testCollection'],
+      coordinate: { kta: ['TYPEA'] },
+      options: {} // No references or aggregations
+    };
+    mockDocRef.get.mockResolvedValue({ exists: true, data: () => docData });
+    const get = getGetOperation(firestore, definitionWithoutRefsAggs, registry);
+    const result = await get(validKey);
+    
+    expect(mockProcessDoc).toHaveBeenCalledWith(
+      expect.objectContaining({ exists: true }),
+      ['TYPEA'],
+      [],
+      [],
+      registry
+    );
+    expect(result).toEqual(expect.objectContaining({ foo: 'bar', processed: true, validated: true }));
   });
 });
