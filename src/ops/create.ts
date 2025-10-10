@@ -33,7 +33,7 @@ export const getCreateOperation = <
 >(
   firestore: FirebaseFirestore.Firestore,
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   registry: Registry,
 ) => {
 
@@ -105,7 +105,14 @@ export const getCreateOperation = <
     } else {
       // Move this up.
       logger.default('🔥 [LIB-FIRESTORE] Processing document and validating keys');
-      const item = validateKeys(processDoc(doc, kta), kta);
+      const processedItem = await processDoc(
+        doc,
+        kta,
+        definition.options.references || [],
+        definition.options.aggregations || [],
+        registry
+      );
+      const item = validateKeys(processedItem, kta);
       logger.default('🔥 [LIB-FIRESTORE] Raw create operation completed', { item });
       return item as V;
     }

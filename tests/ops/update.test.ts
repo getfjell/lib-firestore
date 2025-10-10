@@ -98,6 +98,10 @@ describe('getUpdateOperation', () => {
   const definition = {
     collectionNames: ['testCollection'],
     coordinate: { kta: ['TYPEA'] },
+    options: {
+      references: [],
+      aggregations: []
+    }
   };
   const validKey = { pk: 'id1', kt: 'pri' };
   const item = { foo: 'bar', key: { pk: 'id1', kt: 'pri' } };
@@ -126,7 +130,7 @@ describe('getUpdateOperation', () => {
     expect(mockRemoveKey).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', updated: true, key: { pk: 'id1', kt: 'pri' } }));
     expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', updated: true }), { merge: true });
     expect(mockDocRef.get).toHaveBeenCalled();
-    expect(mockProcessDoc).toHaveBeenCalledWith({ exists: true, data: expect.any(Function) }, ['TYPEA']);
+    expect(mockProcessDoc).toHaveBeenCalledWith({ exists: true, data: expect.any(Function) }, ['TYPEA'], [], [], expect.anything());
     expect(mockValidateKeys).toHaveBeenCalledWith(expect.objectContaining({ processed: true }), ['TYPEA']);
     expect(result).toEqual(expect.objectContaining({ foo: 'bar', processed: true, validated: true }));
   });
@@ -163,5 +167,26 @@ describe('getUpdateOperation', () => {
     const update = getUpdateOperation(firestore, definition, registry);
     await expect(update(validKey, item)).rejects.toThrow('get failed');
     expect(mockDocRef.get).toHaveBeenCalled();
+  });
+
+  it('handles missing references and aggregations options', async () => {
+    const definitionWithoutRefsAggs: any = {
+      collectionNames: ['testCollection'],
+      coordinate: { kta: ['TYPEA'] },
+      options: {} // No references or aggregations
+    };
+    mockDocRef.set.mockResolvedValue(void 0);
+    mockDocRef.get.mockResolvedValue({ exists: true, data: () => docData });
+    const update = getUpdateOperation(firestore, definitionWithoutRefsAggs, registry);
+    const result = await update(validKey, item);
+    
+    expect(mockProcessDoc).toHaveBeenCalledWith(
+      expect.objectContaining({ exists: true }),
+      ['TYPEA'],
+      [],
+      [],
+      registry
+    );
+    expect(result).toEqual(expect.objectContaining({ foo: 'bar', processed: true, validated: true }));
   });
 });

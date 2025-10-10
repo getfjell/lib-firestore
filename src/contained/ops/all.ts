@@ -24,7 +24,7 @@ export const getAllOperation = <
 >(
   firestore: FirebaseFirestore.Firestore,
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   registry: Registry,
 ) => {
 
@@ -87,7 +87,18 @@ export const getAllOperation = <
 
     // this.logger.default('Matching Items', { matchingItems });
     // TODO: Move this up.
-    const docs = matchingItems.docs.map(doc => validateKeys(processDoc(doc, kta), kta));
+    const docs = await Promise.all(
+      matchingItems.docs.map(async (doc) => {
+        const item = await processDoc(
+          doc,
+          kta,
+          definition.options.references || [],
+          definition.options.aggregations || [],
+          registry
+        );
+        return validateKeys(item, kta);
+      })
+    );
 
     logger.debug('Matching Items', {
       docs,
