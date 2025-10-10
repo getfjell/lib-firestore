@@ -4,15 +4,14 @@ import * as Library from "@fjell/lib";
 import {
   AggregationDefinition,
   buildAggregation,
-  buildReference,
   contextManager,
   createOperationContext,
-  OperationContext,
-  ReferenceDefinition
+  OperationContext
 } from "@fjell/lib";
 
 import LibLogger from "./logger";
 import { DocumentSnapshot, Timestamp } from "@google-cloud/firestore";
+import { buildFirestoreReference, FirestoreReferenceDefinition } from "./processing/ReferenceBuilder";
 
 const logger = LibLogger.get('DocProcessor');
 
@@ -49,7 +48,7 @@ export const processDoc = async <S extends string,
   L5 extends string = never>(
   doc: DocumentSnapshot,
   keyTypes: AllItemTypeArrays<S, L1, L2, L3, L4, L5>,
-  referenceDefinitions: ReferenceDefinition[],
+  referenceDefinitions: FirestoreReferenceDefinition[],
   aggregationDefinitions: AggregationDefinition[],
   registry: Library.Registry,
   context?: OperationContext
@@ -80,9 +79,9 @@ export const processDoc = async <S extends string,
         for (const referenceDefinition of referenceDefinitions) {
           logger.default('Processing Reference', {
             keyType: item.key.kt,
-            referenceKta: referenceDefinition.kta
+            referenceName: referenceDefinition.name
           });
-          item = await buildReference(item, referenceDefinition, registry, operationContext);
+          item = await buildFirestoreReference(item, referenceDefinition, registry, operationContext);
         }
       }
 

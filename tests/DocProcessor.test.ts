@@ -142,7 +142,9 @@ describe('DocProcessor', () => {
     it('should process references when referenceDefinitions are provided', async () => {
       const mockData = {
         name: 'Item with References',
-        authorId: 'author123',
+        refs: {
+          author: { kt: 'author', pk: 'author123' }
+        }
       };
       const doc = mockDocSnapshot('doc7', mockData) as DocumentSnapshot;
 
@@ -161,9 +163,8 @@ describe('DocProcessor', () => {
 
       const referenceDefinitions = [
         {
-          column: 'authorId',
-          kta: ['author'],
-          property: 'author'
+          name: 'author',
+          kta: ['author']
         }
       ];
 
@@ -178,7 +179,9 @@ describe('DocProcessor', () => {
 
       expect(mockAddKey).toHaveBeenCalled();
       expect(result.name).toBe('Item with References');
-      expect(result.author).toBeDefined();
+      expect(result.refs?.author).toBeDefined();
+      expect(result.refs?.author.item).toBeDefined();
+      expect(result.refs?.author.item.name).toBe('John Doe');
     });
 
     it('should process aggregations when aggregationDefinitions are provided', async () => {
@@ -226,7 +229,9 @@ describe('DocProcessor', () => {
     it('should process both references and aggregations when both are provided', async () => {
       const mockData = {
         name: 'Item with Both',
-        authorId: 'author123',
+        refs: {
+          author: { kt: 'author', pk: 'author123' }
+        }
       };
       const doc = mockDocSnapshot('doc9', mockData) as DocumentSnapshot;
 
@@ -248,9 +253,8 @@ describe('DocProcessor', () => {
 
       const referenceDefinitions = [
         {
-          column: 'authorId',
-          kta: ['author'],
-          property: 'author'
+          name: 'author',
+          kta: ['author']
         }
       ];
 
@@ -273,7 +277,9 @@ describe('DocProcessor', () => {
 
       expect(mockAddKey).toHaveBeenCalled();
       expect(result.name).toBe('Item with Both');
-      expect(result.author).toBeDefined();
+      expect(result.refs?.author).toBeDefined();
+      expect(result.refs?.author.item).toBeDefined();
+      expect(result.refs?.author.item.name).toBe('John Doe');
       expect(result.comments).toBeDefined();
     });
   });
