@@ -54,7 +54,8 @@ describe('createOptions', () => {
     expect(mockLibCreateOptions).toHaveBeenCalledTimes(1);
     // @ts-ignore
      
-    expect(mockLibCreateOptions).toHaveBeenCalledWith(undefined);
+    // Now expects {} because we destructure the options in createOptions
+    expect(mockLibCreateOptions).toHaveBeenCalledWith({});
     expect(result).toEqual(expectedOptionsOutput);
   });
 
