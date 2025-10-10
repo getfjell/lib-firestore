@@ -11,6 +11,7 @@ import { getReference } from "../ReferenceFinder";
 import LibLogger from "../logger";
 import * as Library from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";
+import { stripReferenceItems } from "../processing/ReferenceBuilder";
 
 const logger = LibLogger.get('ops', 'update');
 
@@ -55,11 +56,16 @@ export const getUpdateOperation = <
     
     let itemToUpdate: Partial<Item<S, L1, L2, L3, L4, L5>> = Object.assign({}, item);
 
-    // Right before this record is going to be updated, we need to update the events AND remove the key
+    // Right before this record is going to be updated, we need to update the events, strip reference items, and remove the key
     // TODO: Move this up.
     logger.default('🔥 [LIB-FIRESTORE] Updating events for item', { itemToUpdate });
     itemToUpdate = updateEvents(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
     logger.default('🔥 [LIB-FIRESTORE] Events updated', { itemToUpdate });
+    
+    // Strip populated reference items before writing to Firestore
+    logger.default('🔥 [LIB-FIRESTORE] Stripping reference items from item', { itemToUpdate });
+    itemToUpdate = stripReferenceItems(itemToUpdate);
+    logger.default('🔥 [LIB-FIRESTORE] Reference items stripped', { itemToUpdate });
     
     // TODO: Move this up.
     logger.default('🔥 [LIB-FIRESTORE] Removing key from item', { itemToUpdate });
