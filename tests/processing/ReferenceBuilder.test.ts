@@ -23,7 +23,7 @@ describe('Firestore ReferenceBuilder', () => {
       const item = {
         key: { kt: 'post', pk: '1' },
         refs: {
-          author: { kt: 'user', pk: 'user123' }
+          author: { key: { kt: 'user', pk: 'user123' } }
         }
       };
 
@@ -52,7 +52,7 @@ describe('Firestore ReferenceBuilder', () => {
       const item = {
         key: { kt: 'post', pk: '1' },
         refs: {
-          author: { kt: 'user', pk: 'user123' }
+          author: { key: { kt: 'user', pk: 'user123' } }
         }
       };
 
@@ -114,7 +114,7 @@ describe('Firestore ReferenceBuilder', () => {
       const item = {
         key: { kt: 'post', pk: '1' },
         refs: {
-          author: { kt: 'user', pk: 'user123' }
+          author: { key: { kt: 'user', pk: 'user123' } }
         }
       };
 
@@ -140,7 +140,7 @@ describe('Firestore ReferenceBuilder', () => {
       const item2 = {
         key: { kt: 'post', pk: '2' },
         refs: {
-          author: { kt: 'user', pk: 'user123' }
+          author: { key: { kt: 'user', pk: 'user123' } }
         }
       };
       await buildFirestoreReference(item2, referenceDef, mockRegistry, context);
@@ -151,7 +151,7 @@ describe('Firestore ReferenceBuilder', () => {
       const item = {
         key: { kt: 'post', pk: '1' },
         refs: {
-          author: { kt: 'user', pk: 'user123' }
+          author: { key: { kt: 'user', pk: 'user123' } }
         }
       };
 
@@ -177,7 +177,7 @@ describe('Firestore ReferenceBuilder', () => {
       const item = {
         key: { kt: 'post', pk: '1' },
         refs: {
-          author: 'invalid-key-format'
+          author: { key: 'invalid-key-format' as any }
         }
       };
 
@@ -195,7 +195,7 @@ describe('Firestore ReferenceBuilder', () => {
       const item = {
         key: { kt: 'post', pk: '1' },
         refs: {
-          author: { kt: 'user', pk: 'user123' }
+          author: { key: { kt: 'user', pk: 'user123' } }
         }
       };
 
@@ -213,7 +213,7 @@ describe('Firestore ReferenceBuilder', () => {
       const item = {
         key: { kt: 'post', pk: '1' },
         refs: {
-          author: { kt: 'user', pk: 'user123' }
+          author: { key: { kt: 'user', pk: 'user123' } }
         }
       };
 
@@ -251,7 +251,7 @@ describe('Firestore ReferenceBuilder', () => {
       const result = stripReferenceItems(item);
 
       expect(result.refs).toBeDefined();
-      expect(result.refs?.author).toEqual({ kt: 'user', pk: 'user123' });
+      expect(result.refs?.author).toEqual({ key: { kt: 'user', pk: 'user123' } });
       expect((result.refs?.author as any).item).toBeUndefined();
     });
 
@@ -259,14 +259,14 @@ describe('Firestore ReferenceBuilder', () => {
       const item: Partial<Item<'post'>> = {
         key: { kt: 'post', pk: '1' },
         refs: {
-          author: { kt: 'user', pk: 'user123' }
+          author: { key: { kt: 'user', pk: 'user123' } }
         } as any
       };
 
       const result = stripReferenceItems(item);
 
       expect(result.refs).toBeDefined();
-      expect(result.refs?.author).toEqual({ kt: 'user', pk: 'user123' });
+      expect(result.refs?.author).toEqual({ key: { kt: 'user', pk: 'user123' } });
     });
 
     it('should handle items without refs', () => {
@@ -296,8 +296,8 @@ describe('Firestore ReferenceBuilder', () => {
 
       const result = stripReferenceItems(item);
 
-      expect(result.refs?.author).toEqual({ kt: 'user', pk: 'user123' });
-      expect(result.refs?.category).toEqual({ kt: 'category', pk: 'cat1' });
+      expect(result.refs?.author).toEqual({ key: { kt: 'user', pk: 'user123' } });
+      expect(result.refs?.category).toEqual({ key: { kt: 'category', pk: 'cat1' } });
       expect((result.refs?.author as any).item).toBeUndefined();
       expect((result.refs?.category as any).item).toBeUndefined();
     });
