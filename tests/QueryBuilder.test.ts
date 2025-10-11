@@ -63,11 +63,11 @@ describe('QueryBuilder', () => {
       buildQuery(itemQuery, mockCollectionRef);
 
       expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.pk', '==', 'test-pk');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.kt', '==', 'test-kt');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc.0.lk', '==', 'loc1');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc.0.kt', '==', 'loc-kt1');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.loc.1.lk', '==', 'loc2');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.key.pk', '==', 'test-pk');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.key.kt', '==', 'test-kt');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.key.loc.0.lk', '==', 'loc1');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.key.loc.0.kt', '==', 'loc-kt1');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.key.loc.1.lk', '==', 'loc2');
     });
 
     it('should add reference queries for PriKey references', () => {
@@ -82,8 +82,8 @@ describe('QueryBuilder', () => {
 
       buildQuery(itemQuery, mockCollectionRef);
 
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.pk', '==', 'test-pk');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.kt', '==', 'test-kt');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.key.pk', '==', 'test-pk');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.testRef.key.kt', '==', 'test-kt');
     });
 
     it('should add event queries with start, end, and by filters', () => {
@@ -236,8 +236,8 @@ describe('QueryBuilder', () => {
 
       // Verify all types of filters were applied
       expect(mockQuery.where).toHaveBeenCalledWith('events.deleted.at', '==', null);
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.pk', '==', 'parent-id');
-      expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.kt', '==', 'parent');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.key.pk', '==', 'parent-id');
+      expect(mockQuery.where).toHaveBeenCalledWith('refs.parent.key.kt', '==', 'parent');
       expect(mockQuery.where).toHaveBeenCalledWith('events.created.at', '>=', new Date('2023-01-01T00:00:00.000Z'));
       expect(mockQuery.where).toHaveBeenCalledWith('status', '==', 'active');
       expect(mockQuery.limit).toHaveBeenCalledWith(20);

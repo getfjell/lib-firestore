@@ -59,23 +59,23 @@ const addReferenceQueries = (query: Query, references: References): Query => {
     if (isComKey(keyValue)) {
       const ComKey: ComKey<string, string, string | never, string | never, string | never, string | never> =
         keyValue as ComKey<string, string, string | never, string | never, string | never, string | never>;
-      retQuery = retQuery.where(`refs.${key}.pk`, '==', ComKey.pk);
+      retQuery = retQuery.where(`refs.${key}.key.pk`, '==', ComKey.pk);
       if (ComKey.kt) {
-        retQuery = retQuery.where(`refs.${key}.kt`, '==', ComKey.kt);
+        retQuery = retQuery.where(`refs.${key}.key.kt`, '==', ComKey.kt);
       }
       ComKey.loc.forEach((
         loc: LocKey<string>,
         index: number) => {
-        retQuery = retQuery.where(`refs.${key}.loc.${index}.lk`, '==', loc.lk);
+        retQuery = retQuery.where(`refs.${key}.key.loc.${index}.lk`, '==', loc.lk);
         if (loc.kt) {
-          retQuery = retQuery.where(`refs.${key}.loc.${index}.kt`, '==', loc.kt);
+          retQuery = retQuery.where(`refs.${key}.key.loc.${index}.kt`, '==', loc.kt);
         }
       });
     } else if (isPriKey(keyValue)) {
       const PriKey: PriKey<string> = keyValue as PriKey<string>;
-      retQuery = retQuery.where(`refs.${key}.pk`, '==', PriKey.pk);
+      retQuery = retQuery.where(`refs.${key}.key.pk`, '==', PriKey.pk);
       if (PriKey.kt) {
-        retQuery = retQuery.where(`refs.${key}.kt`, '==', PriKey.kt);
+        retQuery = retQuery.where(`refs.${key}.key.kt`, '==', PriKey.kt);
       }
     }
   });
