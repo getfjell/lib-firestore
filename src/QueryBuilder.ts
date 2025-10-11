@@ -53,9 +53,12 @@ const addReferenceQueries = (query: Query, references: References): Query => {
   let retQuery = query;
   Object.keys(references).forEach((key: string) => {
     logger.default('Adding Reference Query', { key, references });
-    if (isComKey(references[key])) {
+    const refValue = references[key];
+    const keyValue = (refValue as any).key || refValue;
+    
+    if (isComKey(keyValue)) {
       const ComKey: ComKey<string, string, string | never, string | never, string | never, string | never> =
-        references[key] as ComKey<string, string, string | never, string | never, string | never, string | never>;
+        keyValue as ComKey<string, string, string | never, string | never, string | never, string | never>;
       retQuery = retQuery.where(`refs.${key}.pk`, '==', ComKey.pk);
       if (ComKey.kt) {
         retQuery = retQuery.where(`refs.${key}.kt`, '==', ComKey.kt);
@@ -68,8 +71,8 @@ const addReferenceQueries = (query: Query, references: References): Query => {
           retQuery = retQuery.where(`refs.${key}.loc.${index}.kt`, '==', loc.kt);
         }
       });
-    } else if (isPriKey(references[key])) {
-      const PriKey: PriKey<string> = references[key] as PriKey<string>;
+    } else if (isPriKey(keyValue)) {
+      const PriKey: PriKey<string> = keyValue as PriKey<string>;
       retQuery = retQuery.where(`refs.${key}.pk`, '==', PriKey.pk);
       if (PriKey.kt) {
         retQuery = retQuery.where(`refs.${key}.kt`, '==', PriKey.kt);

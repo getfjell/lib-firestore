@@ -3,6 +3,9 @@ import type { ReferenceDefinition, Registry } from "@fjell/lib";
 import { OperationContext } from "@fjell/lib";
 import logger from "../logger";
 
+// Type alias for the Reference structure
+type ItemReference = { key: PriKey<any> | ComKey<any, any, any, any, any, any>, item?: Item<any, any, any, any, any, any> };
+
 /**
  * Firestore-specific definition for a reference relationship.
  * References in Firestore are stored in the `refs` property of an item.
@@ -52,7 +55,29 @@ export const buildFirestoreReference = async (
     return item;
   }
 
-  const refKey = item.refs[referenceDefinition.name];
+  const ref = item.refs[referenceDefinition.name];
+  
+  // Check if the reference is null or undefined - if so, skip
+  if (ref == null) {
+    return item;
+  }
+
+  // Extract the key from the reference structure
+  // Handle both legacy format (direct key) and new format (key wrapped in 'key' property)
+  let refKey;
+  if (ref.key) {
+    // New format: ref.key exists
+    refKey = ref.key;
+  } else if (ref.kt && ref.pk) {
+    // Legacy format: ref is the key itself
+    refKey = ref;
+  } else {
+    libLogger.error('Invalid reference format', { ref, referenceName: referenceDefinition.name });
+    throw new Error(
+      `Invalid reference format for "${referenceDefinition.name}". ` +
+      `Expected either { key: { kt, pk } } or { kt, pk } format.`
+    );
+  }
   
   // Check if the reference key is null or undefined - if so, skip
   if (refKey == null) {
@@ -185,22 +210,27 @@ export const stripReferenceItems = <
     return item;
   }
 
-  // Create a new refs object with only the keys
-  const strippedRefs: Record<string, PriKey<any> | ComKey<any, any, any, any, any, any>> = {};
+  // Create a new refs object with only the keys (no populated items)
+  const strippedRefs: Record<string, ItemReference> = {};
   
   for (const [name, value] of Object.entries(item.refs)) {
     if (value && typeof value === 'object' && 'key' in value) {
-      // It's a ReferenceItem with both key and item - extract just the key
-      strippedRefs[name] = (value as any).key as PriKey<any> | ComKey<any, any, any, any, any, any>;
+      // It's a Reference with key and possibly item - keep only the key
+      strippedRefs[name] = {
+        key: (value as any).key as PriKey<any> | ComKey<any, any, any, any, any, any>
+      };
     } else {
-      // It's already just a key (PriKey or ComKey)
-      strippedRefs[name] = value as PriKey<any> | ComKey<any, any, any, any, any, any>;
+      // Legacy format: It's just a key (PriKey or ComKey) - wrap it in the new structure
+      const keyValue = (value as any).key || value;
+      strippedRefs[name] = {
+        key: keyValue as PriKey<any> | ComKey<any, any, any, any, any, any>
+      };
     }
   }
 
   return {
     ...item,
-    refs: strippedRefs
+    refs: strippedRefs as any // Type cast needed due to Record<string, ItemReference> compatibility
   };
 };
 
