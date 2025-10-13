@@ -28,23 +28,37 @@ vi.mock('../../src/DocProcessor', () => ({
 // Mock validateKeys to just return the item as an object
 const mockValidateKeys = vi.fn((item: any) => ({ ...item, validated: true }));
 const mockIsValidItemKey = vi.fn(() => true);
+const mockIsComKey = vi.fn(() => false);
 vi.mock('@fjell/core', () => ({
   validateKeys: mockValidateKeys,
   isValidItemKey: mockIsValidItemKey,
+  isComKey: mockIsComKey,
   // Provide minimal stubs for types used in the test
   Item: class { },
   PriKey: Object,
   ComKey: Object,
 }));
 
-// Mock NotFoundError from @fjell/lib
+// Mock errors from @fjell/lib
 const mockNotFoundError = vi.fn((op: any, coordinate: any, key: any) => {
   const err = new Error('NotFoundError: ' + String(key));
   err.name = 'NotFoundError';
   return err;
 });
+const mockInvalidKeyTypeError = vi.fn(() => {
+  const err = new Error('Key for Get is not a valid ItemKey');
+  err.name = 'InvalidKeyTypeError';
+  return err;
+});
+const mockLocationKeyOrderError = vi.fn(() => {
+  const err = new Error('LocationKeyOrderError');
+  err.name = 'LocationKeyOrderError';
+  return err;
+});
 vi.mock('@fjell/lib', () => ({
   NotFoundError: mockNotFoundError,
+  InvalidKeyTypeError: mockInvalidKeyTypeError,
+  LocationKeyOrderError: mockLocationKeyOrderError,
 }));
 
 let getGetOperation: any;
