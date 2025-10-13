@@ -27,7 +27,14 @@ describe('getUpsertOperation', () => {
     vi.clearAllMocks();
 
     mockFirestore = {};
-    mockDefinition = {} as Definition<Item<string>, string>;
+    mockDefinition = {
+      coordinate: {
+        kta: ['test'],
+        scopes: ['firestore']
+      },
+      options: {},
+      collectionNames: ['test-collection']
+    } as Definition<Item<string>, string>;
     mockRegistry = {
       type: 'lib',
       get: vi.fn(),
