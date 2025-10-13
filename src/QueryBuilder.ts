@@ -126,6 +126,8 @@ const applyAndConditions = (query: Query, compoundCondition: CompoundCondition):
       });
       
       // Apply the condition using the traditional three-argument form
+      // Note: Firestore properly handles null values with == and != operators
+      // e.g., .where('field', '==', null) queries for documents where field is null
       resultQuery = resultQuery.where(cond.column, cond.operator || '==', cond.value);
     } else {
       // Nested compound conditions
