@@ -79,7 +79,7 @@ describe('getCreateOperation', () => {
   const registry = {};
   const definition = {
     collectionNames: ['testCollection'],
-    coordinate: { kta: ['TYPEA'] },
+    coordinate: { kta: ['TYPEA', 'LOC1'] }, // Added LOC1 to support location hierarchy
     options: {
       references: [],
       aggregations: []
@@ -109,8 +109,8 @@ describe('getCreateOperation', () => {
     expect(mockCreateEvents).toHaveBeenCalledWith(item);
     expect(lastDocRef!.set).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', events: { created: true } }));
     expect(lastDocRef!.get).toHaveBeenCalled();
-    expect(mockProcessDoc).toHaveBeenCalledWith(expect.anything(), ['TYPEA'], [], [], expect.anything());
-    expect(mockValidateKeys).toHaveBeenCalledWith(expect.objectContaining({ processed: true }), ['TYPEA']);
+    expect(mockProcessDoc).toHaveBeenCalledWith(expect.anything(), ['TYPEA', 'LOC1'], [], [], expect.anything());
+    expect(mockValidateKeys).toHaveBeenCalledWith(expect.objectContaining({ processed: true }), ['TYPEA', 'LOC1']);
     expect(result).toEqual(expect.objectContaining({ foo: 'bar', events: { created: true }, processed: true, validated: true }));
   });
 
@@ -146,10 +146,10 @@ describe('getCreateOperation', () => {
       return lastDocRef;
     });
     const create = getCreateOperation(firestore, definition, registry);
-    const options = { key: { pk: 'com-id', loc: ['loc1'], kt: 'com' } };
+    const options = { key: { pk: 'com-id', loc: [{ kt: 'LOC1', lk: 'loc1' }], kt: 'com' } };
     mockIsComKey.mockReturnValue(true);
     const result = await create(item, options);
-    expect(mockGetReference).toHaveBeenCalledWith(['loc1'], ['testCollection'], firestore);
+    expect(mockGetReference).toHaveBeenCalledWith([{ kt: 'LOC1', lk: 'loc1' }], ['testCollection'], firestore);
     expect(mockCollectionRef.doc).toHaveBeenCalledWith('com-id');
     expect(result).toEqual(expect.objectContaining({ foo: 'qux', events: { created: true }, processed: true, validated: true }));
     expect(lastDocRef!.set).toHaveBeenCalled();
@@ -167,9 +167,9 @@ describe('getCreateOperation', () => {
       return lastDocRef;
     });
     const create = getCreateOperation(firestore, definition, registry);
-    const options = { locations: ['loc2'] };
+    const options = { locations: [{ kt: 'LOC1', lk: 'loc2' }] };
     const result = await create(item, options);
-    expect(mockGetReference).toHaveBeenCalledWith(['loc2'], ['testCollection'], firestore);
+    expect(mockGetReference).toHaveBeenCalledWith([{ kt: 'LOC1', lk: 'loc2' }], ['testCollection'], firestore);
     expect(mockCollectionRef.doc).toHaveBeenCalledWith('00000000-0000-0000-0000-000000000000');
     expect(result).toEqual(expect.objectContaining({ foo: 'baz', events: { created: true }, processed: true, validated: true }));
     expect(lastDocRef!.set).toHaveBeenCalled();

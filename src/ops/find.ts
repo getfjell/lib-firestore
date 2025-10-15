@@ -1,6 +1,7 @@
 import { Item, LocKeyArray } from "@fjell/core";
 
 import { Definition } from "../Definition";
+import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { Operations, Registry } from "@fjell/lib";
 
@@ -30,6 +31,9 @@ export const getFindOperation = <
   ): Promise<V[]> => {
 
     logger.default('Find', { finder, finderParams, locations, options });
+
+    // Validate location key order
+    validateLocations(locations, definition.coordinate, 'find');
 
     // Note that we execute the createFinders function here because we want to make sure we're always getting the
     // most up to date methods.

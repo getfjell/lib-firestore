@@ -15,6 +15,7 @@ import {
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";
 import { createEvents } from "../EventCoordinator";
+import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { getReference } from "../ReferenceFinder";
 import { Registry } from "@fjell/lib";
@@ -75,6 +76,9 @@ export const getCreateOperation = <
       newItemId = crypto.randomUUID();
     }
     logger.default('🔥 [LIB-FIRESTORE] Processed options', { locations, newItemId });
+
+    // Validate location key order
+    validateLocations(locations, coordinate, 'create');
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
     logger.default('🔥 [LIB-FIRESTORE] Getting Reference', { loc });
