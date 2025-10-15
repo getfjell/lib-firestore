@@ -8,6 +8,7 @@ import { CollectionReference } from "@google-cloud/firestore";
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";
 import { getReference } from "../ReferenceFinder";
+import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { Registry } from "@fjell/lib";
 
@@ -37,6 +38,10 @@ export const getAllOperation = <
     const { kta } = coordinate;
 
     logger.default('🔥 [LIB-FIRESTORE] All operation called', { itemQuery, locations, coordinate: coordinate.kta });
+
+    // Validate location key order
+    validateLocations(locations, coordinate, 'all');
+
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
     logger.default('🔥 [LIB-FIRESTORE] Getting collection reference', { loc, collectionNames });
