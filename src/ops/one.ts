@@ -3,6 +3,7 @@ import { Item, LocKeyArray } from "@fjell/core";
 import { ItemQuery } from "@fjell/core";
 
 import { Definition } from "../Definition";
+import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { Registry } from "@fjell/lib";
 import { getAllOperation } from "./all";
@@ -27,6 +28,9 @@ export const getOneOperation = <
     locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
   ): Promise<V | null> => {
     logger.default('One', { itemQuery, locations });
+
+    // Validate location key order
+    validateLocations(locations, definition.coordinate, 'one');
 
     const items = await getAllOperation(firestore, definition, registry)(itemQuery, locations);
     if (items.length > 0) {
