@@ -21,7 +21,7 @@ beforeAll(async () => {
 describe('getFindOperation', () => {
   const mockFinderResult: any = [{ foo: 'bar' }];
   const finderParams = { param1: 'value1' };
-  const locations = ['loc1'];
+  const locations = [{ kt: 'LOC1', lk: 'loc1' }];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -31,6 +31,7 @@ describe('getFindOperation', () => {
     // @ts-ignore
     const mockFinder: any = vi.fn().mockResolvedValue(mockFinderResult);
     const definition: any = {
+      coordinate: { kta: ['TYPEA', 'LOC1'] },
       options: {
         finders: {
           myFinder: mockFinder,
@@ -49,6 +50,7 @@ describe('getFindOperation', () => {
     // @ts-ignore
     const mockFinder: any = vi.fn().mockRejectedValue(new Error('Finder error'));
     const definition: any = {
+      coordinate: { kta: ['TYPEA', 'LOC1'] },
       options: {
         finders: {
           myFinder: mockFinder,
@@ -63,6 +65,7 @@ describe('getFindOperation', () => {
 
   it('throws if the finder does not exist', async () => {
     const definition: any = {
+      coordinate: { kta: ['TYPEA', 'LOC1'] },
       options: {
         finders: {
           otherFinder: vi.fn(),
@@ -72,11 +75,16 @@ describe('getFindOperation', () => {
     const operations: any = {};
     const find = getFindOperation(definition, operations);
     await expect(find('missingFinder', finderParams as any, locations as any)).rejects.toThrow('No finders found');
-    expect(mockLogger.error).toHaveBeenCalledWith('No finders have been defined for this lib.  Requested finder %s with params %j', 'missingFinder', finderParams);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'No finders have been defined for this lib.  Requested finder %s with params %j',
+      'missingFinder',
+      finderParams
+    );
   });
 
   it('throws if no finders are defined', async () => {
     const definition: any = {
+      coordinate: { kta: ['TYPEA', 'LOC1'] },
       options: {},
     };
     const operations: any = {};
