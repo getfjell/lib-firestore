@@ -105,11 +105,56 @@ export const getGetOperation = <
     
     // For composite keys, validate the location key array order
     if (keyIsComposite) {
-      validateLocationKeyOrder(key as ComKey<S, L1, L2, L3, L4, L5>, coordinate, 'get');
+      const comKey = key as ComKey<S, L1, L2, L3, L4, L5>;
+      
+      // Empty loc array is a special case: it means "find by primary key across all locations"
+      // Skip location key order validation for empty loc arrays
+      if (comKey.loc.length > 0) {
+        validateLocationKeyOrder(comKey, coordinate, 'get');
+      } else {
+        logger.debug('Empty loc array detected - will use collection group query', { key });
+      }
     }
 
     const itemKey = key;
 
+    // Handle empty loc array ComKey: use collection group query
+    if (isComKey(itemKey)) {
+      const comKey = itemKey as ComKey<S, L1, L2, L3, L4, L5>;
+      
+      if (comKey.loc.length === 0) {
+        logger.debug('Using collection group query to find item by primary key across all locations', { pk: comKey.pk });
+        
+        // Use collection group to query across all subcollections
+        // We query by the 'id' field which should contain the primary key value
+        const collectionName = collectionNames[0];
+        const collectionGroup = firestore.collectionGroup(collectionName);
+        
+        // Query for documents where the id field matches the primary key
+        // The id field is typically set to the document ID during creation
+        const snapshot = await collectionGroup.where('id', '==', comKey.pk).limit(1).get();
+        
+        if (snapshot.empty) {
+          logger.debug('No document found with primary key across all locations', { pk: comKey.pk });
+          throw new NotFoundError<S, L1, L2, L3, L4, L5>('get', coordinate, key);
+        }
+        
+        // Get the first matching document (should be unique by primary key)
+        const doc = snapshot.docs[0];
+        logger.debug('Found document via collection group query', { path: doc.ref.path, id: doc.id });
+        
+        const item = await processDoc(
+          doc,
+          kta,
+          definition.options.references || [],
+          definition.options.aggregations || [],
+          registry
+        );
+        return validateKeys(item, kta) as V;
+      }
+    }
+
+    // Standard path: get document by reference
     const docRef =
       getReference(
         itemKey as ComKey<S, L1, L2, L3, L4, L5> | PriKey<S>, collectionNames, firestore) as DocumentReference;
