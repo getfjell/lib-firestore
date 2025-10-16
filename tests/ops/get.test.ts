@@ -132,4 +132,96 @@ describe('getGetOperation', () => {
     );
     expect(result).toEqual(expect.objectContaining({ foo: 'bar', processed: true, validated: true }));
   });
+
+  it('uses collection group query for empty loc ComKey', async () => {
+    const compositeDefinition = {
+      collectionNames: ['testCollection'],
+      coordinate: { kta: ['TYPEA', 'TYPEB'] },
+      options: {
+        references: [],
+        aggregations: []
+      }
+    };
+    
+    // Empty loc array means "find by primary key across all locations"
+    const emptyLocKey = { kt: 'TYPEA', pk: 'id1', loc: [] };
+    
+    // Mock collection group query
+    const mockSnapshot = {
+      empty: false,
+      docs: [{
+        ref: { path: 'parents/parent1/testCollection/id1' },
+        id: 'id1',
+        data: () => docData
+      }]
+    };
+    
+    const mockCollectionGroup = {
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      get: vi.fn().mockResolvedValue(mockSnapshot)
+    };
+    
+    const mockFirestore = {
+      collectionGroup: vi.fn(() => mockCollectionGroup)
+    };
+    
+    mockIsComKey.mockReturnValue(true);
+    
+    const get = getGetOperation(mockFirestore as any, compositeDefinition, registry);
+    const result = await get(emptyLocKey);
+    
+    // Should use collection group query
+    expect(mockFirestore.collectionGroup).toHaveBeenCalledWith('testCollection');
+    expect(mockCollectionGroup.where).toHaveBeenCalledWith('id', '==', 'id1');
+    expect(mockCollectionGroup.limit).toHaveBeenCalledWith(1);
+    expect(mockCollectionGroup.get).toHaveBeenCalled();
+    
+    // Should process the found document
+    expect(mockProcessDoc).toHaveBeenCalledWith(
+      mockSnapshot.docs[0],
+      ['TYPEA', 'TYPEB'],
+      [],
+      [],
+      registry
+    );
+    
+    expect(result).toEqual(expect.objectContaining({ foo: 'bar', processed: true, validated: true }));
+  });
+
+  it('throws NotFoundError when collection group query finds no documents', async () => {
+    const compositeDefinition = {
+      collectionNames: ['testCollection'],
+      coordinate: { kta: ['TYPEA', 'TYPEB'] },
+      options: {
+        references: [],
+        aggregations: []
+      }
+    };
+    
+    const emptyLocKey = { kt: 'TYPEA', pk: 'id1', loc: [] };
+    
+    // Mock empty collection group query result
+    const mockSnapshot = {
+      empty: true,
+      docs: []
+    };
+    
+    const mockCollectionGroup = {
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      get: vi.fn().mockResolvedValue(mockSnapshot)
+    };
+    
+    const mockFirestore = {
+      collectionGroup: vi.fn(() => mockCollectionGroup)
+    };
+    
+    mockIsComKey.mockReturnValue(true);
+    
+    const get = getGetOperation(mockFirestore as any, compositeDefinition, registry);
+    
+    await expect(get(emptyLocKey)).rejects.toThrow('NotFoundError');
+    expect(mockNotFoundError).toHaveBeenCalledWith('get', compositeDefinition.coordinate, emptyLocKey);
+  });
 });
