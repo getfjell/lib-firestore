@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { ComKey, isComKey, isValidItemKey, Item, PriKey, validateKeys } from "@fjell/core";
+import { ComKey, GetMethod, isComKey, isValidItemKey, Item, PriKey, validateKeys } from "@fjell/core";
 import { InvalidKeyTypeError, LocationKeyOrderError, NotFoundError, type Registry } from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";
 import { Definition } from "../Definition";
@@ -69,7 +69,7 @@ export const getGetOperation = <
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
    
   registry: Registry,
-) => {
+): GetMethod<V, S, L1, L2, L3, L4, L5> => {
 
   const get = async (
     key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,

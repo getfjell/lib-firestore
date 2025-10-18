@@ -2,7 +2,7 @@
 import { buildQuery } from "../QueryBuilder";
 import { Query } from "@google-cloud/firestore";
 
-import { Item, ItemQuery, LocKeyArray, validateKeys } from "@fjell/core";
+import { AllMethod, Item, ItemQuery, LocKeyArray, validateKeys } from "@fjell/core";
 import { CollectionReference } from "@google-cloud/firestore";
 
 import { Definition } from "../Definition";
@@ -27,7 +27,7 @@ export const getAllOperation = <
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
    
   registry: Registry,
-) => {
+): AllMethod<V, S, L1, L2, L3, L4, L5> => {
 
   const all = async (
     itemQuery: ItemQuery,

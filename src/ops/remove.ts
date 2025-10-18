@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 
-import { ComKey, isValidItemKey, Item, PriKey, validateKeys } from "@fjell/core";
+import { ComKey, isValidItemKey, Item, PriKey, RemoveMethod, validateKeys } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import LibLogger from "../logger";
@@ -21,7 +21,7 @@ export const getRemoveOperations = <
   firestore: FirebaseFirestore.Firestore,
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
   registry: Registry,
-) => {
+): RemoveMethod<V, S, L1, L2, L3, L4, L5> => {
 
   const { options, collectionNames } = definition;
   const { hooks } = options;

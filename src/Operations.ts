@@ -31,26 +31,30 @@ export const createOperations = <
 
   logger.default('createOperations', { firestore, definition });
 
-  const operations = {} as Library.Operations<V, S, L1, L2, L3, L4, L5>;
+  // Create implementation operations (core CRUD and query operations only)
+  // These are the operations that lib-firestore actually implements
+  const implOps: Library.ImplementationOperations<V, S, L1, L2, L3, L4, L5> = {
+    all: getAllOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry),
+    one: getOneOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry),
+    create: getCreateOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry),
+    update: getUpdateOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry),
+    get: getGetOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry),
+    remove: getRemoveOperations<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry),
+    // These operations depend on the operations object itself, so we'll set them temporarily
+    find: null as any,
+    findOne: null as any,
+    upsert: null as any,
+  };
 
-  operations.all = getAllOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry);
-  operations.one = getOneOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry);
-  operations.create = getCreateOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry);
-  operations.update = getUpdateOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry);
-  operations.get = getGetOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry);
-  operations.remove = getRemoveOperations<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry);
-  operations.find = getFindOperation<V, S, L1, L2, L3, L4, L5>(definition, operations, registry);
-  operations.upsert = getUpsertOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry, operations);
+  // Set operations that depend on the operations object
+  implOps.find = getFindOperation<V, S, L1, L2, L3, L4, L5>(definition, implOps as any, registry);
+  implOps.findOne = async (finder: string, params?: Library.OperationParams, locations?: any): Promise<V | null> => {
+    const results = await implOps.find(finder, params || {}, locations);
+    return results.length > 0 ? results[0] : null;
+  };
+  implOps.upsert = getUpsertOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry, implOps as any);
 
-  operations.allFacet = async (): Promise<any> => { };
-  operations.allAction = async (): Promise<any> => { };
-  operations.action = async (): Promise<any> => { };
-  operations.facet = async (): Promise<any> => { };
-  operations.finders = { ...(definition.options.finders || {}) };
-  operations.actions = { ...(definition.options.actions || {}) };
-  operations.facets = { ...(definition.options.facets || {}) };
-  operations.allActions = { ...(definition.options.allActions || {}) };
-  operations.allFacets = { ...(definition.options.allFacets || {}) };
-
-  return operations;
+  // Wrap with default stub implementations for extended operations (facets, actions)
+  // and add metadata dictionaries (finders, actions, facets, allActions, allFacets)
+  return Library.wrapImplementationOperations(implOps, definition.options);
 }
