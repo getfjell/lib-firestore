@@ -1,7 +1,5 @@
 /* eslint-disable indent */
-import { validateKeys } from "@fjell/core";
-
-import { ComKey, isValidItemKey, Item, PriKey } from "@fjell/core";
+import { ComKey, isValidItemKey, Item, PriKey, UpdateMethod, validateKeys } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";
@@ -28,7 +26,7 @@ export const getUpdateOperation = <
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
    
   registry: Library.Registry,
-) => {
+): UpdateMethod<V, S, L1, L2, L3, L4, L5> => {
 
   const { collectionNames, coordinate } = definition;
   const { kta } = coordinate;

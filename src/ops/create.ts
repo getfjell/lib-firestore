@@ -5,6 +5,7 @@ import { DocumentReference, Firestore } from "@google-cloud/firestore";
 
 import {
   ComKey,
+  CreateMethod,
   isComKey,
   Item,
   LocKeyArray,
@@ -37,7 +38,7 @@ export const getCreateOperation = <
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
    
   registry: Registry,
-) => {
+): CreateMethod<V, S, L1, L2, L3, L4, L5> => {
 
   const { collectionNames, coordinate } = definition;
   const { kta } = coordinate;

@@ -1,6 +1,4 @@
-import { Item, LocKeyArray } from "@fjell/core";
-
-import { ItemQuery } from "@fjell/core";
+import { Item, ItemQuery, LocKeyArray, OneMethod } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import { validateLocations } from "../validation/LocationKeyValidator";
@@ -21,7 +19,7 @@ export const getOneOperation = <
     firestore: FirebaseFirestore.Firestore,
     definition: Definition<V, S, L1, L2, L3, L4, L5>,
     registry: Registry,
-  ) => {
+  ): OneMethod<V, S, L1, L2, L3, L4, L5> => {
 
   const one = async (
     itemQuery: ItemQuery,

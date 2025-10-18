@@ -1,4 +1,4 @@
-import { Item, LocKeyArray } from "@fjell/core";
+import { FindMethod, Item, LocKeyArray } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import { validateLocations } from "../validation/LocationKeyValidator";
@@ -19,7 +19,7 @@ export const getFindOperation = <
     operations: Operations<V, S, L1, L2, L3, L4, L5>,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     registry: Registry,
-  ) => {
+  ): FindMethod<V, S, L1, L2, L3, L4, L5> => {
   const { options } = definition;
 
   logger.default('getFindOperation', { definition, operations });
