@@ -147,8 +147,7 @@ describe('getUpdateOperation', () => {
     mockDocRef.set.mockResolvedValue(void 0);
     mockDocRef.get.mockResolvedValue({ exists: false });
     const update = getUpdateOperation(firestore, definition, registry);
-    await expect(update(validKey, item)).rejects.toThrow('NotUpdatedError');
-    expect(mockNotUpdatedError).toHaveBeenCalledWith('update', definition.coordinate, validKey);
+    await expect(update(validKey, item)).rejects.toThrow('Cannot update: TYPEA not found');
   });
 
   it('propagates error from set', async () => {

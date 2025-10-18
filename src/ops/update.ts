@@ -10,6 +10,8 @@ import LibLogger from "../logger";
 import * as Library from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";
 import { stripReferenceItems } from "../processing/ReferenceBuilder";
+import { NotFoundError } from "@fjell/core";
+import { transformFirestoreError } from "../errors/firestoreErrorHandler";
 
 const logger = LibLogger.get('ops', 'update');
 
@@ -37,49 +39,55 @@ export const getUpdateOperation = <
       key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
       item: Partial<Item<S, L1, L2, L3, L4, L5>>,
     ): Promise<V> => {
-      logger.default('🔥 [LIB-FIRESTORE] Raw update operation called', {
-        key,
-        item,
-        coordinate: coordinate.kta,
-        collectionNames
-      });
+      try {
+        logger.default('🔥 [LIB-FIRESTORE] Raw update operation called', {
+          key,
+          item,
+          coordinate: coordinate.kta,
+          collectionNames
+        });
 
-      if (!isValidItemKey(key)) {
-        logger.error('🔥 [LIB-FIRESTORE] Key for Update is not a valid ItemKey: %j', key);
-        throw new Error('Key for Update is not a valid ItemKey');
-      }
+        if (!isValidItemKey(key)) {
+          logger.error('🔥 [LIB-FIRESTORE] Key for Update is not a valid ItemKey: %j', key);
+          throw new Error('Key for Update is not a valid ItemKey');
+        }
 
-      logger.default('🔥 [LIB-FIRESTORE] Getting document reference', { key, collectionNames });
-      const docRef = getReference(
-        key as ComKey<S, L1, L2, L3, L4, L5> | PriKey<S>, collectionNames, firestore) as DocumentReference;
-      logger.default('🔥 [LIB-FIRESTORE] Got document reference', { docRef: docRef.path });
-      
-      let itemToUpdate: Partial<Item<S, L1, L2, L3, L4, L5>> = Object.assign({}, item);
+        logger.default('🔥 [LIB-FIRESTORE] Getting document reference', { key, collectionNames });
+        const docRef = getReference(
+          key as ComKey<S, L1, L2, L3, L4, L5> | PriKey<S>, collectionNames, firestore) as DocumentReference;
+        logger.default('🔥 [LIB-FIRESTORE] Got document reference', { docRef: docRef.path });
+        
+        let itemToUpdate: Partial<Item<S, L1, L2, L3, L4, L5>> = Object.assign({}, item);
 
-      // Right before this record is going to be updated, we need to update the events, strip reference items, and remove the key
-      // TODO: Move this up.
-      logger.default('🔥 [LIB-FIRESTORE] Updating events for item', { itemToUpdate });
-      itemToUpdate = updateEvents(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
-      logger.default('🔥 [LIB-FIRESTORE] Events updated', { itemToUpdate });
-      
-      // Strip populated reference items before writing to Firestore
-      logger.default('🔥 [LIB-FIRESTORE] Stripping reference items from item', { itemToUpdate });
-      itemToUpdate = stripReferenceItems(itemToUpdate);
-      logger.default('🔥 [LIB-FIRESTORE] Reference items stripped', { itemToUpdate });
-      
-      // TODO: Move this up.
-      logger.default('🔥 [LIB-FIRESTORE] Removing key from item', { itemToUpdate });
-      itemToUpdate = removeKey(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
-      logger.default('🔥 [LIB-FIRESTORE] Key removed', { itemToUpdate });
+        // Right before this record is going to be updated, we need to update the events, strip reference items, and remove the key
+        // TODO: Move this up.
+        logger.default('🔥 [LIB-FIRESTORE] Updating events for item', { itemToUpdate });
+        itemToUpdate = updateEvents(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
+        logger.default('🔥 [LIB-FIRESTORE] Events updated', { itemToUpdate });
+        
+        // Strip populated reference items before writing to Firestore
+        logger.default('🔥 [LIB-FIRESTORE] Stripping reference items from item', { itemToUpdate });
+        itemToUpdate = stripReferenceItems(itemToUpdate);
+        logger.default('🔥 [LIB-FIRESTORE] Reference items stripped', { itemToUpdate });
+        
+        // TODO: Move this up.
+        logger.default('🔥 [LIB-FIRESTORE] Removing key from item', { itemToUpdate });
+        itemToUpdate = removeKey(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
+        logger.default('🔥 [LIB-FIRESTORE] Key removed', { itemToUpdate });
 
-      logger.default('🔥 [LIB-FIRESTORE] Setting item in Firestore with merge', { itemToUpdate });
-      await docRef.set(itemToUpdate, { merge: true });
-      logger.default('🔥 [LIB-FIRESTORE] Getting updated document from Firestore');
-      const doc = await docRef.get();
-      if (!doc.exists) {
-        logger.error('🔥 [LIB-FIRESTORE] Document not found after update');
-        throw new Library.NotUpdatedError<S, L1, L2, L3, L4, L5>('update', coordinate, key);
-      } else {
+        logger.default('🔥 [LIB-FIRESTORE] Setting item in Firestore with merge', { itemToUpdate });
+        await docRef.set(itemToUpdate, { merge: true });
+        logger.default('🔥 [LIB-FIRESTORE] Getting updated document from Firestore');
+        const doc = await docRef.get();
+        if (!doc.exists) {
+          logger.error('🔥 [LIB-FIRESTORE] Document not found after update');
+          throw new NotFoundError(
+            `Cannot update: ${kta[0]} not found`,
+            kta[0],
+            key
+          );
+        }
+
         // TODO: Move this up.
         logger.default('🔥 [LIB-FIRESTORE] Processing document and validating keys');
         const processedItem = await processDoc(
@@ -89,9 +97,13 @@ export const getUpdateOperation = <
           definition.options.aggregations || [],
           registry
         );
-        const item = validateKeys(processedItem, kta);
-        logger.default('🔥 [LIB-FIRESTORE] Raw update operation completed', { item });
-        return item as V;
+        const resultItem = validateKeys(processedItem, kta);
+        logger.default('🔥 [LIB-FIRESTORE] Raw update operation completed', { item: resultItem });
+        return resultItem as V;
+      } catch (error: any) {
+        // Transform Firestore errors but pass through NotFoundError
+        if (error instanceof NotFoundError) throw error;
+        throw transformFirestoreError(error, kta[0], key);
       }
     }
   );

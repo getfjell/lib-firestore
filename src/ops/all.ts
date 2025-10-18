@@ -10,6 +10,7 @@ import { processDoc } from "../DocProcessor";
 import { getReference } from "../ReferenceFinder";
 import LibLogger from "../logger";
 import { Registry } from "@fjell/lib";
+import { transformFirestoreError } from "../errors/firestoreErrorHandler";
 
 const logger = LibLogger.get('ops', 'all');
 
@@ -75,13 +76,13 @@ export const getAllOperation = <
 
       logger.default('🔥 [LIB-FIRESTORE] All operation completed', { docCount: docs.length });
       return docs as V[];
-    } catch (error) {
+    } catch (error: any) {
       logger.error('🔥 [LIB-FIRESTORE] Query execution failed', {
         error: error.message,
         errorCode: error.code,
         errorDetails: error.details
       });
-      throw error;
+      throw transformFirestoreError(error, kta[0]);
     }
   });
 }
