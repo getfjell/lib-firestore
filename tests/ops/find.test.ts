@@ -19,7 +19,7 @@ beforeAll(async () => {
 });
 
 describe('getFindOperation', () => {
-  const mockFinderResult: any = [{ foo: 'bar' }];
+  const mockFinderResult: any = [{ key: { kt: 'TYPEA', pk: 'test-id' }, foo: 'bar' }];
   const finderParams = { param1: 'value1' };
   const locations = [{ kt: 'LOC1', lk: 'loc1' }];
 
@@ -42,7 +42,7 @@ describe('getFindOperation', () => {
     const find = getFindOperation(definition, operations);
     const result = await find('myFinder', finderParams as any, locations as any);
     expect(mockFinder).toHaveBeenCalledWith(finderParams, locations);
-    expect(result).toBe(mockFinderResult);
+    expect(result).toStrictEqual(mockFinderResult);
     expect(mockLogger.default).toHaveBeenCalledWith('Find', expect.objectContaining({ finder: 'myFinder' }));
   });
 

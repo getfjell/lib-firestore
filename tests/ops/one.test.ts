@@ -24,12 +24,14 @@ const mockRegistry = {
 } as unknown as Registry;
 
 // Mock @fjell/core types for type compatibility
-vi.mock('@fjell/core', () => ({
-  Item: class { },
-  ItemQuery: Object,
-  LocKeyArray: Array,
-  validateLocations: vi.fn(), // Mock validation function
-}));
+const mockValidateLocations = vi.fn(); // Mock validation function
+vi.mock('@fjell/core', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    validateLocations: mockValidateLocations,
+  };
+});
 
 // Import after mocks
 let getOneOperation: any;
@@ -48,7 +50,7 @@ describe('getOneOperation', () => {
   });
 
   it('returns the first item if getAllOperation returns items', async () => {
-    const items = [{ foo: 'bar' }, { foo: 'baz' }];
+    const items = [{ key: { kt: 'TYPEA', pk: 'item-1' }, foo: 'bar' }, { key: { kt: 'TYPEA', pk: 'item-2' }, foo: 'baz' }];
     // getAllOperation returns a function (the op) that returns items
     mockGetAllOperation.mockReturnValue(() => Promise.resolve(items));
     const one = getOneOperation(firestore, definition, mockRegistry);

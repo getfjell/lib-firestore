@@ -1,4 +1,4 @@
-import { Item, ItemQuery, LocKeyArray, OneMethod, validateLocations } from "@fjell/core";
+import { createOneWrapper, Item, ItemQuery, LocKeyArray, OneMethod } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import LibLogger from "../logger";
@@ -20,22 +20,16 @@ export const getOneOperation = <
     registry: Registry,
   ): OneMethod<V, S, L1, L2, L3, L4, L5> => {
 
-  const one = async (
-    itemQuery: ItemQuery,
-    locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
-  ): Promise<V | null> => {
-    logger.default('One', { itemQuery, locations });
-
-    // Validate location key order
-    validateLocations(locations, definition.coordinate, 'one');
-
-    const items = await getAllOperation(firestore, definition, registry)(itemQuery, locations);
-    if (items.length > 0) {
-      return items[0] as V;
-    } else {
-      return null;
+  return createOneWrapper(
+    definition.coordinate,
+    async (itemQuery: ItemQuery, locations: LocKeyArray<L1, L2, L3, L4, L5> | []) => {
+      logger.default('One', { itemQuery, locations });
+      const items = await getAllOperation(firestore, definition, registry)(itemQuery, locations);
+      if (items.length > 0) {
+        return items[0] as V;
+      } else {
+        return null;
+      }
     }
-  }
-
-  return one;
+  );
 }

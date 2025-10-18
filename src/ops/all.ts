@@ -2,7 +2,7 @@
 import { buildQuery } from "../QueryBuilder";
 import { Query } from "@google-cloud/firestore";
 
-import { AllMethod, Item, ItemQuery, LocKeyArray, validateKeys, validateLocations } from "@fjell/core";
+import { AllMethod, createAllWrapper, Item, ItemQuery, LocKeyArray, validateKeys } from "@fjell/core";
 import { CollectionReference } from "@google-cloud/firestore";
 
 import { Definition } from "../Definition";
@@ -28,18 +28,13 @@ export const getAllOperation = <
   registry: Registry,
 ): AllMethod<V, S, L1, L2, L3, L4, L5> => {
 
-  const all = async (
-    itemQuery: ItemQuery,
-    locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
-  ): Promise<V[]> => {
+  return createAllWrapper(
+    definition.coordinate,
+    async (itemQuery: ItemQuery, locations: LocKeyArray<L1, L2, L3, L4, L5> | []) => {
+      const { collectionNames, coordinate } = definition;
+      const { kta } = coordinate;
 
-    const { collectionNames, coordinate } = definition;
-    const { kta } = coordinate;
-
-    logger.default('🔥 [LIB-FIRESTORE] All operation called', { itemQuery, locations, coordinate: coordinate.kta });
-
-    // Validate location key order
-    validateLocations(locations, coordinate, 'all');
+      logger.default('🔥 [LIB-FIRESTORE] All operation called', { itemQuery, locations, coordinate: coordinate.kta });
 
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
@@ -88,7 +83,5 @@ export const getAllOperation = <
       });
       throw error;
     }
-  }
-
-  return all;
+  });
 }
