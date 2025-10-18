@@ -49,7 +49,7 @@ describe('getUpsertOperation', () => {
   });
 
   it('should return existing item when get succeeds', async () => {
-    const existingItem = { id: 'test-id', name: 'existing' };
+    const existingItem = { key: { kt: 'test', pk: 'test-id' }, id: 'test-id', name: 'existing' };
     mockOperations.get.mockResolvedValue(existingItem);
 
     const upsert = getUpsertOperation(mockFirestore, mockDefinition, mockRegistry, mockOperations);
@@ -62,7 +62,7 @@ describe('getUpsertOperation', () => {
   });
 
   it('should create new item when get fails', async () => {
-    const newItem = { id: 'test-id', name: 'created' };
+    const newItem = { key: { kt: 'test', pk: 'test-id' }, id: 'test-id', name: 'created' };
     mockOperations.get.mockRejectedValue(new Error('Not found'));
     mockOperations.create.mockResolvedValue(newItem);
 

@@ -45,14 +45,14 @@ const mockValidateKeys = vi.fn((item: any, kta: any) => {
   return item;
 });
 const mockValidateLocations = vi.fn(); // Mock validation function
-vi.mock('@fjell/core', () => ({
-  validateKeys: mockValidateKeys,
-  validateLocations: mockValidateLocations,
-  // Provide minimal stubs for types used in the test
-  Item: class { },
-  ItemQuery: Object,
-  LocKeyArray: Array,
-}));
+vi.mock('@fjell/core', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    validateKeys: mockValidateKeys,
+    validateLocations: mockValidateLocations,
+  };
+});
 
 // Import after mocks
 let getAllOperation: any;
