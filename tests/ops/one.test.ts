@@ -28,6 +28,7 @@ vi.mock('@fjell/core', () => ({
   Item: class { },
   ItemQuery: Object,
   LocKeyArray: Array,
+  validateLocations: vi.fn(), // Mock validation function
 }));
 
 // Import after mocks
