@@ -2,15 +2,15 @@
 import { buildQuery } from "../QueryBuilder";
 import { Query } from "@google-cloud/firestore";
 
-import { Item, ItemQuery, LocKeyArray, validateKeys } from "@fjell/core";
+import { AllMethod, createAllWrapper, Item, ItemQuery, LocKeyArray, validateKeys } from "@fjell/core";
 import { CollectionReference } from "@google-cloud/firestore";
 
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";
 import { getReference } from "../ReferenceFinder";
-import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { Registry } from "@fjell/lib";
+import { transformFirestoreError } from "../errors/firestoreErrorHandler";
 
 const logger = LibLogger.get('ops', 'all');
 
@@ -27,20 +27,15 @@ export const getAllOperation = <
   definition: Definition<V, S, L1, L2, L3, L4, L5>,
    
   registry: Registry,
-) => {
+): AllMethod<V, S, L1, L2, L3, L4, L5> => {
 
-  const all = async (
-    itemQuery: ItemQuery,
-    locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
-  ): Promise<V[]> => {
+  return createAllWrapper(
+    definition.coordinate,
+    async (itemQuery: ItemQuery, locations: LocKeyArray<L1, L2, L3, L4, L5> | []) => {
+      const { collectionNames, coordinate } = definition;
+      const { kta } = coordinate;
 
-    const { collectionNames, coordinate } = definition;
-    const { kta } = coordinate;
-
-    logger.default('🔥 [LIB-FIRESTORE] All operation called', { itemQuery, locations, coordinate: coordinate.kta });
-
-    // Validate location key order
-    validateLocations(locations, coordinate, 'all');
+      logger.default('🔥 [LIB-FIRESTORE] All operation called', { itemQuery, locations, coordinate: coordinate.kta });
 
     const loc: LocKeyArray<L1, L2, L3, L4, L5> | [] = locations;
 
@@ -81,15 +76,13 @@ export const getAllOperation = <
 
       logger.default('🔥 [LIB-FIRESTORE] All operation completed', { docCount: docs.length });
       return docs as V[];
-    } catch (error) {
+    } catch (error: any) {
       logger.error('🔥 [LIB-FIRESTORE] Query execution failed', {
         error: error.message,
         errorCode: error.code,
         errorDetails: error.details
       });
-      throw error;
+      throw transformFirestoreError(error, kta[0]);
     }
-  }
-
-  return all;
+  });
 }
