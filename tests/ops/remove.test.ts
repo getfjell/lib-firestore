@@ -35,18 +35,16 @@ const mockGenerateKeyArray = vi.fn((key: any) => {
   return [{ pk: 'mockKey' }];
 });
 const mockIsPriKey = vi.fn(() => true);
-vi.mock('@fjell/core', () => ({
-  validateKeys: mockValidateKeys,
-  isValidItemKey: mockIsValidItemKey,
-  generateKeyArray: mockGenerateKeyArray,
-  isPriKey: mockIsPriKey,
-  Item: class { },
-  PriKey: Object,
-  ComKey: Object,
-  LocKey: Object,
-  LocKeyArray: Object,
-  TypesProperties: Object,
-}));
+vi.mock('@fjell/core', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    validateKeys: mockValidateKeys,
+    isValidItemKey: mockIsValidItemKey,
+    generateKeyArray: mockGenerateKeyArray,
+    isPriKey: mockIsPriKey,
+  };
+});
 
 // Mock getUpdateOperation
 const mockUpdateOperation = vi.fn();
@@ -76,7 +74,7 @@ describe('getRemoveOperations', () => {
     coordinate: { kta: ['TYPEA'] },
     collectionNames: ['testCollection'],
   };
-  const validKey: any = { pk: 'id1', kt: 'pri' };
+  const validKey: any = { pk: 'id1', kt: 'TYPEA' };
   const removedItem: any = { foo: 'bar', events: { deleted: { at: new Date() } } };
 
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import { FindMethod, Item, LocKeyArray, validateLocations } from "@fjell/core";
+import { createFindWrapper, FindMethod, Item, LocKeyArray } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import LibLogger from "../logger";
@@ -23,33 +23,29 @@ export const getFindOperation = <
 
   logger.default('getFindOperation', { definition, operations });
 
-  const find = async (
-    finder: string,
-    finderParams: Record<string, string | number | boolean | Date | Array<string | number | boolean | Date>>,
-    locations?: LocKeyArray<L1, L2, L3, L4, L5> | []
-  ): Promise<V[]> => {
+  return createFindWrapper(
+    definition.coordinate,
+    async (
+      finder: string,
+      finderParams: Record<string, string | number | boolean | Date | Array<string | number | boolean | Date>>,
+      locations?: LocKeyArray<L1, L2, L3, L4, L5> | []
+    ): Promise<V[]> => {
+      logger.default('Find', { finder, finderParams, locations, options });
 
-    logger.default('Find', { finder, finderParams, locations, options });
-
-    // Validate location key order
-    validateLocations(locations, definition.coordinate, 'find');
-
-    // Note that we execute the createFinders function here because we want to make sure we're always getting the
-    // most up to date methods.
-    if (options.finders && options.finders[finder]) {
-      const finderMethod = options.finders[finder];
-      if (finderMethod) {
-        return finderMethod(finderParams, locations);
+      // Note that we execute the createFinders function here because we want to make sure we're always getting the
+      // most up to date methods.
+      if (options.finders && options.finders[finder]) {
+        const finderMethod = options.finders[finder];
+        if (finderMethod) {
+          return finderMethod(finderParams, locations);
+        } else {
+          logger.error(`Finder %s not found`, finder);
+          throw new Error(`Finder ${finder} not found`);
+        }
       } else {
-        logger.error(`Finder %s not found`, finder);
-        throw new Error(`Finder ${finder} not found`);
-      }
-    } else {
-      logger.error(
+        logger.error(
         `No finders have been defined for this lib.  Requested finder %s with params %j`, finder, finderParams);
-      throw new Error(`No finders found`);
-    }
-  }
-
-  return find;
+        throw new Error(`No finders found`);
+      }
+    });
 }

@@ -1,6 +1,6 @@
 import { Definition } from "../Definition";
 import LibLogger from "../logger";
-import { ComKey, Item, LocKeyArray, PriKey, UpsertMethod } from "@fjell/core";
+import { ComKey, createUpsertWrapper, Item, PriKey, UpsertMethod } from "@fjell/core";
 import * as Library from "@fjell/lib";
 
 const logger = LibLogger.get('ops', 'upsert');
@@ -23,23 +23,22 @@ export const getUpsertOperation = <
     operations: Library.Operations<V, S, L1, L2, L3, L4, L5>
   ): UpsertMethod<V, S, L1, L2, L3, L4, L5> => {
 
-  const upsert = async (
-    key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-    itemProperties: Partial<Item<S, L1, L2, L3, L4, L5>>,
+  return createUpsertWrapper(
+    definition.coordinate,
+    async (
+      key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
+      itemProperties: Partial<Item<S, L1, L2, L3, L4, L5>>
+    ): Promise<V> => {
+      logger.default('upsert', { key, itemProperties });
 
-    locations?: LocKeyArray<L1, L2, L3, L4, L5>,
-  ): Promise<V> => {
-    logger.default('upsert', { key, itemProperties, locations });
-
-    // Simple upsert implementation: try to get, if not found then create
-    try {
-      return await operations.get(key);
-    } catch {
-      // If get fails, create a new item
-      logger.default('Item not found, creating new item', { key });
-      return await operations.create(itemProperties, { key });
+      // Simple upsert implementation: try to get, if not found then create
+      try {
+        return await operations.get(key);
+      } catch {
+        // If get fails, create a new item
+        logger.default('Item not found, creating new item', { key });
+        return await operations.create(itemProperties, { key });
+      }
     }
-  };
-
-  return upsert;
+  );
 };

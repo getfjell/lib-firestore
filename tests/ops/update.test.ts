@@ -39,10 +39,11 @@ vi.mock('../../src/ReferenceFinder', () => ({
   getReference: mockGetReference,
 }));
 
-// Mock processDoc to return the doc data
-const mockProcessDoc = vi.fn((doc: any) => {
+// Mock processDoc to return the doc data with a key
+const mockProcessDoc = vi.fn((doc: any, kta: any) => {
   const data = doc && typeof doc.data === 'function' ? doc.data() : {};
-  return { ...data, processed: true };
+  const docId = doc.id || 'mock-id';
+  return { ...data, processed: true, key: { kt: kta[0], pk: docId } };
 });
 vi.mock('../../src/DocProcessor', () => ({
   processDoc: mockProcessDoc,
@@ -59,18 +60,16 @@ const mockGenerateKeyArray = vi.fn((key: any) => {
   return [{ pk: 'mockKey' }];
 });
 const mockIsPriKey = vi.fn(() => true);
-vi.mock('@fjell/core', () => ({
-  validateKeys: mockValidateKeys,
-  isValidItemKey: mockIsValidItemKey,
-  generateKeyArray: mockGenerateKeyArray,
-  isPriKey: mockIsPriKey,
-  Item: class { },
-  PriKey: Object,
-  ComKey: Object,
-  LocKey: Object,
-  LocKeyArray: Object,
-  TypesProperties: Object,
-}));
+vi.mock('@fjell/core', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    validateKeys: mockValidateKeys,
+    isValidItemKey: mockIsValidItemKey,
+    generateKeyArray: mockGenerateKeyArray,
+    isPriKey: mockIsPriKey,
+  };
+});
 
 // Mock NotUpdatedError from @fjell/lib
 const mockNotUpdatedError = vi.fn((op: any, coordinate: any, key: any) => {
@@ -103,8 +102,8 @@ describe('getUpdateOperation', () => {
       aggregations: []
     }
   };
-  const validKey = { pk: 'id1', kt: 'pri' };
-  const item = { foo: 'bar', key: { pk: 'id1', kt: 'pri' } };
+  const validKey = { pk: 'id1', kt: 'TYPEA' };
+  const item = { foo: 'bar', key: { pk: 'id1', kt: 'TYPEA' } };
   const docData = { foo: 'bar' };
 
   beforeEach(() => {
@@ -127,7 +126,7 @@ describe('getUpdateOperation', () => {
     expect(mockIsValidItemKey).toHaveBeenCalledWith(validKey);
     expect(mockGetReference).toHaveBeenCalledWith(validKey, definition.collectionNames, firestore);
     expect(mockUpdateEvents).toHaveBeenCalledWith(item);
-    expect(mockRemoveKey).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', updated: true, key: { pk: 'id1', kt: 'pri' } }));
+    expect(mockRemoveKey).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', updated: true, key: { pk: 'id1', kt: 'TYPEA' } }));
     expect(mockDocRef.set).toHaveBeenCalledWith(expect.objectContaining({ foo: 'bar', updated: true }), { merge: true });
     expect(mockDocRef.get).toHaveBeenCalled();
     expect(mockProcessDoc).toHaveBeenCalledWith({ exists: true, data: expect.any(Function) }, ['TYPEA'], [], [], expect.anything());
