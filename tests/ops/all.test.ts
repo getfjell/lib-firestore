@@ -44,13 +44,15 @@ const mockValidateKeys = vi.fn((item: any, kta: any) => {
   if (item.key && item.key.kt === 'THROW') throw new Error('Key validation error');
   return item;
 });
-vi.mock('@fjell/core', () => ({
-  validateKeys: mockValidateKeys,
-  // Provide minimal stubs for types used in the test
-  Item: class { },
-  ItemQuery: Object,
-  LocKeyArray: Array,
-}));
+const mockValidateLocations = vi.fn(); // Mock validation function
+vi.mock('@fjell/core', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    validateKeys: mockValidateKeys,
+    validateLocations: mockValidateLocations,
+  };
+});
 
 // Import after mocks
 let getAllOperation: any;

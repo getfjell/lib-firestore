@@ -30,10 +30,11 @@ vi.mock('../../src/EventCoordinator', () => ({
   createEvents: mockCreateEvents,
 }));
 
-// Mock processDoc to return the doc data
-const mockProcessDoc = vi.fn((doc: any) => {
+// Mock processDoc to return the doc data with a key
+const mockProcessDoc = vi.fn((doc: any, kta: any) => {
   const data = doc && typeof doc.data === 'function' ? doc.data() : {};
-  return { ...data, events: data.events, processed: true };
+  const docId = doc.id || '00000000-0000-0000-0000-000000000000';
+  return { ...data, events: data.events, processed: true, key: { kt: kta[0], pk: docId } };
 });
 vi.mock('../../src/DocProcessor', () => ({
   processDoc: mockProcessDoc,
@@ -41,17 +42,17 @@ vi.mock('../../src/DocProcessor', () => ({
 
 // Mock validateKeys to just return the item as an object
 const mockValidateKeys = vi.fn((item: any) => ({ ...item, validated: true }));
+const mockValidateLocations = vi.fn(); // Mock validation function
 const mockIsComKey = vi.fn((key: any) => Boolean(key && key.loc));
-vi.mock('@fjell/core', () => ({
-  validateKeys: mockValidateKeys,
-  isComKey: mockIsComKey,
-  // Provide minimal stubs for types used in the test
-  Item: class { },
-  TypesProperties: Object,
-  PriKey: Object,
-  ComKey: Object,
-  LocKeyArray: Array,
-}));
+vi.mock('@fjell/core', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    validateKeys: mockValidateKeys,
+    validateLocations: mockValidateLocations,
+    isComKey: mockIsComKey,
+  };
+});
 
 // Patch global crypto.randomUUID for test
 let originalRandomUUID: any;
@@ -97,7 +98,7 @@ describe('getCreateOperation', () => {
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
         set: vi.fn(() => void 0),
-        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'bar' }) })),
+        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'bar' }), id })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;
@@ -115,24 +116,11 @@ describe('getCreateOperation', () => {
   });
 
   it('creates a document with a provided PriKey', async () => {
-    let lastDocRef;
-    mockCollectionRef.doc.mockImplementationOnce((id) => {
-      lastDocRef = {
-        set: vi.fn(() => void 0),
-        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }) })),
-        path: `mock/doc/path/${id}`,
-      };
-      return lastDocRef;
-    });
+    // This test expects an error because we're using a composite library but providing a PriKey
     const create = getCreateOperation(firestore, definition, registry);
-    const options = { key: { pk: 'custom-id', kt: 'pri' } };
+    const options = { key: { pk: 'custom-id', kt: 'TYPEA' } };
     mockIsComKey.mockReturnValue(false);
-    const result = await create(item, options);
-    expect(mockGetReference).toHaveBeenCalledWith([], ['testCollection'], firestore);
-    expect(mockCollectionRef.doc).toHaveBeenCalledWith('custom-id');
-    expect(result).toEqual(expect.objectContaining({ foo: 'baz', events: { created: true }, processed: true, validated: true }));
-    expect(lastDocRef!.set).toHaveBeenCalled();
-    expect(lastDocRef!.get).toHaveBeenCalled();
+    await expect(create(item, options)).rejects.toThrow('composite item library');
   });
 
   it('creates a document with a provided ComKey and locations', async () => {
@@ -140,13 +128,13 @@ describe('getCreateOperation', () => {
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
         set: vi.fn(() => void 0),
-        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'qux' }) })),
+        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'qux' }), id: 'com-id' })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;
     });
     const create = getCreateOperation(firestore, definition, registry);
-    const options = { key: { pk: 'com-id', loc: [{ kt: 'LOC1', lk: 'loc1' }], kt: 'com' } };
+    const options = { key: { pk: 'com-id', loc: [{ kt: 'LOC1', lk: 'loc1' }], kt: 'TYPEA' } };
     mockIsComKey.mockReturnValue(true);
     const result = await create(item, options);
     expect(mockGetReference).toHaveBeenCalledWith([{ kt: 'LOC1', lk: 'loc1' }], ['testCollection'], firestore);
@@ -161,7 +149,7 @@ describe('getCreateOperation', () => {
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
         set: vi.fn(() => void 0),
-        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }) })),
+        get: vi.fn(() => ({ exists: true, data: () => ({ events: { created: true }, foo: 'baz' }), id })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;
@@ -202,7 +190,7 @@ describe('getCreateOperation', () => {
     mockCollectionRef.doc.mockImplementationOnce((id) => {
       lastDocRef = {
         set: vi.fn(() => void 0),
-        get: vi.fn(() => ({ exists: true, data: () => ({ foo: 'bar' }) })),
+        get: vi.fn(() => ({ exists: true, data: () => ({ foo: 'bar' }), id })),
         path: `mock/doc/path/${id}`,
       };
       return lastDocRef;

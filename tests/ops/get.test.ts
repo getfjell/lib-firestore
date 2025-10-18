@@ -16,10 +16,11 @@ vi.mock('../../src/ReferenceFinder', () => ({
   getReference: mockGetReference,
 }));
 
-// Mock processDoc to return the doc data
-const mockProcessDoc = vi.fn((doc: any) => {
+// Mock processDoc to return the doc data with a key
+const mockProcessDoc = vi.fn((doc: any, kta: any) => {
   const data = doc && typeof doc.data === 'function' ? doc.data() : {};
-  return { ...data, processed: true };
+  const docId = doc.id || 'mock-id';
+  return { ...data, processed: true, key: { kt: kta[0], pk: docId } };
 });
 vi.mock('../../src/DocProcessor', () => ({
   processDoc: mockProcessDoc,
@@ -29,15 +30,15 @@ vi.mock('../../src/DocProcessor', () => ({
 const mockValidateKeys = vi.fn((item: any) => ({ ...item, validated: true }));
 const mockIsValidItemKey = vi.fn(() => true);
 const mockIsComKey = vi.fn(() => false);
-vi.mock('@fjell/core', () => ({
-  validateKeys: mockValidateKeys,
-  isValidItemKey: mockIsValidItemKey,
-  isComKey: mockIsComKey,
-  // Provide minimal stubs for types used in the test
-  Item: class { },
-  PriKey: Object,
-  ComKey: Object,
-}));
+vi.mock('@fjell/core', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    validateKeys: mockValidateKeys,
+    isValidItemKey: mockIsValidItemKey,
+    isComKey: mockIsComKey,
+  };
+});
 
 // Mock errors from @fjell/lib
 const mockNotFoundError = vi.fn((op: any, coordinate: any, key: any) => {
@@ -77,7 +78,7 @@ describe('getGetOperation', () => {
       aggregations: []
     }
   };
-  const validKey = { pk: 'id1', kt: 'pri' };
+  const validKey = { pk: 'id1', kt: 'TYPEA' };
   const docData = { foo: 'bar' };
 
   beforeEach(() => {
@@ -109,8 +110,7 @@ describe('getGetOperation', () => {
   it('throws NotFoundError if doc does not exist', async () => {
     mockDocRef.get.mockResolvedValue({ exists: false });
     const get = getGetOperation(firestore, definition, registry);
-    await expect(get(validKey)).rejects.toThrow('NotFoundError');
-    expect(mockNotFoundError).toHaveBeenCalledWith('get', definition.coordinate, validKey);
+    await expect(get(validKey)).rejects.toThrow('TYPEA not found');
   });
 
   it('handles missing references and aggregations options', async () => {
@@ -221,7 +221,6 @@ describe('getGetOperation', () => {
     
     const get = getGetOperation(mockFirestore as any, compositeDefinition, registry);
     
-    await expect(get(emptyLocKey)).rejects.toThrow('NotFoundError');
-    expect(mockNotFoundError).toHaveBeenCalledWith('get', compositeDefinition.coordinate, emptyLocKey);
+    await expect(get(emptyLocKey)).rejects.toThrow('TYPEA not found');
   });
 });

@@ -195,7 +195,7 @@ describe('Firestore Key Type Safety for get() Operations', () => {
         if (!message.includes('is not a constructor')) {
           expect(message).toContain('Invalid key type for get operation');
           expect(message).toContain('This is a composite item library');
-          expect(message).toContain('You must provide both the parent key and location keys');
+          expect(message).toContain('You must provide a ComKey');
         }
       }
     });
@@ -220,7 +220,7 @@ describe('Firestore Key Type Safety for get() Operations', () => {
           // Verify the error is clear about what went wrong
           expect(message).toContain('Invalid key type for get operation');
           expect(message).toContain('Expected: ComKey with format');
-          expect(message).toContain('Received: PriKey: annotations:xxx');
+          expect(message).toContain('Received: PriKey with format');
           expect(message).toContain('This is a composite item library');
           expect(message).toContain('Example correct usage');
           
@@ -274,7 +274,8 @@ describe('Firestore Key Type Safety for get() Operations', () => {
         // (constructor name check skipped due to Vitest module loading issues)
         const message = (error as Error).message;
         if (!message.includes('is not a constructor')) {
-          expect(message).toContain('a string value: "doc-1"');
+          expect(message).toContain('Invalid key structure');
+          expect(message).toContain('"doc-1"');
         }
       }
     });
@@ -291,7 +292,7 @@ describe('Firestore Key Type Safety for get() Operations', () => {
         // (constructor name check skipped due to Vitest module loading issues)
         const message = (error as Error).message;
         if (!message.includes('is not a constructor')) {
-          expect(message).toContain('Invalid key type');
+          expect(message).toContain('Invalid key structure');
         }
       }
     });

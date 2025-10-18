@@ -1,8 +1,8 @@
-import { Item } from "@fjell/core";
+import { Coordinate, Item } from "@fjell/core";
 import * as Library from "@fjell/lib";
 import { Registry } from "@fjell/lib";
 import { Options } from "./Options";
-import { InstanceFactory as BaseInstanceFactory, Coordinate, RegistryHub } from "@fjell/registry";
+import { InstanceFactory as BaseInstanceFactory, RegistryHub } from "@fjell/registry";
 import { createFirestoreLibraryFromComponents, FirestoreLibrary } from "./FirestoreLibrary";
 import LibLogger from "./logger";
 
