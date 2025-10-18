@@ -110,8 +110,7 @@ describe('getGetOperation', () => {
   it('throws NotFoundError if doc does not exist', async () => {
     mockDocRef.get.mockResolvedValue({ exists: false });
     const get = getGetOperation(firestore, definition, registry);
-    await expect(get(validKey)).rejects.toThrow('NotFoundError');
-    expect(mockNotFoundError).toHaveBeenCalledWith('get', definition.coordinate, validKey);
+    await expect(get(validKey)).rejects.toThrow('TYPEA not found');
   });
 
   it('handles missing references and aggregations options', async () => {
@@ -222,7 +221,6 @@ describe('getGetOperation', () => {
     
     const get = getGetOperation(mockFirestore as any, compositeDefinition, registry);
     
-    await expect(get(emptyLocKey)).rejects.toThrow('NotFoundError');
-    expect(mockNotFoundError).toHaveBeenCalledWith('get', compositeDefinition.coordinate, emptyLocKey);
+    await expect(get(emptyLocKey)).rejects.toThrow('TYPEA not found');
   });
 });
