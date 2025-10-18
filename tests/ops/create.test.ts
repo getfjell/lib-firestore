@@ -41,9 +41,11 @@ vi.mock('../../src/DocProcessor', () => ({
 
 // Mock validateKeys to just return the item as an object
 const mockValidateKeys = vi.fn((item: any) => ({ ...item, validated: true }));
+const mockValidateLocations = vi.fn(); // Mock validation function
 const mockIsComKey = vi.fn((key: any) => Boolean(key && key.loc));
 vi.mock('@fjell/core', () => ({
   validateKeys: mockValidateKeys,
+  validateLocations: mockValidateLocations,
   isComKey: mockIsComKey,
   // Provide minimal stubs for types used in the test
   Item: class { },

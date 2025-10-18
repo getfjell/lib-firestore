@@ -10,13 +10,13 @@ import {
   Item,
   LocKeyArray,
   PriKey,
-  validateKeys
+  validateKeys,
+  validateLocations
 } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";
 import { createEvents } from "../EventCoordinator";
-import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { getReference } from "../ReferenceFinder";
 import { Registry } from "@fjell/lib";

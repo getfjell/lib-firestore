@@ -1,7 +1,6 @@
-import { Item, ItemQuery, LocKeyArray, OneMethod } from "@fjell/core";
+import { Item, ItemQuery, LocKeyArray, OneMethod, validateLocations } from "@fjell/core";
 
 import { Definition } from "../Definition";
-import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { Registry } from "@fjell/lib";
 import { getAllOperation } from "./all";
