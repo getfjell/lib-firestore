@@ -1,7 +1,6 @@
 /* eslint-disable indent */
 import LibLogger from './logger';
-import { Item, ItemTypeArray } from '@fjell/core';
-import { Coordinate } from '@fjell/registry';
+import { Coordinate, Item, ItemTypeArray } from '@fjell/core';
 import * as Library from '@fjell/lib';
 import { Registry } from '@fjell/lib';
 import { Options } from './Options';

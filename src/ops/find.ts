@@ -1,7 +1,6 @@
-import { FindMethod, Item, LocKeyArray } from "@fjell/core";
+import { FindMethod, Item, LocKeyArray, validateLocations } from "@fjell/core";
 
 import { Definition } from "../Definition";
-import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { Operations, Registry } from "@fjell/lib";
 

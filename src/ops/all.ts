@@ -2,13 +2,12 @@
 import { buildQuery } from "../QueryBuilder";
 import { Query } from "@google-cloud/firestore";
 
-import { AllMethod, Item, ItemQuery, LocKeyArray, validateKeys } from "@fjell/core";
+import { AllMethod, Item, ItemQuery, LocKeyArray, validateKeys, validateLocations } from "@fjell/core";
 import { CollectionReference } from "@google-cloud/firestore";
 
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";
 import { getReference } from "../ReferenceFinder";
-import { validateLocations } from "../validation/LocationKeyValidator";
 import LibLogger from "../logger";
 import { Registry } from "@fjell/lib";
 
