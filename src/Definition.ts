@@ -1,10 +1,10 @@
 import {
+  Coordinate,
   Item,
   ItemTypeArray
 } from '@fjell/core';
 
 import * as Library from '@fjell/lib';
-import { Coordinate } from '@fjell/registry';
 import { createCoordinate } from './Coordinate';
 import { createOptions, Options } from './Options';
 import LibLogger from './logger';
