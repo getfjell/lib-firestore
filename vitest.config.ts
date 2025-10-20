@@ -1,24 +1,29 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['tests/**/*.test.ts'],
+    include: ['tests/**/*.{test,spec}.ts'],
+    testTimeout: 10000,
+    hookTimeout: 10000,
+    teardownTimeout: 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      reportsDirectory: './coverage',
       exclude: [
-        'node_modules/',
-        'tests/',
+        'node_modules/**',
+        'tests/**',
         'src/index.ts',
+        '**/*.d.ts',
+        'dist/**',
+        'build.js',
+        'docs/**',
+        'coverage/**',
+        'scripts/**',
         'eslint.config.mjs',
         'vitest.config.ts',
-        'esbuild.config.js',
-        'scripts/',
-        'dist',
-        'build.js',
-        'docs/',
       ],
       thresholds: {
         lines: 85,
@@ -32,11 +37,8 @@ export default defineConfig({
         inline: [/@fjell/],
       },
     },
-    testTimeout: 10000,
-    hookTimeout: 10000,
-    teardownTimeout: 10000,
   },
   build: {
     sourcemap: true,
   },
-})
+});
