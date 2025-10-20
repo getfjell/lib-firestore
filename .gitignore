@@ -46,3 +46,9 @@ output/
 input/
 processed/
 .kodrdriv-link-backup.json
+# IDE
+.vscode/
+
+.env.development
+.env.test
+.env.production
