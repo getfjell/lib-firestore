@@ -1,4 +1,4 @@
-import buildLibrary from '@fjell/eslint-config/esbuild/library';
+import buildLibrary from '@fjell/common-config/esbuild/library';
 
 // Build JS only - custom type generation handled by scripts/build-with-types.js
 buildLibrary({
