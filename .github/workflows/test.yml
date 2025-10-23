@@ -25,9 +25,6 @@ jobs:
       - run: npm run build
       - run: npm run test
 
-      - name: Build documentation
-        uses: ./.github/actions/build-docs
-
       - uses: codecov/codecov-action@v5
         with:
           slug: getfjell/lib-firestore

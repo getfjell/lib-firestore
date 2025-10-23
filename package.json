@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-firestore",
-  "version": "4.4.55",
+  "version": "4.4.56",
   "type": "module",
   "keywords": [
     "library",
@@ -37,10 +37,10 @@
     "docs:test": "cd docs && npm run test"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.51",
-    "@fjell/lib": "^4.4.59",
-    "@fjell/logging": "^4.4.50",
-    "@fjell/registry": "^4.4.53",
+    "@fjell/core": "^4.4.53",
+    "@fjell/lib": "^4.4.60",
+    "@fjell/logging": "^4.4.52",
+    "@fjell/registry": "^4.4.55",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
@@ -48,19 +48,19 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.32.0",
-    "@fjell/eslint-config": "^1.1.28",
-    "@swc/core": "^1.13.2",
+    "@eslint/js": "^9.38.0",
+    "@fjell/common-config": "^1.1.29",
+    "@swc/core": "^1.13.5",
     "@tsconfig/recommended": "^1.0.10",
-    "@types/node": "^24.1.0",
-    "@typescript-eslint/eslint-plugin": "^8.38.0",
-    "@typescript-eslint/parser": "^8.38.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "concurrently": "^9.2.0",
-    "esbuild": "0.25.9",
-    "eslint": "^9.32.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "@types/node": "^24.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "@vitest/coverage-v8": "^4.0.2",
+    "concurrently": "^9.2.1",
+    "esbuild": "0.25.11",
+    "eslint": "^9.38.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.2"
   },
   "repository": {
     "type": "git",
