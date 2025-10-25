@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Item } from '@fjell/core';
+import { type Item, NotFoundError } from '@fjell/core';
 import type { Definition } from '../../src/Definition';
 import type { Registry } from '@fjell/lib';
 
@@ -45,34 +45,52 @@ describe('getUpsertOperation', () => {
     mockOperations = {
       get: vi.fn(),
       create: vi.fn(),
+      update: vi.fn(),
     };
   });
 
-  it('should return existing item when get succeeds', async () => {
+  it('should get and update existing item when get succeeds', async () => {
     const existingItem = { key: { kt: 'test', pk: 'test-id' }, id: 'test-id', name: 'existing' };
+    const updatedItem = { key: { kt: 'test', pk: 'test-id' }, id: 'test-id', name: 'updated' };
     mockOperations.get.mockResolvedValue(existingItem);
+    mockOperations.update.mockResolvedValue(updatedItem);
 
     const upsert = getUpsertOperation(mockFirestore, mockDefinition, mockRegistry, mockOperations);
 
     const result = await upsert({ kt: 'test', pk: 'test-id' }, { name: 'new' });
 
-    expect(result).toBe(existingItem);
+    expect(result).toBe(updatedItem);
     expect(mockOperations.get).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' });
     expect(mockOperations.create).not.toHaveBeenCalled();
+    expect(mockOperations.update).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' }, { name: 'new' });
   });
 
-  it('should create new item when get fails', async () => {
+  it('should create and update new item when get fails with NotFoundError', async () => {
     const newItem = { key: { kt: 'test', pk: 'test-id' }, id: 'test-id', name: 'created' };
-    mockOperations.get.mockRejectedValue(new Error('Not found'));
+    const updatedItem = { key: { kt: 'test', pk: 'test-id' }, id: 'test-id', name: 'updated' };
+    mockOperations.get.mockRejectedValue(new NotFoundError('Not found', 'test', { kt: 'test', pk: 'test-id' }));
     mockOperations.create.mockResolvedValue(newItem);
+    mockOperations.update.mockResolvedValue(updatedItem);
 
     const upsert = getUpsertOperation(mockFirestore, mockDefinition, mockRegistry, mockOperations);
 
     const result = await upsert({ kt: 'test', pk: 'test-id' }, { name: 'new' });
 
-    expect(result).toBe(newItem);
+    expect(result).toBe(updatedItem);
     expect(mockOperations.get).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' });
     expect(mockOperations.create).toHaveBeenCalledWith({ name: 'new' }, { key: { kt: 'test', pk: 'test-id' } });
+    expect(mockOperations.update).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' }, { name: 'new' });
+  });
+
+  it('should rethrow errors that are not NotFoundError', async () => {
+    mockOperations.get.mockRejectedValue(new Error('Database connection failed'));
+
+    const upsert = getUpsertOperation(mockFirestore, mockDefinition, mockRegistry, mockOperations);
+
+    await expect(upsert({ kt: 'test', pk: 'test-id' }, { name: 'new' })).rejects.toThrow('Database connection failed');
+    expect(mockOperations.get).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' });
+    expect(mockOperations.create).not.toHaveBeenCalled();
+    expect(mockOperations.update).not.toHaveBeenCalled();
   });
 
   it('should be a function', () => {
