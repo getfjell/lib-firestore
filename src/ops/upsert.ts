@@ -1,6 +1,6 @@
 import { Definition } from "../Definition";
 import LibLogger from "../logger";
-import { ComKey, createUpsertWrapper, Item, PriKey, UpsertMethod } from "@fjell/core";
+import { ComKey, createUpsertWrapper, Item, NotFoundError, PriKey, UpsertMethod } from "@fjell/core";
 import * as Library from "@fjell/lib";
 
 const logger = LibLogger.get('ops', 'upsert');
@@ -31,14 +31,34 @@ export const getUpsertOperation = <
     ): Promise<V> => {
       logger.default('upsert', { key, itemProperties });
 
-      // Simple upsert implementation: try to get, if not found then create
+      let item: V | null = null;
+
+      // Try to get existing item or create if not found
       try {
-        return await operations.get(key);
-      } catch {
-        // If get fails, create a new item
-        logger.default('Item not found, creating new item', { key });
-        return await operations.create(itemProperties, { key });
+        logger.default('Retrieving item by key', { key });
+        item = await operations.get(key);
+      } catch (error: any) {
+        // Check if this is a NotFoundError (preserved by core wrapper)
+        if (error instanceof NotFoundError) {
+          // Item doesn't exist, create it
+          logger.default('Item not found, creating new item', { key });
+          item = await operations.create(itemProperties, { key });
+        } else {
+          // Re-throw other errors (connection issues, permissions, etc.)
+          throw error;
+        }
       }
+
+      if (!item) {
+        throw new Error(`Failed to retrieve or create item for key: ${JSON.stringify(key)}`);
+      }
+
+      // Always update the item with the new properties (this is what makes it an "upsert")
+      logger.default('Updating item with properties', { key: item.key, itemProperties });
+      item = await operations.update(item.key, itemProperties);
+      logger.default('Item upserted successfully', { item });
+
+      return item;
     }
   );
 };
