@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-firestore",
-  "version": "4.4.59",
+  "version": "4.4.60-dev.0",
   "type": "module",
   "keywords": [
     "library",
