@@ -55,7 +55,7 @@ const addReferenceQueries = (query: Query, references: References): Query => {
     logger.default('Adding Reference Query', { key, references });
     const refValue = references[key];
     const keyValue = (refValue as any).key || refValue;
-    
+
     if (isComKey(keyValue)) {
       const ComKey: ComKey<string, string, string | never, string | never, string | never, string | never> =
         keyValue as ComKey<string, string, string | never, string | never, string | never, string | never>;
@@ -81,17 +81,38 @@ const addReferenceQueries = (query: Query, references: References): Query => {
   });
   return retQuery;
 }
- 
+
 const applyAndConditions = (query: Query, compoundCondition: CompoundCondition): Query => {
   logger.default('Applying AND conditions', { compoundCondition });
+
+  // Defensive check - ensure incoming query is valid
+  if (!query) {
+    logger.default('❌ Input query to applyAndConditions is null/undefined!', {
+      queryType: typeof query,
+      compoundCondition
+    });
+    throw new Error(`Input query to applyAndConditions is ${query}`);
+  }
+
+  if (typeof query.where !== 'function') {
+    logger.default('❌ Input query.where is not a function!', {
+      queryType: typeof query,
+      queryConstructor: query?.constructor?.name,
+      hasWhere: 'where' in (query || {}),
+      whereType: typeof (query as any)?.where,
+      queryKeys: Object.keys(query || {})
+    });
+    throw new Error(`Input query.where is not a function. Query is a ${query?.constructor?.name}`);
+  }
+
   const conditions: Array<Condition | CompoundCondition> = compoundCondition.conditions;
-  
+
   let resultQuery = query;
   for (let i = 0; i < conditions.length; i++) {
     const condition = conditions[i];
     if (isCondition(condition)) {
       const cond: Condition = condition as Condition;
-      
+
       logger.default('Applying condition', {
         column: cond.column,
         operator: cond.operator,
@@ -124,11 +145,43 @@ const applyAndConditions = (query: Query, compoundCondition: CompoundCondition):
         value: cond.value,
         valueType: typeof cond.value
       });
-      
+
       // Apply the condition using the traditional three-argument form
       // Note: Firestore properly handles null values with == and != operators
       // e.g., .where('field', '==', null) queries for documents where field is null
+
+      // Defensive check - ensure resultQuery is valid before calling .where()
+      if (!resultQuery) {
+        logger.default('❌ resultQuery is null/undefined before .where() call!', {
+          iteration: i,
+          condition: cond,
+          queryType: typeof resultQuery
+        });
+        throw new Error(`resultQuery is ${resultQuery} before calling .where()`);
+      }
+
+      if (typeof resultQuery.where !== 'function') {
+        logger.default('❌ resultQuery.where is not a function!', {
+          iteration: i,
+          condition: cond,
+          resultQueryType: typeof resultQuery,
+          resultQueryConstructor: resultQuery?.constructor?.name,
+          hasWhere: 'where' in (resultQuery || {}),
+          whereType: typeof (resultQuery as any)?.where
+        });
+        throw new Error(`resultQuery.where is not a function (type: ${typeof (resultQuery as any)?.where}). ResultQuery is a ${resultQuery?.constructor?.name}`);
+      }
+
       resultQuery = resultQuery.where(cond.column, cond.operator || '==', cond.value);
+
+      // Verify the where() call returned a valid Query
+      if (!resultQuery) {
+        logger.default('❌ .where() returned null/undefined!', {
+          iteration: i,
+          condition: cond
+        });
+        throw new Error(`.where() returned ${resultQuery}`);
+      }
     } else {
       // Nested compound conditions
       if ((condition as CompoundCondition).compoundType === 'AND') {
@@ -138,7 +191,7 @@ const applyAndConditions = (query: Query, compoundCondition: CompoundCondition):
       }
     }
   }
-  
+
   return resultQuery;
 }
 
@@ -149,6 +202,11 @@ export const buildQuery = (
   logger.default('buildQuery', { itemQuery, collectionReference });
 
   let itemsQuery: Query = collectionReference;
+  logger.default('itemsQuery before addDeleteQuery', {
+    type: typeof itemsQuery,
+    constructor: itemsQuery?.constructor?.name,
+    hasWhere: typeof (itemsQuery as any)?.where
+  });
   itemsQuery = addDeleteQuery(itemsQuery);
   if (itemQuery.refs) {
     itemsQuery = addReferenceQueries(itemsQuery, itemQuery.refs);
