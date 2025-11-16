@@ -277,7 +277,7 @@ describe('QueryBuilder', () => {
       expect(mockQuery.where).toHaveBeenCalledWith('name', '==', 'test');
     });
 
-    it('should handle product type OR query (Wagner Skis scenario)', () => {
+    it('should handle product type OR query', () => {
       // This test verifies that OR compound queries throw an error in Firestore v7
       const compoundCondition: CompoundCondition = {
         compoundType: 'OR',
