@@ -62,7 +62,7 @@ describe('getUpsertOperation', () => {
     expect(result).toBe(updatedItem);
     expect(mockOperations.get).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' });
     expect(mockOperations.create).not.toHaveBeenCalled();
-    expect(mockOperations.update).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' }, { name: 'new' });
+    expect(mockOperations.update).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' }, { name: 'new' }, undefined);
   });
 
   it('should create and update new item when get fails with NotFoundError', async () => {
@@ -79,7 +79,7 @@ describe('getUpsertOperation', () => {
     expect(result).toBe(updatedItem);
     expect(mockOperations.get).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' });
     expect(mockOperations.create).toHaveBeenCalledWith({ name: 'new' }, { key: { kt: 'test', pk: 'test-id' } });
-    expect(mockOperations.update).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' }, { name: 'new' });
+    expect(mockOperations.update).toHaveBeenCalledWith({ kt: 'test', pk: 'test-id' }, { name: 'new' }, undefined);
   });
 
   it('should rethrow errors that are not NotFoundError', async () => {

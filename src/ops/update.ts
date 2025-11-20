@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { ComKey, createUpdateWrapper, isValidItemKey, Item, PriKey, UpdateMethod, validateKeys } from "@fjell/core";
+import { ComKey, createUpdateWrapper, isValidItemKey, Item, PriKey, UpdateMethod, UpdateOptions, validateKeys } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";
@@ -38,11 +38,17 @@ export const getUpdateOperation = <
     async (
       key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
       item: Partial<Item<S, L1, L2, L3, L4, L5>>,
+      options?: UpdateOptions
     ): Promise<V> => {
       try {
+        // Default to safe merge behavior
+        const replace = options?.replace ?? false;
+        
         logger.default('🔥 [LIB-FIRESTORE] Raw update operation called', {
           key,
           item,
+          options,
+          replace,
           coordinate: coordinate.kta,
           collectionNames
         });
@@ -75,8 +81,34 @@ export const getUpdateOperation = <
         itemToUpdate = removeKey(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
         logger.default('🔥 [LIB-FIRESTORE] Key removed', { itemToUpdate });
 
-        logger.default('🔥 [LIB-FIRESTORE] Setting item in Firestore with merge', { itemToUpdate });
-        await docRef.set(itemToUpdate, { merge: true });
+        // Perform update based on replace flag
+        if (replace) {
+          // FULL DOCUMENT REPLACEMENT - Use with extreme caution!
+          logger.warning('⚠️  [LIB-FIRESTORE] FULL DOCUMENT REPLACEMENT MODE', {
+            itemType: kta[0],
+            key: { kt: key.kt, pk: key.pk },
+            fieldsBeingSet: Object.keys(itemToUpdate),
+            docPath: docRef.path,
+            warning: 'All fields not included in update will be DELETED!',
+            reason: 'UpdateOptions.replace = true was specified'
+          });
+          
+          // Use .set() WITHOUT merge option - this REPLACES the entire document
+          await docRef.set(itemToUpdate);
+          logger.default('🔥 [LIB-FIRESTORE] Document replaced (full replacement)');
+          
+        } else {
+          // PARTIAL UPDATE (MERGE) - DEFAULT SAFE BEHAVIOR
+          logger.default('🔥 [LIB-FIRESTORE] Setting item in Firestore with merge (safe mode)', {
+            itemToUpdate,
+            fieldsBeingUpdated: Object.keys(itemToUpdate)
+          });
+          
+          // Use .set() WITH merge: true - this preserves unspecified fields
+          await docRef.set(itemToUpdate, { merge: true });
+          logger.default('🔥 [LIB-FIRESTORE] Document merged successfully');
+        }
+        
         logger.default('🔥 [LIB-FIRESTORE] Getting updated document from Firestore');
         const doc = await docRef.get();
         if (!doc.exists) {
