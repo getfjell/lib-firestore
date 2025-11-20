@@ -1,6 +1,6 @@
 import { Definition } from "../Definition";
 import LibLogger from "../logger";
-import { ComKey, createUpsertWrapper, Item, NotFoundError, PriKey, UpsertMethod } from "@fjell/core";
+import { ComKey, createUpsertWrapper, Item, LocKeyArray, NotFoundError, PriKey, UpdateOptions, UpsertMethod } from "@fjell/core";
 import * as Library from "@fjell/lib";
 
 const logger = LibLogger.get('ops', 'upsert');
@@ -27,9 +27,11 @@ export const getUpsertOperation = <
     definition.coordinate,
     async (
       key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-      itemProperties: Partial<Item<S, L1, L2, L3, L4, L5>>
+      itemProperties: Partial<Item<S, L1, L2, L3, L4, L5>>,
+      locations?: LocKeyArray<L1, L2, L3, L4, L5>,
+      options?: UpdateOptions
     ): Promise<V> => {
-      logger.default('upsert', { key, itemProperties });
+      logger.default('upsert', { key, itemProperties, locations, options });
 
       let item: V | null = null;
 
@@ -47,6 +49,7 @@ export const getUpsertOperation = <
 
         if (isNotFound) {
           // Item doesn't exist, create it
+          // Note: UpdateOptions are ignored for creation
           logger.default('Item not found, creating new item', { key, errorType: error?.name, errorCode: error?.errorInfo?.code });
           item = await operations.create(itemProperties, { key });
         } else {
@@ -61,8 +64,9 @@ export const getUpsertOperation = <
       }
 
       // Always update the item with the new properties (this is what makes it an "upsert")
-      logger.default('Updating item with properties', { key: item.key, itemProperties });
-      item = await operations.update(item.key, itemProperties);
+      // Pass through UpdateOptions to control merge vs replace behavior
+      logger.default('Updating item with properties', { key: item.key, itemProperties, options });
+      item = await operations.update(item.key, itemProperties, options);
       logger.default('Item upserted successfully', { item });
 
       return item;
