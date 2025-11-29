@@ -22,11 +22,11 @@ export const getOneOperation = <
 
   return createOneWrapper(
     definition.coordinate,
-    async (itemQuery: ItemQuery, locations: LocKeyArray<L1, L2, L3, L4, L5> | []) => {
-      logger.default('One', { itemQuery, locations });
-      const items = await getAllOperation(firestore, definition, registry)(itemQuery, locations);
-      if (items.length > 0) {
-        return items[0] as V;
+    async (itemQuery: ItemQuery, locations: LocKeyArray<L1, L2, L3, L4, L5> | [], allOptions?: any) => {
+      logger.default('One', { itemQuery, locations, allOptions });
+      const result = await getAllOperation(firestore, definition, registry)(itemQuery, locations, allOptions);
+      if (result.items.length > 0) {
+        return result.items[0] as V;
       } else {
         return null;
       }

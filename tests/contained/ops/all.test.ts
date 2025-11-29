@@ -3,7 +3,7 @@ import { getAllOperation } from '../../../src/contained/ops/all';
 import { Definition } from '../../../src/Definition';
 import { Item, ItemQuery, validateKeys } from '@fjell/core';
 import { CollectionGroup, CollectionReference, Query } from '@google-cloud/firestore';
-import { buildQuery } from '../../../src/QueryBuilder';
+import { buildQuery, buildQueryWithoutPagination } from '../../../src/QueryBuilder';
 import { processDoc } from '../../../src/DocProcessor';
 import { getReference } from '../../../src/ReferenceFinder';
 import { Registry } from '@fjell/lib';
@@ -11,6 +11,7 @@ import { Registry } from '@fjell/lib';
 // Mock dependencies
 vi.mock('../../../src/QueryBuilder', () => ({
   buildQuery: vi.fn(),
+  buildQueryWithoutPagination: vi.fn(),
 }));
 
 vi.mock('../../../src/DocProcessor', () => ({
@@ -39,6 +40,7 @@ vi.mock('../../../src/logger', () => ({
 }));
 
 const mockBuildQuery = vi.mocked(buildQuery);
+const mockBuildQueryWithoutPagination = vi.mocked(buildQueryWithoutPagination);
 const mockProcessDoc = vi.mocked(processDoc);
 const mockGetReference = vi.mocked(getReference);
 const mockValidateKeys = vi.mocked(validateKeys);
@@ -96,8 +98,17 @@ describe('contained/ops/all', () => {
       ]
     };
 
+    const mockCountSnapshot = {
+      data: () => ({ count: 2 })
+    };
+
     mockQuery = {
       get: vi.fn().mockResolvedValue(mockQuerySnapshot),
+      count: vi.fn().mockReturnValue({
+        get: vi.fn().mockResolvedValue(mockCountSnapshot)
+      }),
+      offset: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
     } as unknown as Query;
 
     mockCollectionRef = mockQuery as unknown as CollectionReference;
@@ -106,11 +117,17 @@ describe('contained/ops/all', () => {
     (mockFirestore.collectionGroup as any).mockReturnValue(mockCollectionGroup);
     mockGetReference.mockReturnValue(mockCollectionRef);
     mockBuildQuery.mockReturnValue(mockQuery);
+    mockBuildQueryWithoutPagination.mockReturnValue(mockQuery);
     mockProcessDoc.mockImplementation((doc, kta) => ({
       id: doc.id,
       ...doc.data(),
-      kta
-    } as any));
+      key: { kt: kta[0], pk: doc.id },
+      events: {
+        created: { at: new Date() },
+        updated: { at: new Date() },
+        deleted: { at: null }
+      }
+    } as TestItem));
     mockValidateKeys.mockImplementation((item) => item as TestItem);
   });
 
@@ -128,22 +145,34 @@ describe('contained/ops/all', () => {
       const result = await allOperation(itemQuery, []);
 
       expect(mockFirestore.collectionGroup).toHaveBeenCalledWith('testCollection');
-      expect(mockBuildQuery).toHaveBeenCalledWith(itemQuery, mockCollectionGroup);
+      expect(mockBuildQueryWithoutPagination).toHaveBeenCalledWith(itemQuery, mockCollectionGroup);
+      expect(mockQuery.count).toHaveBeenCalled();
       expect(mockQuery.get).toHaveBeenCalled();
-      expect(result).toHaveLength(2);
+      expect(result.items).toHaveLength(2);
+      expect(result.metadata.total).toBe(2);
     });
 
     it('should query specific collection when location is provided', async () => {
-      const allOperation = getAllOperation(mockFirestore, mockDefinition, mockRegistry);
+      const definitionWithLocation = {
+        ...mockDefinition,
+        coordinate: {
+          kta: ['test', 'level1'],
+          scopes: ['firestore'],
+          toString: () => 'test-coordinate'
+        }
+      } as Definition<TestItem, 'test'>;
+      const allOperation = getAllOperation(mockFirestore, definitionWithLocation, mockRegistry);
       const itemQuery: ItemQuery = { limit: 5 };
       const location = [{ lk: 'location1', kt: 'level1' }];
 
       const result = await allOperation(itemQuery, location as any);
 
       expect(mockGetReference).toHaveBeenCalledWith(location, ['testCollection'], mockFirestore);
-      expect(mockBuildQuery).toHaveBeenCalledWith(itemQuery, mockCollectionRef);
+      expect(mockBuildQueryWithoutPagination).toHaveBeenCalledWith(itemQuery, mockCollectionRef);
+      expect(mockQuery.count).toHaveBeenCalled();
       expect(mockQuery.get).toHaveBeenCalled();
-      expect(result).toHaveLength(2);
+      expect(result.items).toHaveLength(2);
+      expect(result.metadata.total).toBe(2);
     });
 
     it('should process documents correctly', async () => {
@@ -152,7 +181,8 @@ describe('contained/ops/all', () => {
 
       const result = await allOperation(itemQuery, []);
 
-      expect(result).toHaveLength(2);
+      expect(result.items).toHaveLength(2);
+      expect(result.metadata.total).toBe(2);
       expect(mockProcessDoc).toHaveBeenCalledTimes(2);
       expect(mockProcessDoc).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'doc1' }),
@@ -186,11 +216,19 @@ describe('contained/ops/all', () => {
 
       await allOperation(itemQuery, []);
 
-      expect(mockBuildQuery).toHaveBeenCalledWith(itemQuery, mockCollectionGroup);
+      expect(mockBuildQueryWithoutPagination).toHaveBeenCalledWith(itemQuery, mockCollectionGroup);
     });
 
     it('should handle multi-level locations', async () => {
-      const allOperation = getAllOperation(mockFirestore, mockDefinition, mockRegistry);
+      const definitionWithLocations = {
+        ...mockDefinition,
+        coordinate: {
+          kta: ['test', 'level1', 'level2'],
+          scopes: ['firestore'],
+          toString: () => 'test-coordinate'
+        }
+      } as Definition<TestItem, 'test'>;
+      const allOperation = getAllOperation(mockFirestore, definitionWithLocations, mockRegistry);
       const location = [
         { lk: 'location1', kt: 'level1' },
         { lk: 'location2', kt: 'level2' }
@@ -199,17 +237,22 @@ describe('contained/ops/all', () => {
       await allOperation({}, location as any);
 
       expect(mockGetReference).toHaveBeenCalledWith(location, ['testCollection'], mockFirestore);
-      expect(mockBuildQuery).toHaveBeenCalledWith({}, mockCollectionRef);
+      expect(mockBuildQueryWithoutPagination).toHaveBeenCalledWith({}, mockCollectionRef);
     });
 
     it('should return empty array when no documents found', async () => {
       const emptyQuerySnapshot = { docs: [] };
+      const emptyCountSnapshot = { data: () => ({ count: 0 }) };
       mockQuery.get = vi.fn().mockResolvedValue(emptyQuerySnapshot);
+      mockQuery.count = vi.fn().mockReturnValue({
+        get: vi.fn().mockResolvedValue(emptyCountSnapshot)
+      });
 
       const allOperation = getAllOperation(mockFirestore, mockDefinition, mockRegistry);
       const result = await allOperation({}, []);
 
-      expect(result).toEqual([]);
+      expect(result.items).toEqual([]);
+      expect(result.metadata.total).toBe(0);
       expect(mockProcessDoc).not.toHaveBeenCalled();
       expect(mockValidateKeys).not.toHaveBeenCalled();
     });

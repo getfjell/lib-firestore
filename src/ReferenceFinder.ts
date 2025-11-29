@@ -210,10 +210,37 @@ export const getReference =
     logger.debug('Getting Reference', { key, collectionNames });
 
     const collections: string[] = [...collectionNames];
-    let reference: FirebaseFirestore.Firestore |
-      FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = firestore;
     const keys = generateKeyArray(key);
     logger.debug('Generated keys array', { keys, keysLength: keys.length });
+
+    // Special case: if no keys and exactly one collection, return collection reference directly
+    if (keys.length === 0 && collections.length === 1) {
+      logger.debug('No keys, returning collection reference directly', { collection: collections[0] });
+      const colRef = firestore.collection(collections[0]);
+
+      // Validate that we got a real CollectionReference, not a mock
+      if (!colRef || typeof colRef.path !== 'string' || colRef.constructor.name === 'Object') {
+        logger.error('CRITICAL: Firestore.collection() returned a mock object instead of CollectionReference', {
+          collection: collections[0],
+          colRefType: typeof colRef,
+          colRefConstructor: colRef?.constructor?.name,
+          hasPath: typeof (colRef as any)?.path,
+          pathValue: (colRef as any)?.path,
+          firestoreType: firestore?.constructor?.name,
+          firestoreHasCollection: typeof firestore?.collection
+        });
+        throw new Error(`Firestore instance appears to be a mock. collection() returned ${colRef?.constructor?.name || typeof colRef} instead of CollectionReference. Check that GOOGLE_PROJECT_ID, GOOGLE_FIRESTORE_DATABASE, and GOOGLE_ULLR_BUCKET are set.`);
+      }
+
+      logger.debug('Collection reference created', {
+        path: colRef.path,
+        referenceType: colRef.constructor.name
+      });
+      return colRef;
+    }
+
+    let reference: FirebaseFirestore.Firestore |
+      FirebaseFirestore.DocumentReference | FirebaseFirestore.CollectionReference = firestore;
     reference = addReference(reference, keys, collections);
     logger.debug('After addReference', {
       collectionsRemaining: collections.length,
@@ -234,6 +261,6 @@ export const getReference =
       finalReferenceType: reference.constructor.name,
       path: (reference as any).path || 'path not available'
     });
-    
+
     return reference;
   };

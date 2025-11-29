@@ -24,13 +24,14 @@ export const getOneOperation = <
 
   const one = async (
     itemQuery: ItemQuery,
-    locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = []
+    locations: LocKeyArray<L1, L2, L3, L4, L5> | [] = [],
+    allOptions?: any
   ): Promise<V | null> => {
-    logger.default('One', { itemQuery, locations });
+    logger.default('One', { itemQuery, locations, allOptions });
 
-    const items = await getAllOperation(firestore, definition, registry)(itemQuery, locations);
-    if (items.length > 0) {
-      return items[0] as V;
+    const result = await getAllOperation(firestore, definition, registry)(itemQuery, locations, allOptions);
+    if (result.items.length > 0) {
+      return result.items[0] as V;
     } else {
       return null;
     }

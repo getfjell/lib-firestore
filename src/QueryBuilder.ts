@@ -24,12 +24,22 @@ import LibLogger from './logger';
 
 const logger = LibLogger.get('QueryBuilder');
 
-const addDeleteQuery = (query: Query): Query => {
-  logger.default('Adding Delete Query', { query });
+const addDeleteQuery = (query: CollectionReference | CollectionGroup | Query): Query => {
+  logger.default('Adding Delete Query', {
+    queryType: typeof query,
+    queryConstructor: query?.constructor?.name,
+    hasWhere: typeof (query as any)?.where,
+    queryKeys: Object.keys(query || {})
+  });
+
+  if (typeof (query as any)?.where !== 'function') {
+    throw new Error(`addDeleteQuery: query.where is not a function. Query type: ${query?.constructor?.name}, typeof: ${typeof query}`);
+  }
+
   return query.where('events.deleted.at', '==', null);
 }
 
-const addEventQueries = (query: Query, events: Record<string, EventQuery>): Query => {
+const addEventQueries = (query: CollectionReference | CollectionGroup | Query, events: Record<string, EventQuery>): Query => {
   logger.default('Adding Event Queries', { query, events });
   let retQuery = query;
   Object.keys(events).forEach((key: string) => {
@@ -48,7 +58,7 @@ const addEventQueries = (query: Query, events: Record<string, EventQuery>): Quer
 }
 
 // Add the references to the query
-const addReferenceQueries = (query: Query, references: References): Query => {
+const addReferenceQueries = (query: CollectionReference | CollectionGroup | Query, references: References): Query => {
   logger.default('Adding Reference Queries', { query, references });
   let retQuery = query;
   Object.keys(references).forEach((key: string) => {
@@ -82,7 +92,7 @@ const addReferenceQueries = (query: Query, references: References): Query => {
   return retQuery;
 }
 
-const applyAndConditions = (query: Query, compoundCondition: CompoundCondition): Query => {
+const applyAndConditions = (query: CollectionReference | CollectionGroup | Query, compoundCondition: CompoundCondition): Query => {
   logger.default('Applying AND conditions', { compoundCondition });
 
   // Defensive check - ensure incoming query is valid
@@ -195,11 +205,19 @@ const applyAndConditions = (query: Query, compoundCondition: CompoundCondition):
   return resultQuery;
 }
 
-export const buildQuery = (
+/**
+ * Build a Firestore query from ItemQuery WITHOUT applying limit/offset.
+ * This is used for COUNT queries where we need the total before pagination.
+ *
+ * @param itemQuery - The query parameters
+ * @param collectionReference - The Firestore collection reference
+ * @returns A Firestore Query without limit/offset applied
+ */
+export const buildQueryWithoutPagination = (
   itemQuery: ItemQuery,
   collectionReference: CollectionReference | CollectionGroup
 ): Query => {
-  logger.default('buildQuery', { itemQuery, collectionReference });
+  logger.default('buildQueryWithoutPagination', { itemQuery, collectionReference });
 
   let itemsQuery: Query = collectionReference;
   logger.default('itemsQuery before addDeleteQuery', {
@@ -230,6 +248,36 @@ export const buildQuery = (
     }
   }
 
+  // NOTE: Do NOT apply limit/offset here - this is for count queries
+
+  // Add orderBy to the query
+  if (itemQuery.orderBy) {
+    itemQuery.orderBy.forEach((orderBy: OrderBy) => {
+      // Use dot notation for field paths - Firestore supports this natively
+      itemsQuery = itemsQuery.orderBy(orderBy.field, orderBy.direction);
+    });
+  }
+
+  return itemsQuery;
+}
+
+/**
+ * Build a Firestore query from ItemQuery WITH limit/offset applied.
+ * This is the original function for backwards compatibility.
+ *
+ * @param itemQuery - The query parameters
+ * @param collectionReference - The Firestore collection reference
+ * @returns A Firestore Query with all filters including limit/offset
+ */
+export const buildQuery = (
+  itemQuery: ItemQuery,
+  collectionReference: CollectionReference | CollectionGroup
+): Query => {
+  logger.default('buildQuery', { itemQuery, collectionReference });
+
+  // Start with the base query without pagination
+  let itemsQuery = buildQueryWithoutPagination(itemQuery, collectionReference);
+
   // Apply a limit to the result set
   if (itemQuery.limit) {
     logger.default('Limiting to', { limit: itemQuery.limit });
@@ -239,14 +287,6 @@ export const buildQuery = (
   // Apply an offset to the result set
   if (itemQuery.offset) {
     itemsQuery = itemsQuery.offset(itemQuery.offset);
-  }
-
-  // Add orderBy to the query
-  if (itemQuery.orderBy) {
-    itemQuery.orderBy.forEach((orderBy: OrderBy) => {
-      // Use dot notation for field paths - Firestore supports this natively
-      itemsQuery = itemsQuery.orderBy(orderBy.field, orderBy.direction);
-    });
   }
 
   return itemsQuery;

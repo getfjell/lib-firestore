@@ -15,8 +15,10 @@ vi.mock('../../src/logger', () => ({
 
 // Mock buildQuery to just return the collection reference (chainable)
 const mockBuildQuery = vi.fn((itemQuery: any, colRef: any) => colRef);
+const mockBuildQueryWithoutPagination = vi.fn((itemQuery: any, colRef: any) => colRef);
 vi.mock('../../src/QueryBuilder', () => ({
   buildQuery: mockBuildQuery,
+  buildQueryWithoutPagination: mockBuildQueryWithoutPagination,
 }));
 
 // Mock processDoc to return the doc data with a key
@@ -30,8 +32,14 @@ vi.mock('../../src/DocProcessor', () => ({
 }));
 
 // Mock getReference to return a mock CollectionReference
+const mockCountQuery = {
+  get: vi.fn().mockResolvedValue({ data: () => ({ count: 0 }) }) as Mock,
+};
 const mockColRef = {
   get: vi.fn() as Mock,
+  count: vi.fn(() => mockCountQuery) as Mock,
+  limit: vi.fn(function(this: any) { return this; }) as Mock,
+  offset: vi.fn(function(this: any) { return this; }) as Mock,
 };
 const mockGetReference = vi.fn(() => mockColRef);
 vi.mock('../../src/ReferenceFinder', () => ({
@@ -84,24 +92,30 @@ describe('getAllOperation', () => {
       { id: 'id2', data: () => ({ foo: 'baz' }) },
     ];
     mockColRef.get.mockResolvedValue({ docs } as unknown as never);
+    mockCountQuery.get.mockResolvedValue({ data: () => ({ count: 2 }) });
     const all = getAllOperation(firestore, definition, registry);
     const result = await all(itemQuery, locations);
     expect(mockGetReference).toHaveBeenCalledWith(locations, definition.collectionNames, firestore);
-    expect(mockBuildQuery).toHaveBeenCalledWith(itemQuery, mockColRef);
+    expect(mockBuildQueryWithoutPagination).toHaveBeenCalledWith(itemQuery, mockColRef);
     expect(mockColRef.get).toHaveBeenCalled();
     expect(mockProcessDoc).toHaveBeenCalledTimes(2);
     expect(mockValidateKeys).toHaveBeenCalledTimes(2);
-    expect(result).toEqual([
+    expect(result.items).toEqual([
       { foo: 'bar', key: { kt: 'TYPEA', pk: 'id1' } },
       { foo: 'baz', key: { kt: 'TYPEA', pk: 'id2' } },
     ]);
+    expect(result.metadata.total).toBe(2);
+    expect(result.metadata.returned).toBe(2);
   });
 
-  it('returns an empty array if no docs are found', async () => {
+  it('returns an empty result if no docs are found', async () => {
     mockColRef.get.mockResolvedValue({ docs: [] } as unknown as never);
+    mockCountQuery.get.mockResolvedValue({ data: () => ({ count: 0 }) });
     const all = getAllOperation(firestore, definition, registry);
     const result = await all(itemQuery, locations);
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.metadata.total).toBe(0);
+    expect(result.metadata.returned).toBe(0);
     expect(mockProcessDoc).not.toHaveBeenCalled();
     expect(mockValidateKeys).not.toHaveBeenCalled();
   });
@@ -129,6 +143,7 @@ describe('getAllOperation', () => {
       { id: 'id1', data: () => ({ foo: 'bar' }) },
     ];
     mockColRef.get.mockResolvedValue({ docs } as unknown as never);
+    mockCountQuery.get.mockResolvedValue({ data: () => ({ count: 1 }) });
     const all = getAllOperation(firestore, definitionWithoutRefsAggs, registry);
     const result = await all(itemQuery, locations);
     
@@ -139,8 +154,10 @@ describe('getAllOperation', () => {
       [],
       registry
     );
-    expect(result).toEqual([
+    expect(result.items).toEqual([
       { foo: 'bar', key: { kt: 'TYPEA', pk: 'id1' } },
     ]);
+    expect(result.metadata.total).toBe(1);
+    expect(result.metadata.returned).toBe(1);
   });
 });
