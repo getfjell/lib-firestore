@@ -248,7 +248,14 @@ describe('ReferenceFinder', () => {
       mockGenerateKeyArray.mockReturnValue([]);
       const collectionNames = ['rootCol'];
 
-      const finalCollectionResult = { path: 'rootColRef' };
+      // Create a mock CollectionReference-like object that passes validation
+      class MockCollectionReference {
+        path: string;
+        constructor(path: string) {
+          this.path = path;
+        }
+      }
+      const finalCollectionResult = new MockCollectionReference('rootColRef');
       // This is (firestoreInstanceForGetRef as DocumentReference).collection('rootCol')
       firestoreInstanceForGetRef.collection.mockReturnValueOnce(finalCollectionResult);
 

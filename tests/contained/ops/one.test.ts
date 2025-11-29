@@ -83,37 +83,37 @@ describe('contained/ops/one', () => {
         { name: 'test3', value: 3 } as TestItem,
       ];
 
-      mockAllFunction.mockResolvedValue(testItems);
+      mockAllFunction.mockResolvedValue({ items: testItems, metadata: { total: 3, returned: 3, offset: 0, hasMore: false } });
 
       const oneOperation = getOneOperation(mockFirestore, mockDefinition, mockRegistry);
       const itemQuery: ItemQuery = { limit: 1 };
 
       const result = await oneOperation(itemQuery, []);
 
-      expect(mockAllFunction).toHaveBeenCalledWith(itemQuery, []);
+      expect(mockAllFunction).toHaveBeenCalledWith(itemQuery, [], undefined);
       expect(result).toBe(testItems[0]);
       expect(result).toEqual({ name: 'test1', value: 1 });
       // Verify that the logger.default was called with the operation details
-      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery, locations: [] });
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery, locations: [], allOptions: undefined });
     });
 
     it('should return null when getAllOperation returns empty array', async () => {
-      mockAllFunction.mockResolvedValue([]);
+      mockAllFunction.mockResolvedValue({ items: [], metadata: { total: 0, returned: 0, offset: 0, hasMore: false } });
 
       const oneOperation = getOneOperation(mockFirestore, mockDefinition, mockRegistry);
       const itemQuery: ItemQuery = {};
 
       const result = await oneOperation(itemQuery, []);
 
-      expect(mockAllFunction).toHaveBeenCalledWith(itemQuery, []);
+      expect(mockAllFunction).toHaveBeenCalledWith(itemQuery, [], undefined);
       expect(result).toBeNull();
       // Verify that the logger.default was called with the operation details
-      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery, locations: [] });
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery, locations: [], allOptions: undefined });
     });
 
     it('should pass through complex item queries to getAllOperation', async () => {
       const testItems: TestItem[] = [{ name: 'found', value: 42 } as TestItem];
-      mockAllFunction.mockResolvedValue(testItems);
+      mockAllFunction.mockResolvedValue({ items: testItems, metadata: { total: 1, returned: 1, offset: 0, hasMore: false } });
 
       const oneOperation = getOneOperation(mockFirestore, mockDefinition, mockRegistry);
       const complexItemQuery: ItemQuery = {
@@ -134,25 +134,25 @@ describe('contained/ops/one', () => {
 
       const result = await oneOperation(complexItemQuery, []);
 
-      expect(mockAllFunction).toHaveBeenCalledWith(complexItemQuery, []);
+      expect(mockAllFunction).toHaveBeenCalledWith(complexItemQuery, [], undefined);
       expect(result).toBe(testItems[0]);
       // Verify that the logger.default was called with the operation details
-      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: complexItemQuery, locations: [] });
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: complexItemQuery, locations: [], allOptions: undefined });
     });
 
     it('should handle default empty location array', async () => {
       const testItems: TestItem[] = [{ name: 'default-location', value: 789 } as TestItem];
-      mockAllFunction.mockResolvedValue(testItems);
+      mockAllFunction.mockResolvedValue({ items: testItems, metadata: { total: 1, returned: 1, offset: 0, hasMore: false } });
 
       const oneOperation = getOneOperation(mockFirestore, mockDefinition, mockRegistry);
 
       // Call with only itemQuery, locations should default to []
       const result = await oneOperation({});
 
-      expect(mockAllFunction).toHaveBeenCalledWith({}, []);
+      expect(mockAllFunction).toHaveBeenCalledWith({}, [], undefined);
       expect(result).toBe(testItems[0]);
       // Verify that the logger.default was called with the operation details
-      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [] });
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [], allOptions: undefined });
     });
 
     it('should propagate errors from getAllOperation', async () => {
@@ -162,9 +162,9 @@ describe('contained/ops/one', () => {
       const oneOperation = getOneOperation(mockFirestore, mockDefinition, mockRegistry);
 
       await expect(oneOperation({}, [])).rejects.toThrow('All operation failed');
-      expect(mockAllFunction).toHaveBeenCalledWith({}, []);
+      expect(mockAllFunction).toHaveBeenCalledWith({}, [], undefined);
       // Verify that the logger.default was called with the operation details
-      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [] });
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [], allOptions: undefined });
     });
 
     it('should return first item even when many items are returned', async () => {
@@ -174,7 +174,7 @@ describe('contained/ops/one', () => {
         value: i
       } as TestItem));
 
-      mockAllFunction.mockResolvedValue(manyItems);
+      mockAllFunction.mockResolvedValue({ items: manyItems, metadata: { total: 100, returned: 100, offset: 0, hasMore: false } });
 
       const oneOperation = getOneOperation(mockFirestore, mockDefinition, mockRegistry);
       const result = await oneOperation({}, []);
@@ -182,7 +182,7 @@ describe('contained/ops/one', () => {
       expect(result).toBe(manyItems[0]);
       expect(result).toEqual({ name: 'test0', value: 0 });
       // Verify that the logger.default was called with the operation details
-      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [] });
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [], allOptions: undefined });
     });
 
     it('should handle different item types correctly', async () => {
@@ -192,7 +192,7 @@ describe('contained/ops/one', () => {
         { customField: 'value2', data: { nested: false } } as any
       ];
 
-      mockAllFunction.mockResolvedValue(customItems);
+      mockAllFunction.mockResolvedValue({ items: customItems, metadata: { total: 2, returned: 2, offset: 0, hasMore: false } });
 
       const oneOperation = getOneOperation(mockFirestore, mockDefinition, mockRegistry);
       const result = await oneOperation({}, []);
@@ -200,7 +200,7 @@ describe('contained/ops/one', () => {
       expect(result).toBe(customItems[0]);
       expect(result).toEqual({ customField: 'value1', data: { nested: true } });
       // Verify that the logger.default was called with the operation details
-      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [] });
+      expect(mockLogger.default).toHaveBeenCalledWith('One', { itemQuery: {}, locations: [], allOptions: undefined });
     });
   });
 });

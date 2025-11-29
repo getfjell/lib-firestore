@@ -51,8 +51,8 @@ describe('getOneOperation', () => {
 
   it('returns the first item if getAllOperation returns items', async () => {
     const items = [{ key: { kt: 'TYPEA', pk: 'item-1' }, foo: 'bar' }, { key: { kt: 'TYPEA', pk: 'item-2' }, foo: 'baz' }];
-    // getAllOperation returns a function (the op) that returns items
-    mockGetAllOperation.mockReturnValue(() => Promise.resolve(items));
+    // getAllOperation returns a function (the op) that returns AllOperationResult
+    mockGetAllOperation.mockReturnValue(() => Promise.resolve({ items, metadata: { total: 2, returned: 2, offset: 0, hasMore: false } }));
     const one = getOneOperation(firestore, definition, mockRegistry);
     const result = await one(itemQuery, locations);
     expect(mockGetAllOperation).toHaveBeenCalledWith(firestore, definition, mockRegistry);
@@ -60,7 +60,7 @@ describe('getOneOperation', () => {
   });
 
   it('returns null if getAllOperation returns an empty array', async () => {
-    mockGetAllOperation.mockReturnValue(() => Promise.resolve([]));
+    mockGetAllOperation.mockReturnValue(() => Promise.resolve({ items: [], metadata: { total: 0, returned: 0, offset: 0, hasMore: false } }));
     const one = getOneOperation(firestore, definition, mockRegistry);
     const result = await one(itemQuery, locations);
     expect(result).toBeNull();
