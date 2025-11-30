@@ -3,8 +3,10 @@ import type { ReferenceDefinition, Registry } from "@fjell/lib";
 import { OperationContext } from "@fjell/lib";
 import logger from "../logger";
 
-// Type alias for the Reference structure
-type ItemReference = { key: PriKey<any> | ComKey<any, any, any, any, any, any>, item?: Item<any, any, any, any, any, any> };
+// Type alias for the Reference structure with flattened item properties
+type ItemReference = {
+  key: PriKey<any> | ComKey<any, any, any, any, any, any>;
+} & Partial<Omit<Item<any, any, any, any, any, any>, 'key'>>;
 
 /**
  * Firestore-specific definition for a reference relationship.
@@ -28,13 +30,13 @@ export interface FirestoreReferenceDefinition extends ReferenceDefinition {
 
 /**
  * Build a reference by looking up a related item by its key from the refs property.
- * The referenced item will be populated at refs[name].item
+ * The referenced item's properties will be merged directly onto refs[name] (flattened structure).
  *
  * @param item - The item to populate with reference data
  * @param referenceDefinition - Firestore-specific definition of what to reference
  * @param registry - Registry to look up library instances
  * @param context - Optional operation context for caching and cycle detection
- * @returns The item with the reference populated at refs[name].item
+ * @returns The item with the reference populated at refs[name] with flattened properties
  */
 export const buildFirestoreReference = async (
   item: any,
@@ -181,12 +183,19 @@ export const buildFirestoreReference = async (
     referencedItem = await library!.operations.get(priKey);
   }
 
-  // Store the referenced item at refs[name].item
-  // Preserve the key structure by converting the simple key to a ReferenceItem structure
-  item.refs[referenceDefinition.name] = {
-    key: refKey,
-    item: referencedItem
-  };
+  // Store the referenced item with flattened structure - merge properties directly onto refs[name]
+  if (referencedItem) {
+    const { key: _unused, ...itemProperties } = referencedItem; // eslint-disable-line @typescript-eslint/no-unused-vars
+    item.refs[referenceDefinition.name] = {
+      key: refKey,
+      ...itemProperties
+    } as ItemReference;
+  } else {
+    // Item not found or null - keep just the key
+    item.refs[referenceDefinition.name] = {
+      key: refKey
+    };
+  }
 
   return item;
 };
@@ -194,9 +203,10 @@ export const buildFirestoreReference = async (
 /**
  * Strip populated reference items from refs before writing to Firestore.
  * This ensures we only store the keys, not the full populated items.
+ * With flattened references, we extract just the 'key' property from each reference.
  *
  * @param item - The item to strip references from
- * @returns The item with only reference keys (no populated items)
+ * @returns The item with only reference keys (no populated item properties)
  */
 export const stripReferenceItems = <
   S extends string,
@@ -210,12 +220,12 @@ export const stripReferenceItems = <
     return item;
   }
 
-  // Create a new refs object with only the keys (no populated items)
+  // Create a new refs object with only the keys (no populated item properties)
   const strippedRefs: Record<string, ItemReference> = {};
   
   for (const [name, value] of Object.entries(item.refs)) {
     if (value && typeof value === 'object' && 'key' in value) {
-      // It's a Reference with key and possibly item - keep only the key
+      // It's a Reference - extract just the key, discarding any item properties
       strippedRefs[name] = {
         key: (value as any).key as PriKey<any> | ComKey<any, any, any, any, any, any>
       };
