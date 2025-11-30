@@ -50,7 +50,11 @@ describe('createOperations.findOne wrapper', () => {
 
   it('returns first result when find returns non-empty array', async () => {
     const expected = { id: 'first' };
-    mockGetFindOperation.mockReturnValueOnce(vi.fn().mockResolvedValue([expected, { id: 'second' }]));
+    const findResult = {
+      items: [expected, { id: 'second' }],
+      metadata: { total: 2, returned: 2, offset: 0, hasMore: false }
+    };
+    mockGetFindOperation.mockReturnValueOnce(vi.fn().mockResolvedValue(findResult));
 
     const { createOperations } = await import('../src/Operations');
     const ops = createOperations<Item<'TYPEA'>, 'TYPEA'>(mockFirestore, mockDefinition, mockRegistry);
@@ -61,7 +65,11 @@ describe('createOperations.findOne wrapper', () => {
   });
 
   it('returns null when find returns empty array', async () => {
-    mockGetFindOperation.mockReturnValueOnce(vi.fn().mockResolvedValue([]));
+    const findResult = {
+      items: [],
+      metadata: { total: 0, returned: 0, offset: 0, hasMore: false }
+    };
+    mockGetFindOperation.mockReturnValueOnce(vi.fn().mockResolvedValue(findResult));
 
     const { createOperations } = await import('../src/Operations');
     const ops = createOperations<Item<'TYPEA'>, 'TYPEA'>(mockFirestore, mockDefinition, mockRegistry);

@@ -1,4 +1,4 @@
-import { createFindWrapper, FindMethod, Item, LocKeyArray } from "@fjell/core";
+import { createFindWrapper, FindMethod, FindOperationResult, FindOptions, Item, LocKeyArray } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import LibLogger from "../logger";
@@ -29,17 +29,38 @@ export const getFindOperation = <
     async (
       finder: string,
       finderParams: Record<string, string | number | boolean | Date | Array<string | number | boolean | Date>>,
-      locations?: LocKeyArray<L1, L2, L3, L4, L5> | []
-    ): Promise<V[]> => {
+      locations?: LocKeyArray<L1, L2, L3, L4, L5> | [],
+      findOptions?: FindOptions
+    ): Promise<FindOperationResult<V>> => {
       try {
-        logger.default('Find', { finder, finderParams, locations, options });
+        logger.default('Find', { finder, finderParams, locations, findOptions, options });
 
         // Note that we execute the createFinders function here because we want to make sure we're always getting the
         // most up to date methods.
         if (options.finders && options.finders[finder]) {
           const finderMethod = options.finders[finder];
           if (finderMethod) {
-            return finderMethod(finderParams, locations);
+            // Pass findOptions to finder - finder can opt-in by returning FindOperationResult, or return V[] for legacy behavior
+            // Type assertion needed because FinderMethod type from @fjell/lib may be stale
+            const finderResult = await (finderMethod as any)(finderParams, locations, findOptions);
+            
+            // Check if finder opted-in (returned FindOperationResult) or legacy (returned V[])
+            if (finderResult && typeof finderResult === 'object' && 'items' in finderResult && 'metadata' in finderResult) {
+              // Finder opted-in: return as-is (createFindWrapper will validate)
+              return finderResult as FindOperationResult<V>;
+            } else {
+              // Legacy finder: return as FindOperationResult - createFindWrapper will apply post-processing pagination
+              const results = finderResult as V[];
+              return {
+                items: results,
+                metadata: {
+                  total: results.length,
+                  returned: results.length,
+                  offset: 0,
+                  hasMore: false
+                }
+              };
+            }
           } else {
             logger.error(`Finder %s not found`, finder);
             throw new Error(`Finder ${finder} not found`);
