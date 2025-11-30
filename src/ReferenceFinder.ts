@@ -229,7 +229,11 @@ export const getReference =
           firestoreType: firestore?.constructor?.name,
           firestoreHasCollection: typeof firestore?.collection
         });
-        throw new Error(`Firestore instance appears to be a mock. collection() returned ${colRef?.constructor?.name || typeof colRef} instead of CollectionReference. Check that GOOGLE_PROJECT_ID, GOOGLE_FIRESTORE_DATABASE, and GOOGLE_ULLR_BUCKET are set.`);
+        throw new Error(
+          `Firestore instance appears to be a mock. collection() returned ${colRef?.constructor?.name || typeof colRef} ` +
+          `instead of CollectionReference. Check that GOOGLE_PROJECT_ID, GOOGLE_FIRESTORE_DATABASE, ` +
+          `and GOOGLE_ULLR_BUCKET are set.`
+        );
       }
 
       logger.debug('Collection reference created', {

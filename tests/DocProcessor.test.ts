@@ -180,8 +180,9 @@ describe('DocProcessor', () => {
       expect(mockAddKey).toHaveBeenCalled();
       expect(result.name).toBe('Item with References');
       expect(result.refs?.author).toBeDefined();
-      expect(result.refs?.author.item).toBeDefined();
-      expect(result.refs?.author.item.name).toBe('John Doe');
+      // With flattened structure, item properties are directly on the reference
+      expect(result.refs?.author.name).toBe('John Doe');
+      expect(result.refs?.author.key).toBeDefined();
     });
 
     it('should process aggregations when aggregationDefinitions are provided', async () => {
@@ -222,8 +223,10 @@ describe('DocProcessor', () => {
 
       expect(mockAddKey).toHaveBeenCalled();
       expect(result.name).toBe('Item with Aggregations');
-      expect(result.comments).toBeDefined();
-      expect(Array.isArray(result.comments)).toBe(true);
+      expect(result.aggs?.comments).toBeDefined();
+      expect(Array.isArray(result.aggs?.comments)).toBe(true);
+      // Aggregations should be removed from direct properties
+      expect(result.comments).toBeUndefined();
     });
 
     it('should process both references and aggregations when both are provided', async () => {
@@ -278,9 +281,12 @@ describe('DocProcessor', () => {
       expect(mockAddKey).toHaveBeenCalled();
       expect(result.name).toBe('Item with Both');
       expect(result.refs?.author).toBeDefined();
-      expect(result.refs?.author.item).toBeDefined();
-      expect(result.refs?.author.item.name).toBe('John Doe');
-      expect(result.comments).toBeDefined();
+      // With flattened structure, item properties are directly on the reference
+      expect(result.refs?.author.name).toBe('John Doe');
+      expect(result.refs?.author.key).toBeDefined();
+      expect(result.aggs?.comments).toBeDefined();
+      // Aggregations should be removed from direct properties
+      expect(result.comments).toBeUndefined();
     });
   });
 });
