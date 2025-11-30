@@ -44,7 +44,9 @@ describe('Firestore ReferenceBuilder', () => {
 
       expect(mockRegistry.get).toHaveBeenCalledWith(['user']);
       expect(mockLibrary.operations.get).toHaveBeenCalledWith({ kt: 'user', pk: 'user123' });
-      expect(result.refs.author.item).toEqual(referencedItem);
+      // With flattened structure, item properties are directly on the reference
+      expect(result.refs.author.key).toEqual(referencedItem.key);
+      expect(result.refs.author.name).toBe(referencedItem.name);
       expect(result.refs.author.key).toEqual({ kt: 'user', pk: 'user123' });
     });
 
@@ -71,7 +73,9 @@ describe('Firestore ReferenceBuilder', () => {
       const result = await buildFirestoreReference(item, referenceDef, mockRegistry);
 
       expect(mockRegistry.get).toHaveBeenCalledWith(['user']);
-      expect(result.refs.author.item).toEqual(referencedItem);
+      // With flattened structure, item properties are directly on the reference
+      expect(result.refs.author.key).toEqual(referencedItem.key);
+      expect(result.refs.author.name).toBe(referencedItem.name);
     });
 
     it('should skip reference if refs[name] is null', async () => {
@@ -170,7 +174,10 @@ describe('Firestore ReferenceBuilder', () => {
 
       // Should not call get, and should create a placeholder
       expect(mockLibrary.operations.get).not.toHaveBeenCalled();
-      expect(result.refs.author.item).toEqual({ key: priKey });
+      // With flattened structure, circular reference creates minimal reference with just key
+      expect(result.refs.author.key).toEqual(priKey);
+      // No other properties should be present for circular reference placeholder
+      expect(result.refs.author.name).toBeUndefined();
     });
 
     it('should throw error if reference key format is invalid', async () => {
@@ -252,7 +259,8 @@ describe('Firestore ReferenceBuilder', () => {
 
       expect(result.refs).toBeDefined();
       expect(result.refs?.author).toEqual({ key: { kt: 'user', pk: 'user123' } });
-      expect((result.refs?.author as any).item).toBeUndefined();
+      // With flattened structure, unpopulated references have no item properties
+      expect((result.refs?.author as any).name).toBeUndefined();
     });
 
     it('should handle refs with only keys (no populated items)', () => {
@@ -285,12 +293,12 @@ describe('Firestore ReferenceBuilder', () => {
         refs: {
           author: {
             key: { kt: 'user', pk: 'user123' },
-            item: { key: { kt: 'user', pk: 'user123' }, name: 'John' } as any
-          },
+            name: 'John' // Flattened: item properties directly on reference
+          } as any,
           category: {
             key: { kt: 'category', pk: 'cat1' },
-            item: { key: { kt: 'category', pk: 'cat1' }, name: 'Tech' } as any
-          }
+            name: 'Tech' // Flattened: item properties directly on reference
+          } as any
         } as any
       };
 
@@ -298,8 +306,9 @@ describe('Firestore ReferenceBuilder', () => {
 
       expect(result.refs?.author).toEqual({ key: { kt: 'user', pk: 'user123' } });
       expect(result.refs?.category).toEqual({ key: { kt: 'category', pk: 'cat1' } });
-      expect((result.refs?.author as any).item).toBeUndefined();
-      expect((result.refs?.category as any).item).toBeUndefined();
+      // With flattened structure, stripReferenceItems removes item properties, keeping only key
+      expect((result.refs?.author as any).name).toBeUndefined();
+      expect((result.refs?.category as any).name).toBeUndefined();
     });
 
     it('should preserve other item properties', () => {

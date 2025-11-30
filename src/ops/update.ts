@@ -10,6 +10,7 @@ import LibLogger from "../logger";
 import * as Library from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";
 import { stripReferenceItems } from "../processing/ReferenceBuilder";
+import { removeAggsFromItem } from "../processing/AggsAdapter";
 import { NotFoundError } from "@fjell/core";
 import { transformFirestoreError } from "../errors/firestoreErrorHandler";
 
@@ -75,6 +76,14 @@ export const getUpdateOperation = <
         logger.default('🔥 [LIB-FIRESTORE] Stripping reference items from item', { itemToUpdate });
         itemToUpdate = stripReferenceItems(itemToUpdate);
         logger.default('🔥 [LIB-FIRESTORE] Reference items stripped', { itemToUpdate });
+        
+        // Remove aggs structure if present (convert back to direct properties)
+        const aggregations = definition.options.aggregations || [];
+        if (aggregations.length > 0) {
+          logger.default('🔥 [LIB-FIRESTORE] Removing aggs structure from item', { itemToUpdate });
+          itemToUpdate = removeAggsFromItem(itemToUpdate, aggregations);
+          logger.default('🔥 [LIB-FIRESTORE] Aggs structure removed', { itemToUpdate });
+        }
         
         // TODO: Move this up.
         logger.default('🔥 [LIB-FIRESTORE] Removing key from item', { itemToUpdate });

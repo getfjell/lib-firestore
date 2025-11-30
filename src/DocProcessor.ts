@@ -12,6 +12,7 @@ import {
 import LibLogger from "./logger";
 import { DocumentSnapshot, Timestamp } from "@google-cloud/firestore";
 import { buildFirestoreReference, FirestoreReferenceDefinition } from "./processing/ReferenceBuilder";
+import { addAggsToItem } from "./processing/AggsAdapter";
 
 const logger = LibLogger.get('DocProcessor');
 
@@ -101,6 +102,13 @@ export const processDoc = async <S extends string,
     } finally {
       // Mark this item as complete
       operationContext.markComplete(item.key);
+    }
+
+    // Automatically add aggs structure before returning (transparent wrapper)
+    // This ensures items leaving the Firestore library always have unified aggs structure
+    if (aggregationDefinitions && aggregationDefinitions.length > 0) {
+      item = addAggsToItem(item, aggregationDefinitions);
+      logger.debug('Added aggs structure to item (transparent wrapper)', { key: item.key });
     }
 
     logger.default('Processed Doc: ' + JSON.stringify(item));

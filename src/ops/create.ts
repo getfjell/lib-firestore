@@ -22,6 +22,7 @@ import { getReference } from "../ReferenceFinder";
 import { Registry } from "@fjell/lib";
 import { CollectionReference } from "@google-cloud/firestore";
 import { stripReferenceItems } from "../processing/ReferenceBuilder";
+import { removeAggsFromItem } from "../processing/AggsAdapter";
 import { transformFirestoreError } from "../errors/firestoreErrorHandler";
 
 const logger = LibLogger.get('ops', 'create');
@@ -106,6 +107,14 @@ export const getCreateOperation = <
         logger.default('🔥 [LIB-FIRESTORE] Stripping reference items from item', { itemToInsert });
         itemToInsert = stripReferenceItems(itemToInsert);
         logger.default('🔥 [LIB-FIRESTORE] Reference items stripped', { itemToInsert });
+        
+        // Remove aggs structure if present (convert back to direct properties)
+        const aggregations = definition.options.aggregations || [];
+        if (aggregations.length > 0) {
+          logger.default('🔥 [LIB-FIRESTORE] Removing aggs structure from item', { itemToInsert });
+          itemToInsert = removeAggsFromItem(itemToInsert, aggregations);
+          logger.default('🔥 [LIB-FIRESTORE] Aggs structure removed', { itemToInsert });
+        }
 
         logger.default('🔥 [LIB-FIRESTORE] Setting Item in Firestore', { itemToInsert });
         await docRef.set(itemToInsert);
