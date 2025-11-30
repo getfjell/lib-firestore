@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { Item } from "@fjell/core";
+import { FindOperationResult, Item } from "@fjell/core";
 
 import * as Library from "@fjell/lib";
 import { Definition } from "./Definition";
@@ -47,10 +47,10 @@ export const createOperations = <
   };
 
   // Set operations that depend on the operations object
-  implOps.find = getFindOperation<V, S, L1, L2, L3, L4, L5>(definition, implOps as any, registry);
+  implOps.find = getFindOperation<V, S, L1, L2, L3, L4, L5>(definition, implOps as any, registry) as any;
   implOps.findOne = async (finder: string, params?: Library.OperationParams, locations?: any): Promise<V | null> => {
-    const results = await implOps.find(finder, params || {}, locations);
-    return results.length > 0 ? results[0] : null;
+    const result = await implOps.find(finder, params || {}, locations) as any as FindOperationResult<V>;
+    return result.items.length > 0 ? result.items[0] : null;
   };
   implOps.upsert = getUpsertOperation<V, S, L1, L2, L3, L4, L5>(firestore, definition, registry, implOps as any);
 
