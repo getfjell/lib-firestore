@@ -41,8 +41,10 @@ describe('getFindOperation', () => {
     const operations: any = {};
     const find = getFindOperation(definition, operations);
     const result = await find('myFinder', finderParams as any, locations as any);
-    expect(mockFinder).toHaveBeenCalledWith(finderParams, locations);
-    expect(result).toStrictEqual(mockFinderResult);
+    expect(mockFinder).toHaveBeenCalledWith(finderParams, locations, undefined);
+    // Framework wraps legacy finder result (array) in AllOperationResult
+    expect(result.items).toStrictEqual(mockFinderResult);
+    expect(result.metadata.total).toBe(mockFinderResult.length);
     expect(mockLogger.default).toHaveBeenCalledWith('Find', expect.objectContaining({ finder: 'myFinder' }));
   });
 
@@ -60,7 +62,7 @@ describe('getFindOperation', () => {
     const operations: any = {};
     const find = getFindOperation(definition, operations);
     await expect(find('myFinder', finderParams as any, locations as any)).rejects.toThrow('Finder error');
-    expect(mockFinder).toHaveBeenCalledWith(finderParams, locations);
+    expect(mockFinder).toHaveBeenCalledWith(finderParams, locations, undefined);
   });
 
   it('throws if the finder does not exist', async () => {
@@ -74,7 +76,7 @@ describe('getFindOperation', () => {
     };
     const operations: any = {};
     const find = getFindOperation(definition, operations);
-    await expect(find('missingFinder', finderParams as any, locations as any)).rejects.toThrow('No finders found');
+    await expect(find('missingFinder', finderParams as any, locations as any, undefined)).rejects.toThrow('No finders found');
     expect(mockLogger.error).toHaveBeenCalledWith(
       'No finders have been defined for this lib.  Requested finder %s with params %j',
       'missingFinder',
@@ -89,7 +91,7 @@ describe('getFindOperation', () => {
     };
     const operations: any = {};
     const find = getFindOperation(definition, operations);
-    await expect(find('anyFinder', finderParams as any, locations as any)).rejects.toThrow('No finders found');
+    await expect(find('anyFinder', finderParams as any, locations as any, undefined)).rejects.toThrow('No finders found');
     expect(mockLogger.error).toHaveBeenCalledWith(
       'No finders have been defined for this lib.  Requested finder %s with params %j',
       'anyFinder',
