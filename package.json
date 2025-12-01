@@ -37,10 +37,10 @@
     "docs:test": "cd docs && npm run test"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.66",
-    "@fjell/lib": "^4.4.75",
+    "@fjell/core": "^4.4.67",
+    "@fjell/lib": "^4.4.76",
     "@fjell/logging": "^4.4.59",
-    "@fjell/registry": "^4.4.72",
+    "@fjell/registry": "^4.4.73",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
