@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-firestore",
-  "version": "4.4.74",
+  "version": "4.4.75",
   "type": "module",
   "keywords": [
     "library",
@@ -38,9 +38,9 @@
   },
   "dependencies": {
     "@fjell/core": "^4.4.70",
-    "@fjell/lib": "^4.4.80",
-    "@fjell/logging": "^4.4.60",
-    "@fjell/registry": "^4.4.77",
+    "@fjell/lib": "^4.4.81",
+    "@fjell/logging": "^4.4.62",
+    "@fjell/registry": "^4.4.79",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
