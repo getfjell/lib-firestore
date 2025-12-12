@@ -62,13 +62,31 @@ export const getFindOperation = <
               };
             }
           } else {
-            logger.error(`Finder %s not found`, finder);
-            throw new Error(`Finder ${finder} not found`);
+            const availableFinders = options.finders ? Object.keys(options.finders) : [];
+            logger.error(`Finder not found`, {
+              component: 'lib-firestore',
+              operation: 'find',
+              requestedFinder: finder,
+              availableFinders,
+              suggestion: `Use one of: ${availableFinders.join(', ')}`,
+              coordinate: JSON.stringify(definition.coordinate)
+            });
+            throw new Error(`Finder '${finder}' not found. Available finders: ${availableFinders.join(', ')}`);
           }
         } else {
-          logger.error(
-          `No finders have been defined for this lib.  Requested finder %s with params %j`, finder, finderParams);
-          throw new Error(`No finders found`);
+          const availableFinders = options.finders ? Object.keys(options.finders) : [];
+          logger.error(`No finders defined for library`, {
+            component: 'lib-firestore',
+            operation: 'find',
+            requestedFinder: finder,
+            finderParams,
+            availableFinders,
+            suggestion: availableFinders.length > 0
+              ? `Use one of the available finders: ${availableFinders.join(', ')}`
+              : 'Define finders in your library configuration',
+            coordinate: JSON.stringify(definition.coordinate)
+          });
+          throw new Error(`No finders found. ${availableFinders.length > 0 ? `Available finders: ${availableFinders.join(', ')}` : 'No finders defined.'}`);
         }
       } catch (error: any) {
         // Transform Firestore errors

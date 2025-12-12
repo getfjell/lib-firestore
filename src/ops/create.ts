@@ -121,8 +121,15 @@ export const getCreateOperation = <
         logger.default('🔥 [LIB-FIRESTORE] Getting Item from Firestore', { docRef: docRef.path });
         const doc = await docRef.get();
         if (!doc.exists) {
-          logger.error('🔥 [LIB-FIRESTORE] Item not saved to Firestore');
-          throw new Error('Item not saved');
+          logger.error('🔥 [LIB-FIRESTORE] Item not saved to Firestore', {
+            component: 'lib-firestore',
+            operation: 'create',
+            docPath: docRef.path,
+            itemData: JSON.stringify(itemToInsert),
+            suggestion: 'Check Firestore write permissions, network connectivity, and quota limits',
+            coordinate: JSON.stringify(definition.coordinate)
+          });
+          throw new Error(`Item not saved to Firestore at path: ${docRef.path}`);
         }
 
         // Move this up.
