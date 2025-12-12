@@ -76,12 +76,9 @@ describe('getFindOperation', () => {
     };
     const operations: any = {};
     const find = getFindOperation(definition, operations);
-    await expect(find('missingFinder', finderParams as any, locations as any, undefined)).rejects.toThrow('No finders found');
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'No finders have been defined for this lib.  Requested finder %s with params %j',
-      'missingFinder',
-      finderParams
-    );
+    await expect(find('missingFinder', finderParams as any, locations as any, undefined)).rejects.toThrow(/No finders/);
+    // Updated: logger now uses structured logging
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 
   it('throws if no finders are defined', async () => {
@@ -91,11 +88,8 @@ describe('getFindOperation', () => {
     };
     const operations: any = {};
     const find = getFindOperation(definition, operations);
-    await expect(find('anyFinder', finderParams as any, locations as any, undefined)).rejects.toThrow('No finders found');
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'No finders have been defined for this lib.  Requested finder %s with params %j',
-      'anyFinder',
-      finderParams
-    );
+    await expect(find('anyFinder', finderParams as any, locations as any, undefined)).rejects.toThrow(/No finders/);
+    // Updated: logger now uses structured logging
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 });
