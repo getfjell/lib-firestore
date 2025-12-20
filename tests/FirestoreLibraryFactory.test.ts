@@ -1,4 +1,4 @@
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 import { Coordinate, RegistryHub } from '@fjell/registry';
 import * as Library from '@fjell/lib';
 import { Registry } from '@fjell/lib';

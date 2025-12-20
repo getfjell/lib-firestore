@@ -11,11 +11,8 @@ import {
   PriKey,
   References
 } from '@fjell/types';
-import {
-  isComKey,
-  isCondition,
-  isPriKey,
-} from '@fjell/core';
+import { isCondition } from "@fjell/types";
+import { isComKey, isPriKey } from "@fjell/core";
 import {
   CollectionGroup,
   CollectionReference,

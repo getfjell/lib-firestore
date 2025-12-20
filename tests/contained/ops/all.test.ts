@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getAllOperation } from '../../../src/contained/ops/all';
 import { Definition } from '../../../src/Definition';
-import { Item, ItemQuery } from '@fjell/core';
+import { Item, ItemQuery } from "@fjell/types";
 import { validateKeys } from '@fjell/validation';
 import { CollectionGroup, CollectionReference, Query } from '@google-cloud/firestore';
 import { buildQuery, buildQueryWithoutPagination } from '../../../src/QueryBuilder';

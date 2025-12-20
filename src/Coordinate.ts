@@ -20,4 +20,4 @@ export const createCoordinate = <
 };
 
 // Re-export the Coordinate type
-export type { Coordinate } from '@fjell/core';
+export type { Coordinate } from '@fjell/types';
