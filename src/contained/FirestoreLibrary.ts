@@ -9,7 +9,7 @@ import LibLogger from '../logger';
 const logger = LibLogger.get('contained', 'FirestoreLibrary');
 
 export interface FirestoreLibrary<
-  V extends Item<S>,
+  V extends Item<S, L1, L2, L3, L4, L5>,
   S extends string,
   L1 extends string = never,
   L2 extends string = never,
