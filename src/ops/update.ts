@@ -1,5 +1,13 @@
 /* eslint-disable indent */
-import { ComKey, createUpdateWrapper, isValidItemKey, Item, PriKey, UpdateMethod, UpdateOptions, validateKeys } from "@fjell/core";
+import {
+  ComKey,
+  Item,
+  PriKey,
+  UpdateMethod,
+  UpdateOptions
+} from "@fjell/types";
+import { createUpdateWrapper, isValidItemKey } from "@fjell/core";
+import { validateKeys } from "@fjell/validation";
 
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";

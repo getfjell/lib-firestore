@@ -1,6 +1,14 @@
 import { Definition } from "../Definition";
 import LibLogger from "../logger";
-import { ComKey, createUpsertWrapper, Item, LocKeyArray, NotFoundError, PriKey, UpdateOptions, UpsertMethod } from "@fjell/core";
+import {
+  ComKey,
+  Item,
+  LocKeyArray,
+  PriKey,
+  UpdateOptions,
+  UpsertMethod
+} from "@fjell/types";
+import { createUpsertWrapper, NotFoundError } from "@fjell/core";
 import * as Library from "@fjell/lib";
 
 const logger = LibLogger.get('ops', 'upsert');

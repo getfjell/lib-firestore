@@ -1,4 +1,11 @@
-import { createFindWrapper, FindMethod, FindOperationResult, FindOptions, Item, LocKeyArray } from "@fjell/core";
+import {
+  FindMethod,
+  FindOperationResult,
+  FindOptions,
+  Item,
+  LocKeyArray
+} from "@fjell/types";
+import { createFindWrapper } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import LibLogger from "../logger";

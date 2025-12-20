@@ -2,7 +2,7 @@ import { Definition } from "../Definition";
 import * as Abstract from "../Operations";
 import { getAllOperation } from "../contained/ops/all";
 import { getOneOperation } from "../contained/ops/one";
-import { Item } from "@fjell/core";
+import { Item } from "@fjell/types";
 import { Operations, Registry } from "@fjell/lib";
 
 import LibLogger from '../logger';

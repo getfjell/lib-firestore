@@ -1,6 +1,5 @@
-import { ComKey, Item, PriKey } from "@fjell/core";
-import type { ReferenceDefinition, Registry } from "@fjell/lib";
-import { OperationContext } from "@fjell/lib";
+import { ComKey, Item, PriKey } from "@fjell/types";
+import type { OperationContext, ReferenceDefinition, Registry } from "@fjell/lib";
 import logger from "../logger";
 
 // Type alias for the Reference structure with flattened item properties
@@ -243,4 +242,3 @@ export const stripReferenceItems = <
     refs: strippedRefs as any // Type cast needed due to Record<string, ItemReference> compatibility
   };
 };
-

@@ -1,6 +1,6 @@
  
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ComKey, PriKey } from '@fjell/core';
+import { ComKey, PriKey } from "@fjell/types";
 import * as Library from '@fjell/lib';
 import { getGetOperation } from '../src/ops/get';
 import { Definition } from '../src/Definition';

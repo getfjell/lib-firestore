@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ItemTypeArray } from '@fjell/core';
+import { ItemTypeArray } from "@fjell/types";
 import { Coordinate } from '@fjell/registry';
 import { Registry } from '@fjell/lib';
 

@@ -1,5 +1,5 @@
 import { createCoordinate, SCOPE_FIRESTORE } from '../src/Coordinate';
-import { ItemTypeArray } from '@fjell/core';
+import { ItemTypeArray } from "@fjell/types";
 import { describe, expect, it } from 'vitest';
 
 describe('Coordinate', () => {

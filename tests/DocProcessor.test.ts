@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
-import { AllItemTypeArrays } from '@fjell/core';
+import { AllItemTypeArrays } from "@fjell/types";
 import { DocumentData, DocumentSnapshot, Timestamp } from '@google-cloud/firestore';
 import type { OperationContext } from '@fjell/lib';
 

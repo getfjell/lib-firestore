@@ -1,4 +1,4 @@
-import { ComKey, Item, LocKeyArray, PriKey } from '@fjell/core';
+import { ComKey, Item, LocKeyArray, PriKey } from '@fjell/types';
 import * as Library from '@fjell/lib';
 import LibLogger from './logger';
 import { FirestoreReferenceDefinition } from './processing/ReferenceBuilder';

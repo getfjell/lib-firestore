@@ -1,4 +1,4 @@
-import { AllItemTypeArrays, Item, ItemEvent, RecursivePartial } from "@fjell/core";
+import { AllItemTypeArrays, Item, ItemEvent, RecursivePartial } from "@fjell/types";
 import { addKey } from "./KeyMaster";
 import * as Library from "@fjell/lib";
 import {
@@ -16,6 +16,7 @@ import { addAggsToItem } from "./processing/AggsAdapter";
 
 const logger = LibLogger.get('DocProcessor');
 
+// A dummy comment to force a write
 const convertDates = <S extends string,
   L1 extends string = never,
   L2 extends string = never,

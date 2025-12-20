@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-firestore",
-  "version": "4.4.77",
+  "version": "4.4.78",
   "type": "module",
   "keywords": [
     "library",
@@ -37,10 +37,12 @@
     "docs:test": "cd docs && npm run test"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.73",
-    "@fjell/lib": "^4.4.83",
-    "@fjell/logging": "^4.4.65",
-    "@fjell/registry": "^4.4.81",
+    "@fjell/core": "^4.4.74",
+    "@fjell/lib": "^4.4.84",
+    "@fjell/logging": "^4.4.66",
+    "@fjell/registry": "^4.4.82",
+    "@fjell/types": "^4.4.5",
+    "@fjell/validation": "^4.4.2",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {

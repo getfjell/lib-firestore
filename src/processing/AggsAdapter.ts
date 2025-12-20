@@ -13,7 +13,7 @@
  * - Unified API: External code always sees aggs structure, regardless of backend
  */
 
-import { Item } from "@fjell/core";
+import { Item } from "@fjell/types";
 import { AggregationDefinition } from "@fjell/lib";
 import LibLogger from "../logger";
 

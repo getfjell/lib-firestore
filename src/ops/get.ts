@@ -1,5 +1,12 @@
 /* eslint-disable indent */
-import { ComKey, createGetWrapper, GetMethod, isComKey, isValidItemKey, Item, NotFoundError, PriKey, validateKeys } from "@fjell/core";
+import {
+  ComKey,
+  GetMethod,
+  Item,
+  PriKey,
+} from "@fjell/types";
+import { createGetWrapper, isComKey, isValidItemKey, NotFoundError } from "@fjell/core";
+import { validateKeys } from "@fjell/validation";
 import { type Registry } from "@fjell/lib";
 import { DocumentReference } from "@google-cloud/firestore";
 import { Definition } from "../Definition";

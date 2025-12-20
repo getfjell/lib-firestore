@@ -1,6 +1,13 @@
 /* eslint-disable indent */
 
-import { ComKey, createRemoveWrapper, isValidItemKey, Item, PriKey, RemoveMethod, validateKeys } from "@fjell/core";
+import {
+  ComKey,
+  Item,
+  PriKey,
+  RemoveMethod
+} from "@fjell/types";
+import { createRemoveWrapper, isValidItemKey } from "@fjell/core";
+import { validateKeys } from "@fjell/validation";
 
 import { Definition } from "../Definition";
 import LibLogger from "../logger";

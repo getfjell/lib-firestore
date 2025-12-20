@@ -57,8 +57,15 @@ vi.mock('@fjell/core', async (importOriginal) => {
   const actual = await importOriginal() as any;
   return {
     ...actual,
-    validateKeys: mockValidateKeys,
     validateLocations: mockValidateLocations,
+  };
+});
+
+vi.mock('@fjell/validation', async (importOriginal) => {
+  const actual = await importOriginal() as any;
+  return {
+    ...actual,
+    validateKeys: mockValidateKeys,
   };
 });
 

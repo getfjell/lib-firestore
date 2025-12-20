@@ -2,7 +2,7 @@ import {
   Coordinate,
   Item,
   ItemTypeArray
-} from '@fjell/core';
+} from '@fjell/types';
 
 import * as Library from '@fjell/lib';
 import { createCoordinate } from './Coordinate';
@@ -44,7 +44,7 @@ export function createDefinition<
   const options = createOptions(libOptions);
 
   return {
-    coordinate,
+    coordinate: coordinate as any,
     options,
     collectionNames,
   };

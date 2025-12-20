@@ -1,7 +1,6 @@
 /* eslint-disable indent */
-import { ComKey, generateKeyArray, isPriKey, LocKeyArray, PriKey } from "@fjell/core";
-
-import { LocKey } from "@fjell/core";
+import { ComKey, LocKey, LocKeyArray, PriKey } from "@fjell/types";
+import { generateKeyArray, isPriKey } from "@fjell/core";
 
 import LibLogger from "./logger";
 import { DocumentReference } from "@google-cloud/firestore";
