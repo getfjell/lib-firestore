@@ -1,4 +1,10 @@
-import { createOneWrapper, Item, ItemQuery, LocKeyArray, OneMethod } from "@fjell/core";
+import {
+  Item,
+  ItemQuery,
+  LocKeyArray,
+  OneMethod
+} from "@fjell/types";
+import { createOneWrapper } from "@fjell/core";
 
 import { Definition } from "../Definition";
 import LibLogger from "../logger";

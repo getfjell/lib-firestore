@@ -1,6 +1,6 @@
 import { createDefinition } from '../Definition';
 import { FirestoreLibrary as AbstractFirestoreLibrary } from '../FirestoreLibrary';
-import { Item, ItemTypeArray } from '@fjell/core';
+import { Item, ItemTypeArray } from '@fjell/types';
 import { Contained, Operations, Registry } from '@fjell/lib';
 import { createOperations } from './Operations';
 

@@ -41,6 +41,8 @@
     "@fjell/lib": "^4.4.83",
     "@fjell/logging": "^4.4.65",
     "@fjell/registry": "^4.4.81",
+    "@fjell/types": "^4.4.4",
+    "@fjell/validation": "^4.4.1",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {

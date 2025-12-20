@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getAllOperation } from '../../../src/contained/ops/all';
 import { Definition } from '../../../src/Definition';
-import { Item, ItemQuery, validateKeys } from '@fjell/core';
+import { Item, ItemQuery } from '@fjell/core';
+import { validateKeys } from '@fjell/validation';
 import { CollectionGroup, CollectionReference, Query } from '@google-cloud/firestore';
 import { buildQuery, buildQueryWithoutPagination } from '../../../src/QueryBuilder';
 import { processDoc } from '../../../src/DocProcessor';
@@ -24,6 +25,13 @@ vi.mock('../../../src/ReferenceFinder', () => ({
 
 vi.mock('@fjell/core', async () => {
   const actual = await vi.importActual('@fjell/core');
+  return {
+    ...actual,
+  };
+});
+
+vi.mock('@fjell/validation', async () => {
+  const actual = await vi.importActual('@fjell/validation');
   return {
     ...actual,
     validateKeys: vi.fn((item) => item),

@@ -5,14 +5,16 @@ import {
   CompoundCondition,
   Condition,
   EventQuery,
-  isComKey,
-  isCondition,
-  isPriKey,
   ItemQuery,
   LocKey,
   OrderBy,
   PriKey,
   References
+} from '@fjell/types';
+import {
+  isComKey,
+  isCondition,
+  isPriKey,
 } from '@fjell/core';
 import {
   CollectionGroup,

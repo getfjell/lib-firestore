@@ -1,4 +1,4 @@
-import { Coordinate, Item } from "@fjell/core";
+import { Coordinate, Item } from "@fjell/types";
 import * as Library from "@fjell/lib";
 import { Registry } from "@fjell/lib";
 import { Options } from "./Options";

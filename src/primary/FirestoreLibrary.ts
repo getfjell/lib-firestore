@@ -1,8 +1,7 @@
 import { createDefinition } from '../Definition';
-import { FirestoreLibrary as AbstractFirestoreLibrary } from '../FirestoreLibrary';
 import { createOperations } from '../Operations';
 import LibLogger from '../logger';
-import { Item } from '@fjell/core';
+import { Item } from '@fjell/types';
 import { Operations, Primary, Registry } from '@fjell/lib';
 
 const logger = LibLogger.get('primary', 'FirestoreLibrary');
@@ -10,21 +9,25 @@ const logger = LibLogger.get('primary', 'FirestoreLibrary');
 export interface FirestoreLibrary<
   V extends Item<S>,
   S extends string
-> extends AbstractFirestoreLibrary<V, S> {
+> {
+  coordinate: any;
   operations: Operations<V, S>;
+  options: any;
+  firestore: FirebaseFirestore.Firestore;
+  registry: Registry;
 }
 
-export function createFirestoreLibrary<
+export const createFirestoreLibrary = <
   V extends Item<S>,
   S extends string
 >(
-  keyType: S,
-  collectionName: string,
-  firestore: FirebaseFirestore.Firestore,
-  libOptions: Primary.Options<V, S> = {},
-  scopes: string[] = [],
-  registry: Registry
-): FirestoreLibrary<V, S> {
+    keyType: S,
+    collectionName: string,
+    firestore: FirebaseFirestore.Firestore,
+    libOptions: Primary.Options<V, S> = {},
+    scopes: string[] = [],
+    registry: Registry
+  ): FirestoreLibrary<V, S> => {
 
   logger.default('createFirestoreLibrary', { keyType, collectionName, libOptions, scopes });
 
@@ -33,7 +36,7 @@ export function createFirestoreLibrary<
 
   return {
     coordinate: definition.coordinate,
-    operations: Primary.wrapOperations(operations, definition.options as Primary.Options<V, S>, definition.coordinate, registry),
+    operations: Primary.wrapOperations(operations as any, definition.options as Primary.Options<V, S>, definition.coordinate as any, registry),
     options: definition.options,
     firestore,
     registry
