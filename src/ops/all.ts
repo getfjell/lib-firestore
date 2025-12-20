@@ -2,7 +2,9 @@
 import { buildQueryWithoutPagination } from "../QueryBuilder";
 import { Query } from "@google-cloud/firestore";
 
-import { AllMethod, AllOperationResult, AllOptions, createAllWrapper, Item, ItemQuery, LocKeyArray, validateKeys } from "@fjell/core";
+import { AllMethod, AllOperationResult, AllOptions, Item, ItemQuery, LocKeyArray } from "@fjell/types";
+import { createAllWrapper } from "@fjell/core";
+import { validateKeys } from "@fjell/validation";
 import { CollectionReference } from "@google-cloud/firestore";
 
 import { Definition } from "../Definition";
