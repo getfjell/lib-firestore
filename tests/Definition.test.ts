@@ -1,5 +1,5 @@
  
-import { ItemTypeArray } from '@fjell/core';
+import { ItemTypeArray } from "@fjell/types";
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies

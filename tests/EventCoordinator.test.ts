@@ -1,5 +1,5 @@
 import { createEvents, updateEvents } from '../src/EventCoordinator';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('EventCoordinator', () => {

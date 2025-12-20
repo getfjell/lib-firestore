@@ -1,4 +1,4 @@
-import { LocKey, PriKey } from '@fjell/core';
+import { LocKey, PriKey } from "@fjell/types";
 import type { Mock } from 'vitest';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 

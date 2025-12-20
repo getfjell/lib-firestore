@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, type MockedFunction, vi } from 'vites
 import { getOneOperation } from '../../../src/contained/ops/one';
 import { getAllOperation } from '../../../src/contained/ops/all';
 import { Definition } from '../../../src/Definition';
-import { Item, ItemQuery } from '@fjell/core';
+import { Item, ItemQuery } from "@fjell/types";
 import { Registry } from '@fjell/lib';
 
 // Mock dependencies

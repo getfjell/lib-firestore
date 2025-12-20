@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { FindOperationResult, Item } from "@fjell/core";
+import { FindOperationResult, Item } from "@fjell/types";
 
 import * as Library from "@fjell/lib";
 import { Definition } from "./Definition";

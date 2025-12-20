@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildQuery } from '../src/QueryBuilder';
-import { CompoundCondition, Condition, ItemQuery } from '@fjell/core';
+import { CompoundCondition, Condition, ItemQuery } from "@fjell/types";
 import { CollectionGroup, CollectionReference, Query } from '@google-cloud/firestore';
 
 // Mock the logger

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildFirestoreReference, FirestoreReferenceDefinition, stripReferenceItems } from '../../src/processing/ReferenceBuilder';
-import { Item, PriKey } from '@fjell/core';
+import { Item, PriKey } from "@fjell/types";
 import { createOperationContext } from '@fjell/lib';
 
 describe('Firestore ReferenceBuilder', () => {

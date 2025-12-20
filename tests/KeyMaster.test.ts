@@ -1,6 +1,6 @@
  
 import { addKey, removeKey } from '../src/KeyMaster';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 import { describe, expect, it } from 'vitest';
 
 // Mock FirebaseFirestore

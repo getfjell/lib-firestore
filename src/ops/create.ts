@@ -5,14 +5,16 @@ import { DocumentReference, Firestore } from "@google-cloud/firestore";
 
 import {
   ComKey,
-  createCreateWrapper,
   CreateMethod,
-  isComKey,
   Item,
   LocKeyArray,
   PriKey,
-  validateKeys
+} from "@fjell/types";
+import {
+  createCreateWrapper,
+  isComKey
 } from "@fjell/core";
+import { validateKeys } from "@fjell/validation";
 
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";

@@ -1,6 +1,4 @@
-import { Item, LocKeyArray } from "@fjell/core";
-
-import { ItemQuery } from "@fjell/core";
+import { Item, ItemQuery, LocKeyArray } from "@fjell/types";
 
 import { Definition } from "../../Definition";
 import LibLogger from "../../logger";
