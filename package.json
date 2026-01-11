@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-firestore",
-  "version": "4.4.79",
+  "version": "4.4.80",
   "type": "module",
   "keywords": [
     "library",
@@ -37,12 +37,12 @@
     "docs:test": "cd docs && npm run test"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.76",
-    "@fjell/lib": "^4.4.86",
-    "@fjell/logging": "^4.4.66",
-    "@fjell/registry": "^4.4.83",
-    "@fjell/types": "^4.4.6",
-    "@fjell/validation": "^4.4.3",
+    "@fjell/core": "^4.4.77",
+    "@fjell/lib": "^4.4.88",
+    "@fjell/logging": "^4.4.67",
+    "@fjell/registry": "^4.4.84",
+    "@fjell/types": "^4.4.7",
+    "@fjell/validation": "^4.4.4",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
@@ -51,7 +51,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.38.0",
-    "@fjell/common-config": "^1.1.36",
+    "@fjell/common-config": "^1.1.37",
     "@swc/core": "^1.13.5",
     "@tsconfig/recommended": "^1.0.10",
     "@types/node": "^24.9.1",
@@ -66,6 +66,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getfjell/lib-firestore.git"
+    "url": "git+https://github.com/fjellgrunn/lib-firestore.git"
   }
 }
