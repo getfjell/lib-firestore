@@ -8,7 +8,7 @@ import {
 import { createGetWrapper, isComKey, isValidItemKey, NotFoundError } from "@fjell/core";
 import { validateKeys } from "@fjell/validation";
 import { type Registry } from "@fjell/lib";
-import { DocumentReference } from "@google-cloud/firestore";
+import { DocumentReference, FieldPath } from "@google-cloud/firestore";
 import { Definition } from "../Definition";
 import { processDoc } from "../DocProcessor";
 import { getReference } from "../ReferenceFinder";
@@ -61,9 +61,8 @@ export const getGetOperation = <
             const collectionName = collectionNames[0];
             const collectionGroup = firestore.collectionGroup(collectionName);
             
-            // Query for documents where the id field matches the primary key
-            // The id field is typically set to the document ID during creation
-            const snapshot = await collectionGroup.where('id', '==', comKey.pk).limit(1).get();
+            // Query by document ID across all subcollections (create does not write an `id` field)
+            const snapshot = await collectionGroup.where(FieldPath.documentId(), '==', String(comKey.pk)).limit(1).get();
             
             if (snapshot.empty) {
               logger.debug('No document found with primary key across all locations', { pk: comKey.pk });

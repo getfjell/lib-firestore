@@ -72,14 +72,16 @@ const addReferenceQueries = (query: CollectionReference | CollectionGroup | Quer
       if (ComKey.kt) {
         retQuery = retQuery.where(`refs.${key}.key.kt`, '==', ComKey.kt);
       }
-      ComKey.loc.forEach((
-        loc: LocKey<string>,
-        index: number) => {
-        retQuery = retQuery.where(`refs.${key}.key.loc.${index}.lk`, '==', loc.lk);
-        if (loc.kt) {
-          retQuery = retQuery.where(`refs.${key}.key.loc.${index}.kt`, '==', loc.kt);
-        }
-      });
+      if (ComKey.loc?.length) {
+        ComKey.loc.forEach((
+          loc: LocKey<string>,
+          index: number) => {
+          retQuery = retQuery.where(`refs.${key}.key.loc.${index}.lk`, '==', loc.lk);
+          if (loc.kt) {
+            retQuery = retQuery.where(`refs.${key}.key.loc.${index}.kt`, '==', loc.kt);
+          }
+        });
+      }
     } else if (isPriKey(keyValue)) {
       const PriKey: PriKey<string> = keyValue as PriKey<string>;
       retQuery = retQuery.where(`refs.${key}.key.pk`, '==', PriKey.pk);
