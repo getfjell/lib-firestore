@@ -62,7 +62,10 @@ export const addKey = <
     const type = [...keyTypes];
     const pkType = type.shift();
     Object.assign(key, { kt: pkType, pk: doc.id });
-    // TODO: This is a hack to get the location key - I fucking hate this
+    // Build location keys by traversing the document reference hierarchy.
+    // Each LocKey corresponds to a parent collection in the Firestore path.
+    // We traverse parent.parent chains because Firestore nests collections
+    // and documents alternately (e.g., /colA/docA/colB/docB/colC/docC).
     if (type.length === 1) {
       Object.assign(key, { loc: [{ kt: type[0], lk: doc.ref.parent.parent?.id }] });
     } else if (type.length === 2) {

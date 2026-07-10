@@ -103,7 +103,7 @@ export const getAllOperation = <
       });
 
       // this.logger.default('Matching Items', { matchingItems });
-      // TODO: Move this up.
+      // Validate keys after processing each document
       const items = await Promise.all(
         matchingItems.docs.map(async (doc) => {
           const item = await processDoc(

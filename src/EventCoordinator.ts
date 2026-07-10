@@ -60,8 +60,8 @@ export const updateEvents = <
     updated: { at: currentDate },
   };
 
-  // TODO: This is clean-up code, we should remove it
-  // If the event lacks a created data, let's just insert it here...
+  // Safety net: if a legacy item lacks a created event (e.g., migrated data),
+  // backfill it on update so the event chain remains consistent.
   if (!item.events || !item.events.created || !item.events.created.at) {
     events.created = { at: currentDate };
   }

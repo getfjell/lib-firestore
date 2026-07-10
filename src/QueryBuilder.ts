@@ -239,7 +239,8 @@ export const buildQueryWithoutPagination = (
     itemsQuery = addEventQueries(itemsQuery, itemQuery.events);
   }
 
-  // TODO: Once we start to support Aggs on the server-side, we'll need to parse agg queries
+  // NOTE: Aggregation query parsing is deferred until server-side Aggs support is implemented.
+  // Currently, aggregations are resolved client-side via AggsAdapter during document processing.
 
   if (itemQuery.compoundCondition) {
     logger.default('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });

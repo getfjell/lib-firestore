@@ -82,8 +82,9 @@ export const addReference = <S extends string,
   });
 
   if (keys.length === 0) {
-    // If you've recursively consumed all of the keys, return the base.
-    // TODO: There's one issue here, if the base is a Firestore instance, this is a weird cast
+    // All keys consumed: return the accumulated reference.
+    // In normal usage (via getReference), the base at this point is a DocumentReference.
+    // The empty-keys case is handled by getReference() before calling addReference.
     return base as DocumentReference;
   } else {
     // Retrieve the next key and collection, and create the next base
@@ -117,7 +118,7 @@ export const addReference = <S extends string,
       }
     } else {
       logger.error('addReference should never run out of keys or collections');
-      // TODO: Make this an exception type?
+      logger.error('addReference should never run out of keys or collections');
       throw new Error('addReference should never run out of keys or collections');
     }
 

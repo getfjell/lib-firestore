@@ -75,7 +75,7 @@ export const getUpdateOperation = <
         let itemToUpdate: Partial<Item<S, L1, L2, L3, L4, L5>> = Object.assign({}, item);
 
         // Right before this record is going to be updated, we need to update the events, strip reference items, and remove the key
-        // TODO: Move this up.
+        // Pre-write: update events, strip references, remove key
         logger.default('🔥 [LIB-FIRESTORE] Updating events for item', { itemToUpdate });
         itemToUpdate = updateEvents(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
         logger.default('🔥 [LIB-FIRESTORE] Events updated', { itemToUpdate });
@@ -93,7 +93,7 @@ export const getUpdateOperation = <
           logger.default('🔥 [LIB-FIRESTORE] Aggs structure removed', { itemToUpdate });
         }
         
-        // TODO: Move this up.
+        // Pre-write: update events, strip references, remove key
         logger.default('🔥 [LIB-FIRESTORE] Removing key from item', { itemToUpdate });
         itemToUpdate = removeKey(itemToUpdate) as Partial<Item<S, L1, L2, L3, L4, L5>>;
         logger.default('🔥 [LIB-FIRESTORE] Key removed', { itemToUpdate });
@@ -137,7 +137,7 @@ export const getUpdateOperation = <
           );
         }
 
-        // TODO: Move this up.
+        // Post-write: process document and validate keys
         logger.default('🔥 [LIB-FIRESTORE] Processing document and validating keys');
         const processedItem = await processDoc(
           doc,

@@ -55,7 +55,7 @@ export const getRemoveOperations = <
         const updateOperation = getUpdateOperation(firestore, definition, registry);
         
         logger.default('🔥 [LIB-FIRESTORE] Performing soft delete by updating events', { key });
-        // TODO: Move validate keys up.
+        // Validate keys after soft delete
         const item = validateKeys(await updateOperation(
           key,
           { events: { deleted: { at: new Date() } } } as unknown as Partial<Item<S, L1, L2, L3, L4, L5>>,
