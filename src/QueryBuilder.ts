@@ -201,7 +201,7 @@ const applyAndConditions = (query: CollectionReference | CollectionGroup | Query
       if ((condition as CompoundCondition).compoundType === 'AND') {
         resultQuery = applyAndConditions(resultQuery, condition as CompoundCondition);
       } else {
-        throw new Error('OR conditions within AND are not supported in Firestore v7');
+        throw new Error('OR conditions within AND are not supported by @fjell/lib-firestore QueryBuilder');
       }
     }
   }
@@ -241,14 +241,17 @@ export const buildQueryWithoutPagination = (
 
   if (itemQuery.compoundCondition) {
     logger.default('Adding Conditions', { compoundCondition: itemQuery.compoundCondition });
-    // For v7 compatibility, we need to apply conditions differently
+    // For AND-only QueryBuilder support, apply conditions sequentially
     if (itemQuery.compoundCondition.compoundType === 'AND') {
       // AND conditions can be applied sequentially
       itemsQuery = applyAndConditions(itemsQuery, itemQuery.compoundCondition);
     } else {
-      // OR conditions are not supported in Firestore v7 without composite indexes
-      logger.default('OR conditions are not directly supported in Firestore v7');
-      throw new Error('OR conditions require Firestore SDK v10+ or composite indexes. Consider upgrading @google-cloud/firestore to v10.1.0 or higher.');
+      // Top-level OR compound conditions are not implemented in QueryBuilder yet
+      logger.default('OR compound conditions are not supported by QueryBuilder');
+      throw new Error(
+        'OR compound conditions are not supported by @fjell/lib-firestore QueryBuilder. ' +
+        'Use AND conditions, or implement a custom finder. Supported peer: @google-cloud/firestore ^8.'
+      );
     }
   }
 

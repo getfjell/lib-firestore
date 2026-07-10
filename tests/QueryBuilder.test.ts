@@ -146,10 +146,10 @@ describe('QueryBuilder', () => {
         compoundCondition
       };
 
-      // OR conditions should throw an error in Firestore v7
+      // OR conditions are not implemented in QueryBuilder
       expect(() => {
         buildQuery(itemQuery, mockCollectionRef);
-      }).toThrow('OR conditions require Firestore SDK v10+ or composite indexes. Consider upgrading @google-cloud/firestore to v10.1.0 or higher.');
+      }).toThrow(/OR compound conditions are not supported by @fjell\/lib-firestore QueryBuilder/);
     });
 
     it('should add nested compound conditions', () => {
@@ -173,10 +173,10 @@ describe('QueryBuilder', () => {
         compoundCondition
       };
 
-      // Nested OR conditions should throw an error in Firestore v7
+      // Nested OR conditions should throw an error
       expect(() => {
         buildQuery(itemQuery, mockCollectionRef);
-      }).toThrow('OR conditions within AND are not supported in Firestore v7');
+      }).toThrow('OR conditions within AND are not supported by @fjell/lib-firestore QueryBuilder');
     });
 
     it('should apply limit to query', () => {
@@ -278,7 +278,7 @@ describe('QueryBuilder', () => {
     });
 
     it('should handle product type OR query', () => {
-      // This test verifies that OR compound queries throw an error in Firestore v7
+      // OR compound queries are not implemented in QueryBuilder
       const compoundCondition: CompoundCondition = {
         compoundType: 'OR',
         conditions: [
@@ -291,10 +291,9 @@ describe('QueryBuilder', () => {
         compoundCondition
       };
 
-      // OR conditions should throw an error in Firestore v7
       expect(() => {
         buildQuery(itemQuery, mockCollectionRef);
-      }).toThrow('OR conditions require Firestore SDK v10+ or composite indexes. Consider upgrading @google-cloud/firestore to v10.1.0 or higher.');
+      }).toThrow(/OR compound conditions are not supported by @fjell\/lib-firestore QueryBuilder/);
     });
   });
 });
