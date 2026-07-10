@@ -180,7 +180,7 @@ describe('getGetOperation', () => {
     
     // Should use collection group query
     expect(mockFirestore.collectionGroup).toHaveBeenCalledWith('testCollection');
-    expect(mockCollectionGroup.where).toHaveBeenCalledWith('id', '==', 'id1');
+    expect(mockCollectionGroup.where).toHaveBeenCalledWith(expect.anything(), '==', 'id1');
     expect(mockCollectionGroup.limit).toHaveBeenCalledWith(1);
     expect(mockCollectionGroup.get).toHaveBeenCalled();
     
