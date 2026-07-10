@@ -37,32 +37,32 @@
     "docs:test": "cd docs && npm run test"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.77",
-    "@fjell/lib": "^4.4.88",
-    "@fjell/logging": "^4.4.67",
-    "@fjell/registry": "^4.4.84",
-    "@fjell/types": "^4.4.7",
-    "@fjell/validation": "^4.4.4",
+    "@fjell/core": "^4.4.80",
+    "@fjell/lib": "^4.4.90",
+    "@fjell/logging": "^4.4.73",
+    "@fjell/registry": "^4.4.87",
+    "@fjell/types": "^4.4.10",
+    "@fjell/validation": "^4.4.7",
     "deepmerge": "^4.3.1"
   },
   "peerDependencies": {
     "@google-cloud/firestore": "^7.11.6"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.38.0",
-    "@fjell/common-config": "^1.1.37",
-    "@swc/core": "^1.13.5",
-    "@tsconfig/recommended": "^1.0.10",
-    "@types/node": "^24.9.1",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
-    "@vitest/coverage-v8": "^4.0.2",
-    "concurrently": "^9.2.1",
-    "esbuild": "0.25.11",
-    "eslint": "^9.38.0",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.39.4",
+    "@fjell/common-config": "^1.1.41",
+    "@swc/core": "^1.15.43",
+    "@tsconfig/recommended": "^1.0.13",
+    "@types/node": "^24.13.3",
+    "@typescript-eslint/eslint-plugin": "^8.63.0",
+    "@typescript-eslint/parser": "^8.63.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "concurrently": "^9.2.3",
+    "esbuild": "0.28.1",
+    "eslint": "^9.39.4",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.2"
+    "vitest": "^4.1.10"
   },
   "repository": {
     "type": "git",
